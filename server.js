@@ -28,6 +28,17 @@ function readApiKey() {
   } catch { return ''; }
 }
 
+// ─── www → canonical redirect ─────────────────────────────────────────────────
+// Redirects www.pitacopa.com → pitacopa.com (or any www.* → bare domain)
+app.use((req, res, next) => {
+  const host = req.headers.host || '';
+  if (host.startsWith('www.')) {
+    const bare = host.slice(4);
+    return res.redirect(301, `https://${bare}${req.url}`);
+  }
+  next();
+});
+
 // ─── Proxy endpoint ───────────────────────────────────────────────────────────
 // Frontend calls: /api/matches?season=2026
 // Proxy forwards: https://api.football-data.org/v4/competitions/WC/matches?season=2026
