@@ -90,7 +90,7 @@
 <!-- NAVBAR -->
 <nav class="navbar" role="navigation" aria-label="Menu principal">
   <div class="navbar-inner">
-    <a href="index.html" class="navbar-brand" aria-label="PitaCopa">
+    <a href="/" class="navbar-brand" aria-label="PitaCopa">
       <div class="brand-logo">
         <img src="img/logo-icon-dark.png" alt="PitaCopa" onerror="this.parentElement.innerHTML='<div class=\'brand-logo-text\'>P</div>'">
       </div>
@@ -100,10 +100,10 @@
       </div>
     </a>
     <ul class="navbar-nav" id="mainNav">
-      <li><a href="games.html"><i data-lucide="calendar-days" width="14" height="14"></i> <span>Jogos</span></a></li>
-      <li><a href="ranking.html"><i data-lucide="trophy" width="14" height="14"></i> <span>Ranking</span></a></li>
-      <li><a href="dashboard.html"><i data-lucide="layout-grid" width="14" height="14"></i> <span>Meus Bolões</span></a></li>
-      <li><a href="profile.html" style="font-weight:600;display:flex;align-items:center;gap:6px;color:var(--gold);"><i data-lucide="user" width="14" height="14"></i><span id="navUserName"></span></a></li>
+      <li><a href="games"><i data-lucide="calendar-days" width="14" height="14"></i> <span>Jogos</span></a></li>
+      <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> <span>Ranking</span></a></li>
+      <li><a href="dashboard"><i data-lucide="layout-grid" width="14" height="14"></i> <span>Meus Bolões</span></a></li>
+      <li><a href="profile" style="font-weight:600;display:flex;align-items:center;gap:6px;color:var(--gold);"><i data-lucide="user" width="14" height="14"></i><span id="navUserName"></span></a></li>
       <li>
         <div class="lang-switch">
           <button class="lang-btn" data-lang="pt">PT</button>
@@ -220,7 +220,7 @@
   <div class="profile-content">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
       <h2 style="font-size:18px;font-weight:700;">Meus Bolões</h2>
-      <a href="dashboard.html" class="btn btn-primary btn-sm">
+      <a href="dashboard" class="btn btn-primary btn-sm">
         <i data-lucide="plus" width="14" height="14"></i> Novo Bolão
       </a>
     </div>
@@ -233,8 +233,8 @@
         <h3>Nenhum bolão ainda</h3>
         <p>Crie um bolão ou entre com um código de convite para começar!</p>
         <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-          <a href="dashboard.html" class="btn btn-primary"><i data-lucide="plus" width="14" height="14"></i> Criar Bolão</a>
-          <a href="join.html" class="btn btn-ghost"><i data-lucide="key-round" width="14" height="14"></i> Entrar com Código</a>
+          <a href="dashboard" class="btn btn-primary"><i data-lucide="plus" width="14" height="14"></i> Criar Bolão</a>
+          <a href="join" class="btn btn-ghost"><i data-lucide="key-round" width="14" height="14"></i> Entrar com Código</a>
         </div>
       </div>
     </div>
@@ -447,7 +447,7 @@ if (window.lucide) lucide.createIcons();
 
 // ── Auth guard ────────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async (user) => {
-  if (!user) { window.location.href = 'login.html'; return; }
+  if (!user) { window.location.href = 'login'; return; }
   currentUser = user;
   await loadUser();
 });
@@ -592,7 +592,7 @@ if (btnChangePass) btnChangePass.addEventListener('click', async () => {
 // ── Logout ────────────────────────────────────────────────────────────────
 document.getElementById('btnLogout').addEventListener('click', async () => {
   await signOut(auth);
-  window.location.href = 'index.html';
+  window.location.href = '/';
 });
 
 // ── Delete account ────────────────────────────────────────────────────────
@@ -601,7 +601,7 @@ document.getElementById('btnDeleteAccount').addEventListener('click', async () =
   try {
     await deleteDoc(doc(db, 'users', currentUser.uid));
     await deleteUser(currentUser);
-    window.location.href = 'index.html';
+    window.location.href = '/';
   } catch(e) {
     if (e.code === 'auth/requires-recent-login') {
       showAlert('profileAlert', 'Por segurança, faça login novamente antes de deletar a conta.', 'error');
@@ -681,7 +681,7 @@ window._loadGroups = async function() {
       }).join('');
 
       const inviteCode = bolao.inviteCode || '';
-      const inviteLink = `${window.location.origin}/bolao.html?id=${p.bolaoId}`;
+      const inviteLink = `${window.location.origin}/bolao?id=${p.bolaoId}`;
 
       const card = document.createElement('div');
       card.className = 'bolao-card';
@@ -703,7 +703,7 @@ window._loadGroups = async function() {
               <div style="font-size:11px;color:var(--muted);">pts</div>
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;">
-              <a href="bolao.html?id=${p.bolaoId}" class="btn btn-primary btn-sm">
+              <a href="bolao?id=${p.bolaoId}" class="btn btn-primary btn-sm">
                 <i data-lucide="arrow-right" width="13" height="13"></i> Ver Bolão
               </a>
               ${inviteCode ? `<button class="btn btn-ghost btn-sm copy-invite-btn" data-code="${inviteCode}" data-link="${inviteLink}" data-name="${bolao.name}">

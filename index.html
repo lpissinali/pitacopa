@@ -32,17 +32,17 @@
       </div>
     </a>
     <ul class="navbar-nav" id="mainNav">
-      <li><a href="games.html"><i data-lucide="calendar" width="14" height="14"></i> Jogos</a></li>
-      <li><a href="ranking.html"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
+      <li><a href="games"><i data-lucide="calendar" width="14" height="14"></i> Jogos</a></li>
+      <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
       <li>
         <div class="lang-switch">
           <button class="lang-btn" data-lang="pt">PT</button>
           <button class="lang-btn" data-lang="en">EN</button>
         </div>
       </li>
-      <li><a href="login.html" data-i18n="nav_login">Entrar</a></li>
+      <li><a href="login" data-i18n="nav_login">Entrar</a></li>
       <li>
-        <a href="login.html?tab=register" class="btn btn-primary btn-sm" data-i18n="nav_register">
+        <a href="login?tab=register" class="btn btn-primary btn-sm" data-i18n="nav_register">
           Criar Conta Grátis
         </a>
       </li>
@@ -68,11 +68,11 @@
       Crie bolões, faça palpites nos 104 jogos e mostre pra galera quem manja mais de futebol. 100% gratuito.
     </p>
     <div class="hero-cta">
-      <a href="login.html?tab=register" class="btn btn-primary btn-xl" data-i18n="hero_cta_primary">
+      <a href="login?tab=register" class="btn btn-primary btn-xl" data-i18n="hero_cta_primary">
         <i data-lucide="trophy" width="18" height="18"></i>
         Criar Meu Bolão Grátis
       </a>
-      <a href="login.html" class="btn btn-ghost-dark btn-lg" data-i18n="hero_cta_secondary">
+      <a href="login" class="btn btn-ghost-dark btn-lg" data-i18n="hero_cta_secondary">
         Já tenho conta
       </a>
     </div>
@@ -243,7 +243,7 @@
     <div style="text-align:center;padding:72px 0 32px;">
       <h2 class="section-title" data-i18n="final_title">Pronto pra provar que você é o maior pitaqueiro?</h2>
       <p style="color:var(--muted);font-size:17px;margin:16px 0 36px;" data-i18n="final_sub">Grátis, sem cartão, em 30 segundos.</p>
-      <a href="login.html?tab=register" class="btn btn-primary btn-xl" data-i18n="final_cta">
+      <a href="login?tab=register" class="btn btn-primary btn-xl" data-i18n="final_cta">
         <i data-lucide="trophy" width="18" height="18"></i>
         Começar Agora — É Grátis
       </a>
@@ -268,14 +268,14 @@
       </div>
       <div class="footer-col">
         <div class="footer-col-title" data-i18n="footer_product">Produto</div>
-        <a href="login.html?tab=register" data-i18n="footer_signup">Criar conta grátis</a>
-        <a href="login.html" data-i18n="footer_login">Entrar</a>
+        <a href="login?tab=register" data-i18n="footer_signup">Criar conta grátis</a>
+        <a href="login" data-i18n="footer_login">Entrar</a>
       </div>
       <div class="footer-col">
         <div class="footer-col-title" data-i18n="footer_legal">Legal</div>
-        <a href="rules.html" data-i18n="footer_rules">Regras do Bolão</a>
-        <a href="terms.html" data-i18n="footer_terms">Termos de Uso</a>
-        <a href="privacy.html" data-i18n="footer_privacy">Privacidade</a>
+        <a href="rules" data-i18n="footer_rules">Regras do Bolão</a>
+        <a href="terms" data-i18n="footer_terms">Termos de Uso</a>
+        <a href="privacy" data-i18n="footer_privacy">Privacidade</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -289,7 +289,7 @@
   import { auth } from './js/config.js';
   import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   onAuthStateChanged(auth, user => {
-    if (user) window.location.href = 'dashboard.html';
+    if (user) window.location.href = 'dashboard';
   });
 </script>
 <script src="js/i18n.js"></script>

@@ -64,28 +64,9 @@ app.get('/api/matches', async (req, res) => {
   }
 });
 
-// ─── Clean URLs (no .html required) ──────────────────────────────────────────
-// /profile → profile.html, /games → games.html, etc.
-// The .html versions still work via express.static below
-const HTML_PAGES = ['login', 'dashboard', 'bolao', 'join', 'profile', 'games', 'ranking', 'admin', 'terms', 'privacy', 'rules'];
-HTML_PAGES.forEach(page => {
-  app.get(`/${page}`, (req, res) => {
-    res.sendFile(path.join(__dirname, `${page}.html`));
-  });
-});
-
-// ─── Static files ─────────────────────────────────────────────────────────────
-app.use(express.static(__dirname));
-
-// ─── Start ───────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n🏆 PitaCopa server running at http://localhost:${PORT}`);
-  console.log(`   API proxy: http://localhost:${PORT}/api/matches?season=2026`);
-  const key = readApiKey();
-  if (key) {
-    console.log(`   football-data.org key: ${key.slice(0,6)}…${key.slice(-4)} ✓`);
-  } else {
-    console.log(`   ⚠️  No API key found in js/config.js`);
-  }
-  console.log('');
-});
+// ─── Strip .html — redirect /foo.html → /foo ─────────────────────────────────
+app.use((req, res, next) => {
+  if (req.path.endsWith('.html')) {
+    const clean = req.path.slice(0, -5) || '/';
+    const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    return res.redirect(301, cle

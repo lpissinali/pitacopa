@@ -13,7 +13,7 @@
 
 <nav class="navbar" role="navigation" aria-label="Menu principal">
   <div class="navbar-inner">
-    <a href="index.html" class="navbar-brand" aria-label="PitaCopa">
+    <a href="/" class="navbar-brand" aria-label="PitaCopa">
       <div class="brand-logo">
         <img src="img/logo-icon-dark.png" alt="PitaCopa" onerror="this.parentElement.innerHTML='<div class=\'brand-logo-text\'>P</div>'">
       </div>
@@ -22,9 +22,9 @@
       </div>
     </a>
     <ul class="navbar-nav" id="mainNav">
-      <li><a href="games.html"><i data-lucide="calendar" width="14" height="14"></i> Jogos</a></li>
-      <li><a href="ranking.html"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
-      <li><a href="profile.html" id="navUserLink" style="font-weight:600;display:flex;align-items:center;gap:6px;"><i data-lucide="user" width="14" height="14"></i><span id="navUserName">Perfil</span></a></li>
+      <li><a href="games"><i data-lucide="calendar" width="14" height="14"></i> Jogos</a></li>
+      <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
+      <li><a href="profile" id="navUserLink" style="font-weight:600;display:flex;align-items:center;gap:6px;"><i data-lucide="user" width="14" height="14"></i><span id="navUserName">Perfil</span></a></li>
       <li>
         <div class="lang-switch">
           <button class="lang-btn" data-lang="pt">PT</button>
@@ -168,14 +168,14 @@
   let currentUser = null;
 
   onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href = 'login.html'; return; }
+    if (!user) { window.location.href = 'login'; return; }
 
     // Check if account is disabled by admin
     try {
       const userSnap = await getDoc(doc(db, 'users', user.uid));
       if (userSnap.exists() && userSnap.data().disabled) {
         await signOut(auth);
-        window.location.href = 'login.html?disabled=1';
+        window.location.href = 'login?disabled=1';
         return;
       }
     } catch(e) { /* non-blocking */ }
@@ -224,7 +224,7 @@
     const rank = b.myData.rank || '-';
     const participants = b.participantCount || 1;
     const lang = localStorage.getItem('lang') || 'pt';
-    return '<div class="bolao-card" onclick="window.location.href=\'bolao.html?id=' + b.id + '\'"><div class="bolao-card-header"><h3>' + b.name + '</h3><p>' + (b.description || '') + '</p></div><div class="bolao-card-body"><div class="bolao-meta"><span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> ' + participants + ' ' + (lang === 'pt' ? 'participantes' : 'participants') + '</span><span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ' + pts + ' pts</span></div><div class="bolao-rank"><div class="bolao-rank-pos">' + rank + 'º</div><div class="bolao-rank-label">' + (lang === 'pt' ? 'Sua posição' : 'Your position') + '</div></div><a href="bolao.html?id=' + b.id + '" class="btn btn-primary btn-block btn-sm">' + (lang === 'pt' ? 'Ver Bolão' : 'View Pool') + '</a></div></div>';
+    return '<div class="bolao-card" onclick="window.location.href=\'bolao?id=' + b.id + '\'"><div class="bolao-card-header"><h3>' + b.name + '</h3><p>' + (b.description || '') + '</p></div><div class="bolao-card-body"><div class="bolao-meta"><span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> ' + participants + ' ' + (lang === 'pt' ? 'participantes' : 'participants') + '</span><span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ' + pts + ' pts</span></div><div class="bolao-rank"><div class="bolao-rank-pos">' + rank + 'º</div><div class="bolao-rank-label">' + (lang === 'pt' ? 'Sua posição' : 'Your position') + '</div></div><a href="bolao?id=' + b.id + '" class="btn btn-primary btn-block btn-sm">' + (lang === 'pt' ? 'Ver Bolão' : 'View Pool') + '</a></div></div>';
   }
 
   window.openCreateModal = () => document.getElementById('createModal').classList.add('show');
@@ -269,7 +269,7 @@
       });
       closeModal('createModal');
       showToast('Bolão criado!', 'success');
-      window.location.href = 'bolao.html?id=' + bolaoRef.id;
+      window.location.href = 'bolao?id=' + bolaoRef.id;
     } catch (err) {
       console.error(err);
       btn.disabled = false;
@@ -308,7 +308,7 @@
         await updateDoc(doc(db, 'boloes', bolaoId), { participantCount: increment(1) });
       }
       closeModal('joinModal');
-      window.location.href = 'bolao.html?id=' + bolaoId;
+      window.location.href = 'bolao?id=' + bolaoId;
     } catch (err) {
       console.error(err);
       btn.disabled = false;
@@ -319,7 +319,7 @@
 
   document.getElementById('btnLogout').addEventListener('click', async () => {
     await signOut(auth);
-    window.location.href = 'index.html';
+    window.location.href = '/';
   });
 
   document.getElementById('joinCode').addEventListener('input', (e) => {

@@ -202,7 +202,7 @@
 <!-- NAVBAR -->
 <nav class="navbar" role="navigation" aria-label="Menu principal">
   <div class="navbar-inner">
-    <a href="index.html" class="navbar-brand" aria-label="PitaCopa">
+    <a href="/" class="navbar-brand" aria-label="PitaCopa">
       <div class="brand-logo">
         <img src="img/logo-icon-dark.png" alt="PitaCopa" onerror="this.parentElement.innerHTML='<div class=\'brand-logo-text\'>P</div>'">
       </div>
@@ -212,13 +212,13 @@
       </div>
     </a>
     <ul class="navbar-nav" id="mainNav">
-      <li><a href="games.html" style="color:var(--gold);font-weight:700;">
+      <li><a href="games" style="color:var(--gold);font-weight:700;">
         <i data-lucide="calendar-days" width="14" height="14"></i> Jogos
       </a></li>
-      <li><a href="ranking.html"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
-      <li id="navAuthLink"><a href="login.html">Entrar</a></li>
+      <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
+      <li id="navAuthLink"><a href="login">Entrar</a></li>
       <li id="navDashLink" style="display:none;">
-        <a href="dashboard.html"><i data-lucide="layout-grid" width="14" height="14"></i> Meus Bolões</a>
+        <a href="dashboard"><i data-lucide="layout-grid" width="14" height="14"></i> Meus Bolões</a>
       </li>
       <li>
         <div class="lang-switch">
@@ -610,7 +610,7 @@ function buildCard(m) {
       predHtml = `<div class="pred-col"><div class="pred-col-label">pitaco</div><div class="pred-empty">—</div></div>`;
     }
   } else {
-    predHtml = `<div class="pred-login"><a href="login.html">Entrar</a><br>p/ palpitar</div>`;
+    predHtml = `<div class="pred-login"><a href="login">Entrar</a><br>p/ palpitar</div>`;
   }
 
   card.innerHTML = `
@@ -638,9 +638,9 @@ function showError(html) {
 <footer style="border-top:1px solid var(--border);padding:20px;text-align:center;font-size:12px;color:var(--muted);margin-top:48px;">
   <div>© 2026 PitaCopa · <span data-i18n="footer_disclaimer">Apenas entretenimento. Sem apostas reais.</span></div>
   <div style="margin-top:6px;">
-    <a href="rules.html" style="color:var(--muted);margin:0 8px;" data-i18n="footer_rules">Regras do Bolão</a>
-    <a href="terms.html" style="color:var(--muted);margin:0 8px;" data-i18n="footer_terms">Termos de Uso</a>
-    <a href="privacy.html" style="color:var(--muted);margin:0 8px;" data-i18n="footer_privacy">Privacidade</a>
+    <a href="rules" style="color:var(--muted);margin:0 8px;" data-i18n="footer_rules">Regras do Bolão</a>
+    <a href="terms" style="color:var(--muted);margin:0 8px;" data-i18n="footer_terms">Termos de Uso</a>
+    <a href="privacy" style="color:var(--muted);margin:0 8px;" data-i18n="footer_privacy">Privacidade</a>
   </div>
 </footer>
 </body>

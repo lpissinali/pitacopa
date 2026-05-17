@@ -1108,12 +1108,4 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   .section { padding: 56px 0; }
   .section-title { font-size: 26px; }
   .aff-band { flex-direction: column; padding: 28px 24px; }
-  .aff-band a { width: 100%; justify-content: center; }
-  .auth-right { padding: 32px 20px; }
-  .join-card { padding: 36px 24px; }
-  .footer-grid { grid-template-columns: 1fr; gap: 24px; }
-  .footer { margin-top: 40px; }
-  .bolao-card { min-width: 0; }
-  .game-card { flex-direction: column; align-items: stretch; }
-  .game-teams { font-size: 13px; }
-}
+  .aff-band a { width

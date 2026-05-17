@@ -437,36 +437,3 @@ function t(key) {
   return TRANSLATIONS[currentLang][key] || TRANSLATIONS['pt'][key] || key;
 }
 
-function setLang(lang) {
-  currentLang = lang;
-  localStorage.setItem('lang', lang);
-  applyTranslations();
-  document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.lang === lang);
-  });
-}
-
-function applyTranslations() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.dataset.i18n;
-    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-      el.placeholder = t(key);
-    } else {
-      el.innerHTML = t(key);
-    }
-  });
-  document.querySelectorAll('[data-i18n-title]').forEach(el => {
-    el.title = t(el.dataset.i18nTitle);
-  });
-}
-
-function initI18n() {
-  applyTranslations();
-  document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => setLang(btn.dataset.lang));
-    btn.classList.toggle('active', btn.dataset.lang === currentLang);
-  });
-}
-
-document.addEventListener('DOMContentLoaded', initI18n);
