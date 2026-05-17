@@ -18,8 +18,9 @@ const fs       = require('fs');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── Read API key from js/config.js ──────────────────────────────────────────
+// ─── Read API key — env var takes priority, fallback to js/config.js ─────────
 function readApiKey() {
+  if (process.env.FOOTBALL_DATA_API_KEY) return process.env.FOOTBALL_DATA_API_KEY;
   try {
     const cfg = fs.readFileSync(path.join(__dirname, 'js', 'config.js'), 'utf8');
     const m   = cfg.match(/FOOTBALL_DATA_API_KEY\s*=\s*['"]([^'"]+)['"]/);
