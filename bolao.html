@@ -68,12 +68,6 @@
       <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> <span data-i18n="nav_ranking">Ranking</span></a></li>
       <li><a href="profile" id="navUserLink" style="font-weight:600;display:flex;align-items:center;gap:6px;"><i data-lucide="user" width="14" height="14"></i><span id="navUserName">Perfil</span></a></li>
       <li>
-        <div class="lang-switch">
-          <button class="lang-btn" data-lang="pt">PT</button>
-          <button class="lang-btn" data-lang="en">EN</button>
-        </div>
-      </li>
-      <li>
         <button class="btn btn-ghost btn-sm" id="btnLogout">
           <i data-lucide="log-out" width="15" height="15"></i>
           <span data-i18n="nav_logout">Sair</span>
@@ -252,7 +246,7 @@
   let bolaoId = null;
   let isDeadlinePassed = false;
   let predictions = {};
-  let lang = localStorage.getItem('lang') || 'pt';
+  let lang = 'pt';
 
   bolaoId = new URLSearchParams(window.location.search).get('id');
   if (!bolaoId) window.location.href = 'dashboard';
@@ -682,11 +676,11 @@
     window.location.href = '/';
   });
 </script>
-<script src="js/i18n.js?v=7"></script>
+<script src="js/i18n.js?v=8"></script>
 <script src="js/utils.js"></script>
 <script src="js/wc2026.js"></script>
 <script src="js/scoring.js"></script>
 <script>lucide.createIcons();</script>
 </body>
 </html>
-                                                                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                        

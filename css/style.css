@@ -199,19 +199,6 @@ a:hover { text-decoration: underline; }
   .navbar-nav.open { display: flex; }
   .navbar-nav li { width: 100%; }
   .navbar-nav a { display: block; padding: 12px 16px; font-size: 16px; }
-  .lang-switch { justify-content: flex-start; padding: 4px 0; }
-}
-
-/* ── Lang Switch ─────────────────────────── */
-.lang-switch { display: flex; gap: 4px; }
-.lang-btn {
-  background: none; border: 1px solid var(--border-2);
-  color: var(--muted); font-size: 11px; font-weight: 700;
-  padding: 4px 8px; border-radius: var(--r-sm); cursor: pointer;
-  transition: all .15s; letter-spacing: .5px;
-}
-.lang-btn.active, .lang-btn:hover {
-  background: var(--gold); color: var(--navy); border-color: var(--gold);
 }
 
 /* ── Buttons ─────────────────────────────── */
@@ -1114,44 +1101,4 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .footer-brand-name .copa { color: var(--gold); }
 .footer-col { display: flex; flex-direction: column; gap: 10px; }
 .footer-col-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,.4); margin-bottom: 4px; }
-.footer-col a { font-size: 13px; color: rgba(255,255,255,.55); font-weight: 500; transition: color .15s; }
-.footer-col a:hover { color: var(--gold); text-decoration: none; }
-.footer-bottom {
-  max-width: 1120px; margin: 0 auto;
-  padding-top: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 12px;
-}
-
-/* ── Responsive ──────────────────────────── */
-@media (max-width: 900px) {
-  .auth-layout { grid-template-columns: 1fr; }
-  .auth-left { display: none; }
-  .auth-right { padding: 40px 32px; min-height: calc(100vh - 64px); }
-  .bento { grid-template-columns: 1fr; }
-  .bento-1, .bento-4 { grid-row: span 1; }
-  .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
-}
-@media (max-width: 640px) {
-  .hero { padding: 56px 20px 64px; }
-  .hero-logo { width: 150px; }
-  .hero-title { font-size: 36px; letter-spacing: -1px; }
-  .hero-sub { font-size: 15px; }
-  .hero-stats { gap: 24px; }
-  .steps { grid-template-columns: 1fr; }
-  .section { padding: 56px 0; }
-  .section-title { font-size: 26px; }
-  .aff-band { flex-direction: column; padding: 28px 24px; }
-  .aff-band a { width: 100%; justify-content: center; }
-  .auth-right { padding: 32px 20px; }
-  .join-card { padding: 36px 24px; }
-  .footer-grid { grid-template-columns: 1fr; gap: 24px; }
-  .footer { margin-top: 40px; }
-  .bolao-card { min-width: 0; }
-  .game-card { flex-direction: column; align-items: stretch; }
-  .game-teams { font-size: 13px; }
-}
+.footer-col a { font-size: 13px; color: rgba(255,255,255,.55); font-weight: 500; transition: color

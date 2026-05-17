@@ -220,12 +220,6 @@
       <li id="navDashLink" style="display:none;">
         <a href="dashboard"><i data-lucide="layout-grid" width="14" height="14"></i> Meus Bolões</a>
       </li>
-      <li>
-        <div class="lang-switch">
-          <button class="lang-btn" data-lang="pt">PT</button>
-          <button class="lang-btn" data-lang="en">EN</button>
-        </div>
-      </li>
       <li id="navLogoutLi" style="display:none;">
         <button class="btn btn-ghost btn-sm" id="btnLogout">
           <i data-lucide="log-out" width="14" height="14"></i> Sair
@@ -330,7 +324,7 @@ import { auth, db } from './js/config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const lang = localStorage.getItem('lang') || 'pt';
+const lang = 'pt';
 
 /* ── Stage metadata ───────────────────────────────────────────────────── */
 const STAGE_ORDER = ['GROUP_STAGE','LAST_32','LAST_16','QUARTER_FINALS','SEMI_FINALS','THIRD_PLACE','FINAL'];
@@ -644,7 +638,7 @@ function showError(html) {
     <a href="privacy" style="color:var(--muted);margin:0 8px;" data-i18n="footer_privacy">Privacidade</a>
   </div>
 </footer>
-<script src="js/i18n.js?v=7"></script>
+<script src="js/i18n.js?v=8"></script>
 <script>if(window.lucide)lucide.createIcons();</script>
 </body>
 </html>

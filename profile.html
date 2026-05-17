@@ -105,12 +105,6 @@
       <li><a href="dashboard"><i data-lucide="layout-grid" width="14" height="14"></i> <span data-i18n="profile_tab_boloes">Meus Bolões</span></a></li>
       <li><a href="profile" style="font-weight:600;display:flex;align-items:center;gap:6px;color:var(--gold);"><i data-lucide="user" width="14" height="14"></i><span id="navUserName"></span></a></li>
       <li>
-        <div class="lang-switch">
-          <button class="lang-btn" data-lang="pt">PT</button>
-          <button class="lang-btn" data-lang="en">EN</button>
-        </div>
-      </li>
-      <li>
         <button class="btn btn-ghost btn-sm" id="btnLogout">
           <i data-lucide="log-out" width="14" height="14"></i>
           <span>Sair</span>
@@ -332,7 +326,7 @@ let userData = {};
 let userPreds = {};
 let groupsLoaded = false;
 let predsLoaded = false;
-const lang = localStorage.getItem('lang') || 'pt';
+const lang = 'pt';
 
 // ── All countries, sorted alphabetically in Portuguese ────────────────────
 const ALL_COUNTRIES = [
@@ -1003,5 +997,5 @@ function showAlert(containerId, msg, type) {
 }
 </script>
 
-<script src="js/i18n.js?v=7"></script>
+<script src="js/i18n.js?v=8"></script>
 <script>lucide.createIcons();</scr
