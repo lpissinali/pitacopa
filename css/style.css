@@ -906,18 +906,21 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 }
 
 /* ── Bolão page ──────────────────────────── */
-.bolao-content { max-width: 1120px; margin: 0 auto; padding: 28px 24px; }
+.bolao-content { max-width: 1400px; margin: 0 auto; padding: 28px 24px; }
 .bolao-tabs {
-  display: flex; gap: 4px;
   border-bottom: 2px solid var(--border);
   margin-bottom: 28px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+.bolao-tabs-inner {
+  display: flex; gap: 4px;
+  max-width: 1400px; margin: 0 auto; padding: 0 20px;
+}
 .bolao-tab,
 .bolao-tab-btn {
   background: none; border: none; cursor: pointer;
-  padding: 10px 18px;
+  padding: 10px 20px;
   font-size: 14px; font-weight: 700;
   color: var(--muted);
   border-bottom: 3px solid transparent;
@@ -930,6 +933,41 @@ textarea.form-control { resize: vertical; min-height: 80px; }
 .bolao-tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
 .bolao-tab:hover:not(.active),
 .bolao-tab-btn:hover:not(.active) { color: var(--text-2); background: var(--bg-2); }
+
+/* ── Player picker (artilheiro custom dropdown) ── */
+.player-picker { position: relative; }
+.player-picker-trigger {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--r-lg); cursor: pointer; font-size: 14px; color: var(--text);
+  font-family: var(--font); text-align: left; transition: border-color .15s;
+}
+.player-picker-trigger:hover,
+.player-picker-trigger.open { border-color: var(--gold); outline: none; }
+.player-picker-chevron { font-size: 11px; color: var(--muted); flex-shrink: 0; margin-left: 8px; }
+.player-picker-panel {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 400;
+  background: var(--white); border: 1.5px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: 0 8px 32px rgba(0,0,0,.13); overflow: hidden;
+}
+.player-picker-panel.open { display: block; }
+.player-picker-search-wrap { padding: 8px; border-bottom: 1px solid var(--border); }
+.player-picker-search {
+  width: 100%; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: var(--r);
+  font-size: 13px; font-family: var(--font); outline: none; box-sizing: border-box;
+  background: var(--bg-2); color: var(--text);
+}
+.player-picker-search:focus { border-color: var(--gold); }
+.player-picker-list { max-height: 260px; overflow-y: auto; }
+.player-picker-item {
+  display: flex; align-items: center; gap: 8px; padding: 8px 14px;
+  cursor: pointer; font-size: 13px; transition: background .1s;
+}
+.player-picker-item:hover { background: var(--bg-2); }
+.player-picker-item.selected { background: rgba(245,166,35,.08); font-weight: 600; }
+.player-picker-name { flex: 1; color: var(--text); }
+.player-picker-team { font-size: 11px; color: var(--muted); }
+.player-picker-empty { padding: 16px; text-align: center; color: var(--muted); font-size: 13px; }
 .tab-content-panel { display: none; }
 .tab-content-panel.active { display: block; }
 

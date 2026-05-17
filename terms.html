@@ -119,59 +119,66 @@
   var toggle = document.getElementById('menuToggle');
   var nav = document.getElementById('mainNav');
   if(toggle && nav) toggle.addEventListener('click', function(){ nav.classList.toggle('open'); });
-  document.querySelectorAll('.lang-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){ localStorage.setItem('lang', btn.dataset.lang); location.reload(); });
-  });
+
+  var PT_BODY = document.getElementById('termsBody').innerHTML;
+
+  function applyLang(lang) {
+    if (lang === 'en') {
+      document.title = 'Terms of Use — PitaCopa 2026';
+      document.getElementById('termsTitle').textContent = 'Terms of Use';
+      document.getElementById('termsDate').textContent = 'Last updated: May 2026';
+      document.getElementById('termsBody').innerHTML = `
+        <h2>1. Acceptance</h2>
+        <p>By accessing or using PitaCopa, you agree to these Terms of Use. If you do not agree, please do not use the service.</p>
+
+        <h2>2. The Service</h2>
+        <p>PitaCopa is a free entertainment platform for World Cup 2026 prediction pools. It does not involve real-money gambling in any way. All content is recreational.</p>
+
+        <h2>3. Eligibility</h2>
+        <ul>
+          <li>You must be at least 13 years old to create an account.</li>
+          <li>By registering, you confirm that the information you provide is accurate.</li>
+          <li>One account per person. Duplicate accounts may be removed.</li>
+        </ul>
+
+        <h2>4. Your Account</h2>
+        <p>You are responsible for keeping your password confidential and for all activity under your account. Notify us immediately of any unauthorised use.</p>
+
+        <h2>5. Prohibited Conduct</h2>
+        <ul>
+          <li>Creating fake accounts or impersonating others.</li>
+          <li>Manipulating scores or the pool system fraudulently.</li>
+          <li>Using bots, scripts or automation to interact with the service.</li>
+          <li>Posting offensive, illegal or rights-infringing content.</li>
+        </ul>
+
+        <h2>6. Intellectual Property</h2>
+        <p>All PitaCopa content — code, design, text and images — belongs to PitaCopa or its licensors. Reproduction without prior authorisation is prohibited.</p>
+
+        <h2>7. Availability</h2>
+        <p>The service is provided "as is". We do not guarantee uninterrupted availability and may modify or discontinue features at any time without notice.</p>
+
+        <h2>8. Limitation of Liability</h2>
+        <p>PitaCopa is not liable for direct or indirect damages arising from your use of, or inability to use, the platform.</p>
+
+        <h2>9. Changes</h2>
+        <p>These terms may be updated at any time. Continued use of the service after changes constitutes acceptance of the new terms.</p>
+
+        <h2>10. Contact</h2>
+        <p>Questions? Contact us via the e-mail listed on the platform.</p>
+      `;
+    } else {
+      document.title = 'Termos de Uso — PitaCopa 2026';
+      document.getElementById('termsTitle').textContent = 'Termos de Uso';
+      document.getElementById('termsDate').textContent = 'Última atualização: maio de 2026';
+      document.getElementById('termsBody').innerHTML = PT_BODY;
+    }
+  }
 
   var lang = localStorage.getItem('lang') || 'pt';
-  if (lang === 'en') switchToEn();
+  if (lang === 'en') applyLang('en');
 
-  function switchToEn() {
-    document.documentElement.lang = 'en';
-    document.title = 'Terms of Use — PitaCopa 2026';
-    document.getElementById('termsTitle').textContent = 'Terms of Use';
-    document.getElementById('termsDate').textContent = 'Last updated: May 2026';
-    document.getElementById('termsBody').innerHTML = `
-      <h2>1. Acceptance</h2>
-      <p>By accessing or using PitaCopa, you agree to these Terms of Use. If you do not agree, please do not use the service.</p>
-
-      <h2>2. The Service</h2>
-      <p>PitaCopa is a free entertainment platform for World Cup 2026 prediction pools. It does not involve real-money gambling in any way. All content is recreational.</p>
-
-      <h2>3. Eligibility</h2>
-      <ul>
-        <li>You must be at least 13 years old to create an account.</li>
-        <li>By registering, you confirm that the information you provide is accurate.</li>
-        <li>One account per person. Duplicate accounts may be removed.</li>
-      </ul>
-
-      <h2>4. Your Account</h2>
-      <p>You are responsible for keeping your password confidential and for all activity under your account. Notify us immediately of any unauthorised use.</p>
-
-      <h2>5. Prohibited Conduct</h2>
-      <ul>
-        <li>Creating fake accounts or impersonating others.</li>
-        <li>Manipulating scores or the pool system fraudulently.</li>
-        <li>Using bots, scripts or automation to interact with the service.</li>
-        <li>Posting offensive, illegal or rights-infringing content.</li>
-      </ul>
-
-      <h2>6. Intellectual Property</h2>
-      <p>All PitaCopa content — code, design, text and images — belongs to PitaCopa or its licensors. Reproduction without prior authorisation is prohibited.</p>
-
-      <h2>7. Availability</h2>
-      <p>The service is provided "as is". We do not guarantee uninterrupted availability and may modify or discontinue features at any time without notice.</p>
-
-      <h2>8. Limitation of Liability</h2>
-      <p>PitaCopa is not liable for direct or indirect damages arising from your use of, or inability to use, the platform.</p>
-
-      <h2>9. Changes</h2>
-      <p>These terms may be updated at any time. Continued use of the service after changes constitutes acceptance of the new terms.</p>
-
-      <h2>10. Contact</h2>
-      <p>Questions? Contact us via the e-mail listed on the platform.</p>
-    `;
-  }
+  window.onLangChange = applyLang;
 })();
 </script>
 <script src="js/i18n.js?v=7"></script>

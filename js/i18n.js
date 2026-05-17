@@ -26,7 +26,7 @@ const TRANSLATIONS = {
     hero_sub: "Crie bolões, faça palpites nos 104 jogos e mostre pra galera quem manja mais de futebol. 100% gratuito.",
     hero_cta_1: "🚀 Criar Bolão Grátis",
     hero_cta_2: "Como Funciona",
-    hero_cta_primary: "Criar Meu Bolão Grátis",
+    hero_cta_primary: '<i data-lucide="trophy" width="18" height="18"></i> Criar Meu Bolão Grátis',
     hero_cta_secondary: "Já tenho conta",
     stat_teams: "seleções na Copa",
     stat_games: "jogos para palpitar",
@@ -322,7 +322,7 @@ const TRANSLATIONS = {
     hero_sub: "Create pools with friends, predict all 104 matches, and prove who knows football best. 100% free.",
     hero_cta_1: "🚀 Create Free Pool",
     hero_cta_2: "How It Works",
-    hero_cta_primary: "Create My Free Pool",
+    hero_cta_primary: '<i data-lucide="trophy" width="18" height="18"></i> Create My Free Pool',
     hero_cta_secondary: "I already have an account",
     stat_teams: "teams in the Cup",
     stat_games: "matches to predict",
@@ -632,6 +632,8 @@ function applyTranslations() {
   document.querySelectorAll('[data-i18n-title]').forEach(function(el) {
     el.title = t(el.getAttribute('data-i18n-title'));
   });
+  // Re-render Lucide icons that may have been wiped by innerHTML replacement
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function setLang(lang) {
@@ -642,6 +644,7 @@ function setLang(lang) {
   document.querySelectorAll('.lang-btn').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.lang === lang);
   });
+  if (typeof window.onLangChange === 'function') window.onLangChange(lang);
 }
 
 function initI18n() {

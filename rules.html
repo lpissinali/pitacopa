@@ -151,61 +151,70 @@
   var toggle = document.getElementById('menuToggle');
   var nav = document.getElementById('mainNav');
   if(toggle && nav) toggle.addEventListener('click', function(){ nav.classList.toggle('open'); });
-  document.querySelectorAll('.lang-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){ localStorage.setItem('lang', btn.dataset.lang); location.reload(); });
-  });
 
-  var lang = localStorage.getItem('lang') || 'pt';
-  if (lang === 'en') switchToEn();
+  var PT_BODY = document.getElementById('rulesBody').innerHTML;
 
-  function switchToEn() {
-    document.documentElement.lang = 'en';
-    document.title = 'Pool Rules — PitaCopa 2026';
-    document.getElementById('rulesTitle').textContent = 'Pool Rules';
-    document.getElementById('rulesSubtitle').textContent = 'How scoring and tiebreakers work';
-    document.getElementById('rulesBody').innerHTML = `
-      <h2>How to Join</h2>
-      <p>Create a free account, go to My Predictions in your profile and enter your scores for every World Cup match. You can also join private pools with friends using an invite code.</p>
+  function applyLang(lang) {
+    if (lang === 'en') {
+      document.title = 'Pool Rules — PitaCopa 2026';
+      document.getElementById('rulesTitle').textContent = 'Pool Rules';
+      document.getElementById('rulesSubtitle').textContent = 'How scoring and tiebreakers work';
+      document.getElementById('rulesBody').innerHTML = `
+        <h2>How to Join</h2>
+        <p>Create a free account, go to My Predictions in your profile and enter your scores for every World Cup match. You can also join private pools with friends using an invite code.</p>
 
-      <h2>Prediction Deadline</h2>
-      <p>Predictions for each match are open until kick-off. After that the field locks automatically and cannot be changed.</p>
-      <p>Your <strong>Champion</strong>, <strong>Runner-up</strong> and <strong>Top Scorer</strong> picks lock when the tournament begins on 11 June 2026.</p>
+        <h2>Prediction Deadline</h2>
+        <p>Predictions for each match are open until kick-off. After that the field locks automatically and cannot be changed.</p>
+        <p>Your <strong>Champion</strong>, <strong>Runner-up</strong> and <strong>Top Scorer</strong> picks lock when the tournament begins on 11 June 2026.</p>
 
-      <h2>Scoring System</h2>
-      <div class="score-grid">
-        <div class="score-row header"><div>Outcome</div><div>Points</div></div>
-        <div class="score-row"><div>🎯 Exact score (e.g. you pick 2–1 and it ends 2–1)</div><div>3 pts</div></div>
-        <div class="score-row"><div>✅ Correct result (win/draw/loss, wrong score)</div><div>1 pt</div></div>
-        <div class="score-row"><div>❌ Wrong result</div><div>0 pts</div></div>
-        <div class="score-row"><div>🏆 Correct Champion</div><div>10 pts</div></div>
-        <div class="score-row"><div>🥈 Correct Runner-up</div><div>5 pts</div></div>
-        <div class="score-row"><div>⚽ Correct Top Scorer</div><div>5 pts</div></div>
-      </div>
-      <div class="tip-box">
-        💡 <strong>Tip:</strong> There are 48 group-stage matches — fill them all in even if you're unsure. An exact score is worth 3 points!
-      </div>
+        <h2>Scoring System</h2>
+        <div class="score-grid">
+          <div class="score-row header"><div>Outcome</div><div>Points</div></div>
+          <div class="score-row"><div>🎯 Exact score (e.g. you pick 2–1 and it ends 2–1)</div><div>3 pts</div></div>
+          <div class="score-row"><div>✅ Correct result (win/draw/loss, wrong score)</div><div>1 pt</div></div>
+          <div class="score-row"><div>❌ Wrong result</div><div>0 pts</div></div>
+          <div class="score-row"><div>🏆 Correct Champion</div><div>10 pts</div></div>
+          <div class="score-row"><div>🥈 Correct Runner-up</div><div>5 pts</div></div>
+          <div class="score-row"><div>⚽ Correct Top Scorer</div><div>5 pts</div></div>
+        </div>
+        <div class="tip-box">
+          💡 <strong>Tip:</strong> There are 48 group-stage matches — fill them all in even if you're unsure. An exact score is worth 3 points!
+        </div>
 
-      <h2>Tiebreakers</h2>
-      <p>When two players are tied on points, the tiebreaker order is:</p>
-      <ul>
-        <li>Most exact scores (3-point predictions).</li>
-        <li>Most correct results (1-point predictions).</li>
-        <li>Correctly predicted the <strong>Champion</strong>.</li>
-        <li>Correctly predicted the <strong>Runner-up</strong>.</li>
-        <li>Alphabetical name order (last resort).</li>
-      </ul>
+        <h2>Tiebreakers</h2>
+        <p>When two players are tied on points, the tiebreaker order is:</p>
+        <ul>
+          <li>Most exact scores (3-point predictions).</li>
+          <li>Most correct results (1-point predictions).</li>
+          <li>Correctly predicted the <strong>Champion</strong>.</li>
+          <li>Correctly predicted the <strong>Runner-up</strong>.</li>
+          <li>Alphabetical name order (last resort).</li>
+        </ul>
 
-      <h2>Private Pools</h2>
-      <p>Any user can create a private pool and invite friends with a unique 6-character code. Each pool has its own ranking, separate from the global leaderboard.</p>
-      <p>Your pool predictions are the same ones you enter in "My Predictions" on your profile — you only need to fill them in once.</p>
+        <h2>Private Pools</h2>
+        <p>Any user can create a private pool and invite friends with a unique 6-character code. Each pool has its own ranking, separate from the global leaderboard.</p>
+        <p>Your pool predictions are the same ones you enter in "My Predictions" on your profile — you only need to fill them in once.</p>
 
-      <h2>Global Ranking</h2>
-      <p>The global ranking includes all registered users. The points shown are the sum across all pools you belong to.</p>
+        <h2>Global Ranking</h2>
+        <p>The global ranking includes all registered users. The points shown are the sum across all pools you belong to.</p>
 
-      <h2>Fair Play</h2>
-      <p>PitaCopa is a free entertainment game with no real money involved. Any attempt to manipulate the system will result in permanent account removal.</p>
-    `;
+        <h2>Fair Play</h2>
+        <p>PitaCopa is a free entertainment game with no real money involved. Any attempt to manipulate the system will result in permanent account removal.</p>
+      `;
+    } else {
+      document.title = 'Regras do Bolão — PitaCopa 2026';
+      document.getElementById('rulesTitle').textContent = 'Regras do Bolão';
+      document.getElementById('rulesSubtitle').textContent = 'Como funciona a pontuação e o desempate';
+      document.getElementById('rulesBody').innerHTML = PT_BODY;
+    }
   }
+
+  // Initial load
+  var lang = localStorage.getItem('lang') || 'pt';
+  if (lang === 'en') applyLang('en');
+
+  // Hook into i18n system for live switching
+  window.onLangChange = applyLang;
 })();
 </script>
 <script src="js/i18n.js?v=7"></script>

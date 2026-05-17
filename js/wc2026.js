@@ -423,36 +423,110 @@ function flagHtml(emojiOrCode, cls = '') {
   return emojiOrCode;
 }
 
-// Helper: build artilheiro select options grouped by team
+// Helper: build artilheiro custom picker (uses flag-icons — works on Windows)
 function buildPlayerOptions(selectEl, lang, savedValue) {
   if (typeof WC2026_PLAYERS === 'undefined') return;
-  // Group players by team
+
+  // Build flat sorted player list
   const byTeam = {};
   WC2026_PLAYERS.forEach(p => {
     const team = ALL_TEAMS.find(t => t.id === p.team);
     if (!team) return;
-    const key  = team.id;
-    if (!byTeam[key]) byTeam[key] = { team, players: [] };
-    byTeam[key].players.push(p);
+    if (!byTeam[team.id]) byTeam[team.id] = { team, players: [] };
+    byTeam[team.id].players.push(p);
   });
-  // Sort teams alphabetically by localised name
-  const sorted = Object.values(byTeam).sort((a, b) => {
-    const na = lang === 'en' ? a.team.nameEn : a.team.name;
-    const nb = lang === 'en' ? b.team.nameEn : b.team.name;
-    return na.localeCompare(nb);
+  const sorted = Object.values(byTeam).sort((a, b) =>
+    (lang === 'en' ? a.team.nameEn : a.team.name)
+      .localeCompare(lang === 'en' ? b.team.nameEn : b.team.name)
+  );
+  const players = [];
+  sorted.forEach(({ team, players: ps }) => {
+    ps.slice()
+      .sort((a, b) => (lang === 'en' ? a.nameEn : a.name).localeCompare(lang === 'en' ? b.nameEn : b.name))
+      .forEach(p => players.push({
+        value:    lang === 'en' ? p.nameEn : p.name,
+        name:     lang === 'en' ? p.nameEn : p.name,
+        teamName: lang === 'en' ? team.nameEn : team.name,
+        teamFlag: team.flag,
+      }));
   });
-  sorted.forEach(({ team, players }) => {
-    const og = document.createElement('optgroup');
-    og.label = team.flag + ' ' + (lang === 'en' ? team.nameEn : team.name);
-    players.sort((a, b) => (lang === 'en' ? a.nameEn : a.name).localeCompare(lang === 'en' ? b.nameEn : b.name))
-      .forEach(p => {
-        const opt = document.createElement('option');
-        const playerName = lang === 'en' ? p.nameEn : p.name;
-        opt.value = playerName;
-        opt.textContent = playerName;
-        og.appendChild(opt);
+
+  // Hide original select (keep its ID so .value reads still work)
+  selectEl.style.display = 'none';
+
+  // Remove any existing picker
+  const existingPicker = selectEl.parentNode.querySelector('.player-picker');
+  if (existingPicker) existingPicker.remove();
+
+  const ph    = lang === 'en' ? '— Select player —' : '— Selecionar jogador —';
+  const sph   = lang === 'en' ? 'Search player or team…' : 'Buscar jogador ou seleção…';
+  const noRes = lang === 'en' ? 'No results' : 'Nenhum resultado';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'player-picker';
+  wrapper.innerHTML = `
+    <button type="button" class="player-picker-trigger">
+      <span class="player-picker-label">${ph}</span>
+      <span class="player-picker-chevron">▾</span>
+    </button>
+    <div class="player-picker-panel">
+      <div class="player-picker-search-wrap">
+        <input type="text" class="player-picker-search" placeholder="${sph}" autocomplete="off">
+      </div>
+      <div class="player-picker-list"></div>
+    </div>`;
+  selectEl.parentNode.insertBefore(wrapper, selectEl.nextSibling);
+
+  const trigger = wrapper.querySelector('.player-picker-trigger');
+  const label   = wrapper.querySelector('.player-picker-label');
+  const panel   = wrapper.querySelector('.player-picker-panel');
+  const search  = wrapper.querySelector('.player-picker-search');
+  const list    = wrapper.querySelector('.player-picker-list');
+
+  function renderList(filter) {
+    const q = (filter || '').toLowerCase();
+    const hits = players.filter(p =>
+      !q || p.name.toLowerCase().includes(q) || p.teamName.toLowerCase().includes(q)
+    );
+    list.innerHTML = '';
+    if (!hits.length) {
+      list.innerHTML = `<div class="player-picker-empty">${noRes}</div>`;
+      return;
+    }
+    hits.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'player-picker-item' + (selectEl.value === p.value ? ' selected' : '');
+      item.innerHTML = `${flagHtml(p.teamFlag)}<span class="player-picker-name">${p.name}</span><span class="player-picker-team">${p.teamName}</span>`;
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
+        selectEl.value = p.value;
+        label.innerHTML = `${flagHtml(p.teamFlag)} ${p.name}`;
+        panel.classList.remove('open');
+        trigger.classList.remove('open');
       });
-    selectEl.appendChild(og);
+      list.appendChild(item);
+    });
+  }
+
+  trigger.addEventListener('click', () => {
+    const open = panel.classList.toggle('open');
+    trigger.classList.toggle('open', open);
+    if (open) { search.value = ''; renderList(''); search.focus(); }
   });
-  if (savedValue) selectEl.value = savedValue;
+  search.addEventListener('input', () => renderList(search.value));
+  document.addEventListener('click', e => {
+    if (!wrapper.contains(e.target)) {
+      panel.classList.remove('open');
+      trigger.classList.remove('open');
+    }
+  });
+
+  // Restore saved value
+  if (savedValue) {
+    selectEl.value = savedValue;
+    const p = players.find(pl => pl.value === savedValue);
+    if (p) label.innerHTML = `${flagHtml(p.teamFlag)} ${p.name}`;
+  }
+
+  renderList('');
 }
