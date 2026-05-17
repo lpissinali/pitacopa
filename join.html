@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Você foi convidado — PitaCopa 2026</title>
+  <meta name="description" content="Você foi convidado para um bolão da Copa do Mundo 2026. Entre gratuitamente!">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar" role="navigation">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand" aria-label="PitaCopa">
+      <div class="brand-logo">
+        <img src="img/logo-icon-dark.png" alt="PitaCopa" onerror="this.parentElement.innerHTML='<div class=\'brand-logo-text\'>P</div>'">
+      </div>
+      <div>
+        <div class="brand-name"><span class="pita">pita</span><span class="copa">copa</span></div>
+      </div>
+    </a>
+    <ul class="navbar-nav">
+      <li>
+        <div class="lang-switch">
+          <button class="lang-btn" data-lang="pt">PT</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="join-page-wrap">
+  <div class="join-card">
+    <div class="join-icon">
+      <i data-lucide="trophy" width="40" height="40"></i>
+    </div>
+    <h2 id="joinHeading">Você foi convidado!</h2>
+    <p class="join-desc" id="joinDesc">Entre no bolão da Copa 2026</p>
+
+    <div class="invite-box" style="margin-bottom:24px;">
+      <div class="invite-box-label">Código do bolão</div>
+      <div class="invite-code" id="joinCodeDisplay">——</div>
+    </div>
+
+    <div id="joinStatus"></div>
+
+    <a href="login.html" class="btn btn-primary btn-block btn-lg" id="btnJoinLogin">
+      <i data-lucide="arrow-right-circle" width="18" height="18"></i>
+      <span>Entrar / Criar Conta para Participar</span>
+    </a>
+    <p class="join-free-note">100% gratuito · Sem dinheiro real · Sem cartão</p>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db } from './js/config.js';
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const code = new URLSearchParams(window.location.search).get('code');
+  const lang = localStorage.getItem('lang') || 'pt';
+
+  if (code) {
+    document.getElementById('joinCodeDisplay').textContent = code;
+    document.getElementById('btnJoinLogin').href = 'login.html?tab=register&redirect=' + encodeURIComponent('dashboard.html?join=' + code);
+  }
+
+  onAuthStateChanged(auth, user => {
+    if (user && code) window.location.href = 'dashboard.html?join=' + code;
+  });
+</script>
+<script src="js/i18n.js"></script>
+<script src="js/utils.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

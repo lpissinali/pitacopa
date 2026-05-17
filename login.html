@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar — PitaCopa 2026</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+
+<nav class="navbar" role="navigation">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand" aria-label="PitaCopa">
+      <div class="brand-logo">
+        <img src="img/logo-icon-dark.png" alt="PitaCopa" onerror="this.parentElement.innerHTML='<div class=\'brand-logo-text\'>P</div>'">
+      </div>
+      <div>
+        <div class="brand-name"><span class="pita">pita</span><span class="copa">copa</span></div>
+        <div class="brand-tagline">seu pitaco, sua glória</div>
+      </div>
+    </a>
+    <ul class="navbar-nav">
+      <li>
+        <div class="lang-switch">
+          <button class="lang-btn" data-lang="pt">PT</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<div class="auth-layout">
+  <!-- LEFT panel -->
+  <div class="auth-left">
+    <img src="img/logo.png" alt="PitaCopa" class="auth-left-logo" onerror="this.style.display='none'">
+    <h2 class="auth-left-title" data-i18n="left_title">Bora jogar a <span>Copa 2026!</span></h2>
+    <p class="auth-left-sub" data-i18n="left_sub">Crie seus bolões, faça palpites e dispute com amigos o título de maior pitaqueiro da turma.</p>
+    <div class="auth-perks">
+      <div class="auth-perk">
+        <div class="auth-perk-icon"><i data-lucide="shield-check" width="14" height="14"></i></div>
+        <span data-i18n="perk1">100% gratuito, sem dinheiro real</span>
+      </div>
+      <div class="auth-perk">
+        <div class="auth-perk-icon"><i data-lucide="users" width="14" height="14"></i></div>
+        <span data-i18n="perk2">Crie bolões ilimitados</span>
+      </div>
+      <div class="auth-perk">
+        <div class="auth-perk-icon"><i data-lucide="target" width="14" height="14"></i></div>
+        <span data-i18n="perk3">Palpites em todos os 104 jogos</span>
+      </div>
+      <div class="auth-perk">
+        <div class="auth-perk-icon"><i data-lucide="zap" width="14" height="14"></i></div>
+        <span data-i18n="perk4">Ranking automático em tempo real</span>
+      </div>
+    </div>
+    <div class="auth-affiliate">
+      <p style="font-weight:700;color:var(--gold);margin-bottom:10px;" data-i18n="aff_left_title">Quer análises antes de palpitar?</p>
+      <a href="https://SEU-LINK-AFILIADO.com" target="_blank" rel="noopener sponsored" class="btn btn-outline btn-sm">
+        <i data-lucide="arrow-right" width="14" height="14"></i>
+        <span data-i18n="aff_btn_short">Ver Odds da Copa</span>
+      </a>
+      <p style="font-size:11px;color:rgba(255,255,255,.3);margin-top:10px;" data-i18n="aff_disclaimer_short">Conteúdo patrocinado. +18. Jogue com responsabilidade.</p>
+    </div>
+  </div>
+
+  <!-- RIGHT panel -->
+  <div class="auth-right">
+    <h2 id="authTitle" data-i18n="auth_login_title" style="font-size:26px;font-weight:900;color:var(--text);letter-spacing:-.5px;margin-bottom:6px;">Bem-vindo de volta!</h2>
+    <p id="authSubtitle" data-i18n="auth_login_sub" style="font-size:14px;color:var(--muted);margin-bottom:24px;">Entre para ver seus bolões.</p>
+
+    <!-- TABS — driven by plain JS below, no Firebase dependency -->
+    <div class="tabs" style="margin-bottom:24px;">
+      <button class="tab-btn active" id="tabLoginBtn" data-i18n="tab_login">Entrar</button>
+      <button class="tab-btn" id="tabRegisterBtn" data-i18n="tab_register">Criar Conta</button>
+    </div>
+
+    <div id="authAlert" style="display:none;margin-bottom:16px;"></div>
+
+    <button class="btn btn-ghost btn-block" id="btnGoogle" style="justify-content:center;margin-bottom:4px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" style="flex-shrink:0"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      <span data-i18n="btn_google">Continuar com Google</span>
+    </button>
+
+    <div style="display:flex;align-items:center;gap:12px;margin:16px 0;">
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+      <span style="font-size:12px;font-weight:600;color:var(--muted-2);" data-i18n="or">ou</span>
+      <div style="flex:1;height:1px;background:var(--border);"></div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm">
+      <div class="form-group">
+        <label class="form-label" data-i18n="label_email">E-mail</label>
+        <input type="email" id="loginEmail" class="form-control" placeholder="seu@email.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="label_password">Senha</label>
+        <input type="password" id="loginPassword" class="form-control" data-i18n="ph_password" placeholder="Mínimo 6 caracteres" required autocomplete="current-password">
+      </div>
+      <div style="text-align:right;margin-bottom:20px;">
+        <a href="#" id="forgotLink" style="font-size:13px;color:var(--muted);" data-i18n="forgot_password">Esqueci minha senha</a>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg" id="btnLogin">
+        <i data-lucide="log-in" width="16" height="16"></i>
+        <span data-i18n="btn_login">Entrar</span>
+      </button>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="registerForm" style="display:none;">
+      <div class="form-group">
+        <label class="form-label" data-i18n="label_nickname">Seu apelido de pitaqueiro</label>
+        <input type="text" id="regName" class="form-control" data-i18n="ph_nickname" placeholder="Ex: Rei do Pitaco" required autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="label_email">E-mail</label>
+        <input type="email" id="regEmail" class="form-control" placeholder="seu@email.com" required autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="label_password">Senha</label>
+        <input type="password" id="regPassword" class="form-control" data-i18n="ph_password" placeholder="Mínimo 6 caracteres" required autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="label_confirm_password">Confirmar senha</label>
+        <input type="password" id="regConfirm" class="form-control" data-i18n="ph_confirm" placeholder="Repita a senha" required autocomplete="new-password">
+        <div class="alert alert-danger" id="passwordMismatch" data-i18n="password_mismatch" style="display:none;margin-top:8px;">As senhas não coincidem.</div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block btn-lg" id="btnRegister">
+        <i data-lucide="user-plus" width="16" height="16"></i>
+        <span data-i18n="btn_register">Criar Conta Grátis</span>
+      </button>
+      <p data-i18n="terms_agree" style="font-size:12px;color:var(--muted);text-align:center;margin-top:14px;">
+        Ao criar conta você concorda com os <a href="terms.html" style="color:var(--gold);">Termos de Uso</a> e <a href="privacy.html" style="color:var(--gold);">Política de Privacidade</a>.
+      </p>
+    </form>
+  </div>
+</div>
+
+<div class="toast-container"></div>
+
+<!-- ── Tab switching — plain script, no Firebase dependency ── -->
+<script>
+  function showAlert(msg, type) {
+    var el = document.getElementById('authAlert');
+    el.className = 'alert alert-' + (type || 'danger');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+  function hideAlert() {
+    document.getElementById('authAlert').style.display = 'none';
+  }
+
+  function switchTab(tab) {
+    var isLogin = tab !== 'register';
+    document.getElementById('tabLoginBtn').classList.toggle('active', isLogin);
+    document.getElementById('tabRegisterBtn').classList.toggle('active', !isLogin);
+    document.getElementById('loginForm').style.display    = isLogin ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = isLogin ? 'none'  : 'block';
+    document.getElementById('authTitle').dataset.i18n    = isLogin ? 'auth_login_title'    : 'auth_register_title';
+    document.getElementById('authSubtitle').dataset.i18n = isLogin ? 'auth_login_sub'      : 'auth_register_sub';
+    if (typeof applyTranslations === 'function') applyTranslations();
+    hideAlert();
+    if (window.lucide) lucide.createIcons();
+  }
+
+  document.getElementById('tabLoginBtn').addEventListener('click', function(){ switchTab('login'); });
+  document.getElementById('tabRegisterBtn').addEventListener('click', function(){ switchTab('register'); });
+
+  // Check URL param immediately
+  var urlTab = new URLSearchParams(window.location.search).get('tab');
+  if (urlTab === 'register') switchTab('register');
+</script>
+
+<!-- ── Firebase auth — module script ── -->
+<script type="module">
+  import { auth, db, googleProvider } from './js/config.js';
+  import {
+    signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    signInWithPopup, sendPasswordResetEmail, onAuthStateChanged, updateProfile
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // Signal that module loaded successfully
+  window._firebaseReady = true;
+
+  // Redirect if already logged in
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      var redirect = new URLSearchParams(window.location.search).get('redirect');
+      window.location.href = redirect || 'dashboard.html';
+    }
+  });
+
+  function setLoading(btn, loading, defaultText) {
+    btn.disabled = loading;
+    var span = btn.querySelector('span');
+    if (span) span.textContent = loading ? '...' : defaultText;
+  }
+
+  async function saveUser(user) {
+    await setDoc(doc(db, 'users', user.uid), {
+      name: user.displayName || 'Pitaqueiro',
+      email: user.email,
+      photoURL: user.photoURL || '',
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  }
+
+  // Google sign-in
+  document.getElementById('btnGoogle').addEventListener('click', async () => {
+    var btn = document.getElementById('btnGoogle');
+    setLoading(btn, true, 'Continuar com Google');
+    try {
+      var result = await signInWithPopup(auth, googleProvider);
+      await saveUser(result.user);
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      var msg = err.code === 'auth/popup-closed-by-user' ? 'Pop-up fechado. Tente novamente.' : (err.message || 'Erro ao entrar com Google.');
+      showAlert(msg, 'danger');
+      setLoading(btn, false, 'Continuar com Google');
+    }
+  });
+
+  // Login form
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    var btn = document.getElementById('btnLogin');
+    setLoading(btn, true, 'Entrar');
+    try {
+      await signInWithEmailAndPassword(auth,
+        document.getElementById('loginEmail').value.trim(),
+        document.getElementById('loginPassword').value
+      );
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      var msg = 'E-mail ou senha incorretos.';
+      if (err.code !== 'auth/wrong-password' && err.code !== 'auth/user-not-found' && err.code !== 'auth/invalid-credential') {
+        msg = err.message;
+      }
+      showAlert(msg, 'danger');
+      setLoading(btn, false, 'Entrar');
+    }
+  });
+
+  // Register form
+  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    var btn = document.getElementById('btnRegister');
+    var pass    = document.getElementById('regPassword').value;
+    var confirm = document.getElementById('regConfirm').value;
+    var mismatch = document.getElementById('passwordMismatch');
+    if (pass !== confirm) { mismatch.style.display = 'block'; return; }
+    mismatch.style.display = 'none';
+    setLoading(btn, true, 'Criar Conta Grátis');
+    try {
+      var cred = await createUserWithEmailAndPassword(auth,
+        document.getElementById('regEmail').value.trim(), pass
+      );
+      var displayName = document.getElementById('regName').value.trim();
+      await updateProfile(cred.user, { displayName });
+      // Pass the live user object directly — spreading Firebase User loses prototype getters (uid, email, etc.)
+      await saveUser(cred.user);
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      var msg = err.code === 'auth/email-already-in-use' ? 'Este e-mail já está cadastrado.' : err.message;
+      showAlert(msg, 'danger');
+      setLoading(btn, false, 'Criar Conta Grátis');
+    }
+  });
+
+  // Forgot password
+  document.getElementById('forgotLink').addEventListener('click', async (e) => {
+    e.preventDefault();
+    var email = document.getElementById('loginEmail').value.trim();
+    if (!email) {
+      showAlert('Digite seu e-mail no campo acima primeiro.', 'danger');
+      document.getElementById('loginEmail').focus();
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showAlert('E-mail de redefinição enviado! Verifique sua caixa de entrada.', 'success');
+    } catch (err) {
+      showAlert(err.code === 'auth/user-not-found' ? 'Nenhuma conta com este e-mail.' : err.message, 'danger');
+    }
+  });
+</script>
+
+
+<!-- ── Fallback: show message if Firebase module failed to load ── -->
+<script>
+  setTimeout(function() {
+    if (window._firebaseReady) return; // module loaded fine, nothing to do
+
+    var isFile = window.location.protocol === 'file:';
+    var msg = isFile
+      ? 'Abra o site via servidor local (ex: VS Code Live Server ou npx serve) — o login não funciona com file://.'
+      : 'Configure o Firebase em js/config.js para ativar o login.';
+
+    function guardedAlert(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      showAlert(msg, 'danger');
+    }
+
+    document.getElementById('btnGoogle').addEventListener('click', guardedAlert);
+    document.getElementById('forgotLink').addEventListener('click', guardedAlert);
+    document.getElementById('loginForm').addEventListener('submit', guardedAlert);
+    document.getElementById('registerForm').addEventListener('submit', guardedAlert);
+
+    // Show a subtle banner
+    showAlert(msg, 'danger');
+  }, 800);
+</script>
+<script src="js/i18n.js"></script>
+<script src="js/utils.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

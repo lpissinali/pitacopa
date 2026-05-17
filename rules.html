@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regras do Bolão — PitaCopa 2026</title>
+  <meta name="description" content="Regras de pontuação e funcionamento do bolão PitaCopa 2026.">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    .legal-wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 80px; }
+    .legal-hero { text-align: center; margin-bottom: 40px; }
+    .legal-hero h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+    .legal-hero p  { font-size: 14px; color: var(--muted); }
+    .legal-body h2 { font-size: 17px; font-weight: 700; margin: 32px 0 10px; color: var(--text); }
+    .legal-body p, .legal-body li { font-size: 14px; line-height: 1.8; color: var(--text-2); }
+    .legal-body ul { padding-left: 20px; margin: 8px 0 16px; }
+    .legal-body ul li { margin-bottom: 6px; }
+    /* Scoring table */
+    .score-grid { display: grid; grid-template-columns: 1fr auto; gap: 0; border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; margin: 16px 0 24px; }
+    .score-row { display: contents; }
+    .score-row > div { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
+    .score-row:last-child > div { border-bottom: none; }
+    .score-row > div:first-child { color: var(--text-2); }
+    .score-row > div:last-child { font-weight: 800; font-size: 18px; color: var(--gold); text-align: center; white-space: nowrap; background: var(--bg-2); }
+    .score-row.header > div { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: var(--bg-2); }
+    .slim-footer { border-top: 1px solid var(--border); padding: 20px; text-align: center; font-size: 12px; color: var(--muted); }
+    .slim-footer a { color: var(--muted); margin: 0 8px; }
+    .slim-footer a:hover { color: var(--gold); text-decoration: none; }
+    .tip-box { background: var(--gold-l); border: 1px solid rgba(245,166,35,.25); border-radius: var(--r-lg); padding: 16px 20px; margin: 16px 0; font-size: 14px; color: var(--text-2); }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" role="navigation">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand" aria-label="PitaCopa">
+      <div class="brand-logo">
+        <img src="img/logo-icon-dark.png" alt="PitaCopa" onerror="this.parentElement.innerHTML='<div class=\'brand-logo-text\'>P</div>'">
+      </div>
+      <div>
+        <div class="brand-name"><span class="pita">pita</span><span class="copa">copa</span></div>
+        <div class="brand-tagline">seu pitaco, sua glória</div>
+      </div>
+    </a>
+    <ul class="navbar-nav" id="mainNav">
+      <li><a href="games.html"><i data-lucide="calendar-days" width="14" height="14"></i> <span data-i18n="nav_games">Jogos</span></a></li>
+      <li><a href="ranking.html"><i data-lucide="trophy" width="14" height="14"></i> <span data-i18n="nav_ranking">Ranking</span></a></li>
+      <li><a href="login.html" class="btn btn-primary btn-sm" data-i18n="nav_enter">Entrar</a></li>
+      <li>
+        <div class="lang-switch">
+          <button class="lang-btn" data-lang="pt">PT</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+      </li>
+    </ul>
+    <button class="navbar-toggle" id="menuToggle" aria-label="Abrir menu">
+      <i data-lucide="menu" width="22" height="22"></i>
+    </button>
+  </div>
+</nav>
+
+<div class="legal-wrap">
+
+  <div class="legal-hero">
+    <h1 id="rulesTitle">Regras do Bolão</h1>
+    <p id="rulesSubtitle">Como funciona a pontuação e o desempate</p>
+  </div>
+
+  <div class="legal-body" id="rulesBody">
+
+    <h2>Como Participar</h2>
+    <p>Crie uma conta gratuita, acesse Meus Palpites no perfil e registre seus placares para todos os jogos da Copa. Você também pode entrar em bolões privados com amigos usando um código de convite.</p>
+
+    <h2>Prazo para Palpites</h2>
+    <p>Os palpites de cada jogo ficam disponíveis até o momento do apito inicial. Depois disso, o campo é bloqueado automaticamente e não é possível alterar.</p>
+    <p>As escolhas de <strong>Campeão</strong>, <strong>Vice-campeão</strong> e <strong>Artilheiro</strong> ficam bloqueadas no início do torneio, em 11 de junho de 2026.</p>
+
+    <h2>Sistema de Pontuação</h2>
+
+    <div class="score-grid" id="scoreGrid">
+      <div class="score-row header">
+        <div>Acerto</div>
+        <div>Pontos</div>
+      </div>
+      <div class="score-row">
+        <div>🎯 Placar exato (ex: 2×1 e você marcou 2×1)</div>
+        <div>3 pts</div>
+      </div>
+      <div class="score-row">
+        <div>✅ Resultado correto (vitória/empate/derrota, sem o placar exato)</div>
+        <div>1 pt</div>
+      </div>
+      <div class="score-row">
+        <div>❌ Resultado errado</div>
+        <div>0 pts</div>
+      </div>
+      <div class="score-row">
+        <div>🏆 Campeão correto</div>
+        <div>10 pts</div>
+      </div>
+      <div class="score-row">
+        <div>🥈 Vice-campeão correto</div>
+        <div>5 pts</div>
+      </div>
+      <div class="score-row">
+        <div>⚽ Artilheiro correto</div>
+        <div>5 pts</div>
+      </div>
+    </div>
+
+    <div class="tip-box">
+      💡 <strong>Dica:</strong> Na fase de grupos há 48 jogos — vale a pena preencher todos, mesmo sem ter certeza. Um placar exato vale 3 pontos!
+    </div>
+
+    <h2>Critérios de Desempate</h2>
+    <p>Em caso de empate em pontos, o desempate segue esta ordem:</p>
+    <ul>
+      <li>Maior número de placares exatos (3 pontos cada).</li>
+      <li>Maior número de resultados corretos (1 ponto cada).</li>
+      <li>Acertou o <strong>Campeão</strong>.</li>
+      <li>Acertou o <strong>Vice-campeão</strong>.</li>
+      <li>Nome em ordem alfabética (último critério).</li>
+    </ul>
+
+    <h2>Bolões Privados</h2>
+    <p>Qualquer usuário pode criar um bolão privado e convidar amigos com um código único de 6 caracteres. O ranking do bolão é independente do ranking global — vale separado para cada grupo.</p>
+    <p>Os palpites usados nos bolões são os mesmos que você registra em "Meus Palpites" no perfil. Você não precisa preencher duas vezes.</p>
+
+    <h2>Ranking Global</h2>
+    <p>O ranking global reúne todos os usuários cadastrados. Os pontos exibidos são a soma de todos os bolões dos quais você participa.</p>
+
+    <h2>Fair Play</h2>
+    <p>O PitaCopa é um jogo de entretenimento sem dinheiro real. Qualquer tentativa de manipular o sistema resultará na remoção permanente da conta.</p>
+
+  </div>
+
+</div>
+
+<footer class="slim-footer">
+  <div>© 2026 PitaCopa · <span data-i18n="footer_disclaimer">Apenas entretenimento. Sem apostas reais.</span></div>
+  <div style="margin-top:6px;">
+    <a href="terms.html" data-i18n="footer_terms">Termos de Uso</a>
+    <a href="privacy.html" data-i18n="footer_privacy">Privacidade</a>
+    <a href="rules.html" data-i18n="footer_rules">Regras do Bolão</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var toggle = document.getElementById('menuToggle');
+  var nav = document.getElementById('mainNav');
+  if(toggle && nav) toggle.addEventListener('click', function(){ nav.classList.toggle('open'); });
+  document.querySelectorAll('.lang-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){ localStorage.setItem('lang', btn.dataset.lang); location.reload(); });
+  });
+
+  var lang = localStorage.getItem('lang') || 'pt';
+  if (lang === 'en') switchToEn();
+
+  function switchToEn() {
+    document.documentElement.lang = 'en';
+    document.title = 'Pool Rules — PitaCopa 2026';
+    document.getElementById('rulesTitle').textContent = 'Pool Rules';
+    document.getElementById('rulesSubtitle').textContent = 'How scoring and tiebreakers work';
+    document.getElementById('rulesBody').innerHTML = `
+      <h2>How to Join</h2>
+      <p>Create a free account, go to My Predictions in your profile and enter your scores for every World Cup match. You can also join private pools with friends using an invite code.</p>
+
+      <h2>Prediction Deadline</h2>
+      <p>Predictions for each match are open until kick-off. After that the field locks automatically and cannot be changed.</p>
+      <p>Your <strong>Champion</strong>, <strong>Runner-up</strong> and <strong>Top Scorer</strong> picks lock when the tournament begins on 11 June 2026.</p>
+
+      <h2>Scoring System</h2>
+      <div class="score-grid">
+        <div class="score-row header"><div>Outcome</div><div>Points</div></div>
+        <div class="score-row"><div>🎯 Exact score (e.g. you pick 2–1 and it ends 2–1)</div><div>3 pts</div></div>
+        <div class="score-row"><div>✅ Correct result (win/draw/loss, wrong score)</div><div>1 pt</div></div>
+        <div class="score-row"><div>❌ Wrong result</div><div>0 pts</div></div>
+        <div class="score-row"><div>🏆 Correct Champion</div><div>10 pts</div></div>
+        <div class="score-row"><div>🥈 Correct Runner-up</div><div>5 pts</div></div>
+        <div class="score-row"><div>⚽ Correct Top Scorer</div><div>5 pts</div></div>
+      </div>
+      <div class="tip-box">
+        💡 <strong>Tip:</strong> There are 48 group-stage matches — fill them all in even if you're unsure. An exact score is worth 3 points!
+      </div>
+
+      <h2>Tiebreakers</h2>
+      <p>When two players are tied on points, the tiebreaker order is:</p>
+      <ul>
+        <li>Most exact scores (3-point predictions).</li>
+        <li>Most correct results (1-point predictions).</li>
+        <li>Correctly predicted the <strong>Champion</strong>.</li>
+        <li>Correctly predicted the <strong>Runner-up</strong>.</li>
+        <li>Alphabetical name order (last resort).</li>
+      </ul>
+
+      <h2>Private Pools</h2>
+      <p>Any user can create a private pool and invite friends with a unique 6-character code. Each pool has its own ranking, separate from the global leaderboard.</p>
+      <p>Your pool predictions are the same ones you enter in "My Predictions" on your profile — you only need to fill them in once.</p>
+
+      <h2>Global Ranking</h2>
+      <p>The global ranking includes all registered users. The points shown are the sum across all pools you belong to.</p>
+
+      <h2>Fair Play</h2>
+      <p>PitaCopa is a free entertainment game with no real money involved. Any attempt to manipulate the system will result in permanent account removal.</p>
+    `;
+  }
+})();
+</script>
+<script src="js/i18n.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

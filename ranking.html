@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ranking Global — PitaCopa 2026</title>
+  <meta name="description" content="Ranking global de todos os pitaqueiros da Copa do Mundo 2026. Veja quem lidera o placar geral.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    /* flag-icons sizing */
+    .fi { width:1.4em; line-height:1em; border-radius:2px; }
+    .country-cell .fi, .podium-country .fi { width:24px; height:18px; border-radius:2px; vertical-align:middle; }
+    .ranking-header { background:var(--navy-2); color:#fff; padding:48px 0 40px; text-align:center; }
+    .ranking-header h1 { font-size:32px; font-weight:800; margin-bottom:8px; }
+    .ranking-header p { font-size:16px; color:var(--dark-muted); }
+    .ranking-content { max-width:800px; margin:0 auto; padding:32px 20px 80px; }
+    .search-bar { display:flex; gap:10px; margin-bottom:24px; align-items:center; }
+    .search-bar input { flex:1; }
+    .ranking-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--r-xl); overflow:hidden; box-shadow:var(--sh-sm); }
+    .ranking-table { width:100%; border-collapse:collapse; }
+    .ranking-table thead tr { background:var(--bg-2); border-bottom:2px solid var(--border); }
+    .ranking-table th { padding:12px 16px; font-size:12px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; text-align:left; }
+    .ranking-table th.center { text-align:center; }
+    .ranking-table tbody tr { border-bottom:1px solid var(--border); transition:background .15s; }
+    .ranking-table tbody tr:last-child { border-bottom:none; }
+    .ranking-table tbody tr:hover { background:var(--bg-2); }
+    .ranking-table tbody tr.me { background:var(--gold-l); }
+    .ranking-table tbody tr.me:hover { background:var(--gold-l2); }
+    .ranking-table td { padding:14px 16px; font-size:14px; }
+    .ranking-table td.center { text-align:center; }
+    .pos-cell { font-size:16px; font-weight:800; width:56px; text-align:center; }
+    .pos-medal { font-size:20px; }
+    .player-cell { display:flex; align-items:center; gap:12px; }
+    .player-avatar { width:36px; height:36px; border-radius:50%; background:var(--gold-l); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:var(--gold); flex-shrink:0; overflow:hidden; }
+    .player-avatar img { width:100%; height:100%; object-fit:cover; }
+    .player-name { font-weight:700; font-size:14px; }
+    .player-me { font-size:11px; color:var(--gold); font-weight:600; margin-left:6px; }
+    .country-cell { font-size:18px; text-align:center; }
+    .pts-cell { font-size:18px; font-weight:800; color:var(--gold-d); text-align:center; }
+    .exact-cell { font-size:13px; color:var(--muted); text-align:center; }
+    .rank-1 .pts-cell { color:var(--gold); }
+    .rank-2 .pts-cell { color:#9ca3af; }
+    .rank-3 .pts-cell { color:#b45309; }
+    .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin .7s linear infinite; margin:60px auto; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .top3-podium { display:flex; justify-content:center; align-items:flex-end; gap:12px; margin:-10px 0 32px; }
+    .podium-slot { background:var(--bg); border:1px solid var(--border); border-radius:var(--r-lg); padding:20px 16px; text-align:center; box-shadow:var(--sh); min-width:120px; }
+    .podium-slot.first { transform:translateY(-16px); border-color:var(--gold); box-shadow:var(--sh-gold); }
+    .podium-slot.second { transform:translateY(0); }
+    .podium-slot.third { transform:translateY(8px); }
+    .podium-avatar { width:52px; height:52px; border-radius:50%; background:var(--gold-l); margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; color:var(--gold); border:2px solid var(--gold); overflow:hidden; }
+    .podium-avatar img { width:100%; height:100%; object-fit:cover; }
+    .podium-name { font-size:13px; font-weight:700; margin-bottom:4px; }
+    .podium-country { font-size:18px; margin-bottom:8px; }
+    .podium-pts { font-size:20px; font-weight:800; color:var(--gold); }
+    .podium-pts-label { font-size:11px; color:var(--muted); }
+    .podium-medal { font-size:24px; margin-bottom:8px; }
+    .empty-state { text-align:center; padding:60px 24px; color:var(--muted); }
+    .empty-icon { font-size:48px; margin-bottom:16px; }
+    .my-position { background:var(--gold-l); border:1px solid rgba(245,166,35,.3); border-radius:var(--r-lg); padding:16px 20px; margin-bottom:20px; display:none; align-items:center; gap:12px; }
+    .my-position .my-rank { font-size:24px; font-weight:800; color:var(--gold); }
+    .my-position .my-label { font-size:13px; color:var(--text-2); }
+    .my-position .my-pts { font-size:16px; font-weight:700; margin-left:auto; }
+    @media(max-width:600px){
+      .top3-podium { gap:6px; }
+      .podium-slot { min-width:90px; padding:14px 10px; }
+      .ranking-table th:nth-child(4), .ranking-table td:nth-child(4) { display:none; }
+    }
+    .slim-footer { border-top: 1px solid var(--border); padding: 20px; text-align: center; font-size: 12px; color: var(--muted); margin-top: 48px; }
+    .slim-footer a { color: var(--muted); margin: 0 8px; }
+    .slim-footer a:hover { color: var(--gold); text-decoration: none; }
+    .pagination { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:20px; }
+    .pagination button { padding:7px 14px; font-size:13px; font-weight:600; border:1.5px solid var(--border-2); border-radius:var(--r-f); background:transparent; cursor:pointer; color:var(--text-2); transition:all .15s; }
+    .pagination button:hover:not(:disabled) { border-color:var(--gold); color:var(--gold); background:var(--gold-l); }
+    .pagination button:disabled { opacity:.35; cursor:default; }
+    .pagination .page-info { font-size:13px; color:var(--muted); min-width:80px; text-align:center; }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" role="navigation" aria-label="Menu principal">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand" aria-label="PitaCopa">
+      <div class="brand-logo">
+        <img src="img/logo-icon-dark.png" alt="PitaCopa" onerror="this.parentElement.innerHTML='<div class=\'brand-logo-text\'>P</div>'">
+      </div>
+      <div>
+        <div class="brand-name"><span class="pita">pita</span><span class="copa">copa</span></div>
+        <div class="brand-tagline">seu pitaco, sua glória</div>
+      </div>
+    </a>
+    <ul class="navbar-nav" id="mainNav">
+      <li><a href="games.html"><i data-lucide="calendar-days" width="14" height="14"></i> Jogos</a></li>
+      <li><a href="ranking.html" style="color:var(--gold);font-weight:700;"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
+      <li id="navAuthLinks"><a href="login.html">Entrar</a></li>
+      <li id="navUserLinks" style="display:none;">
+        <a href="dashboard.html"><i data-lucide="layout-grid" width="14" height="14"></i> Meus Bolões</a>
+      </li>
+      <li>
+        <div class="lang-switch">
+          <button class="lang-btn" data-lang="pt">PT</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+      </li>
+      <li id="navLogoutLi" style="display:none;">
+        <button class="btn btn-ghost btn-sm" id="btnLogout">
+          <i data-lucide="log-out" width="14" height="14"></i> Sair
+        </button>
+      </li>
+    </ul>
+    <button class="navbar-toggle" id="menuToggle" aria-label="Abrir menu">
+      <i data-lucide="menu" width="22" height="22"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<div class="ranking-header">
+  <div class="container">
+    <h1><i data-lucide="trophy" width="34" height="34" style="vertical-align:middle;margin-right:10px;stroke-width:2;"></i>Ranking Global</h1>
+    <p id="rankingSubtitle">Os maiores pitaqueiros da Copa 2026</p>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="ranking-content">
+
+  <!-- My position (when logged in) -->
+  <div class="my-position" id="myPositionBar">
+    <div>
+      <div class="my-label">Minha posição</div>
+      <div class="my-rank" id="myRankDisplay">—</div>
+    </div>
+    <div style="flex:1;">
+      <div class="my-label">Nome</div>
+      <div style="font-weight:700;" id="myNameDisplay">—</div>
+    </div>
+    <div>
+      <div class="my-label">Pontos</div>
+      <div class="my-pts" id="myPtsDisplay">—</div>
+    </div>
+  </div>
+
+  <!-- TOP 3 PODIUM -->
+  <div class="top3-podium" id="podiumSection" style="display:none;"></div>
+
+  <!-- SEARCH & FILTER -->
+  <div class="search-bar">
+    <input type="text" class="form-control" id="searchInput" placeholder="🔍 Buscar jogador...">
+  </div>
+
+  <div id="rankingLoader"><div class="spinner"></div></div>
+
+  <div id="rankingCard" style="display:none;">
+    <div class="ranking-card">
+      <table class="ranking-table">
+        <thead>
+          <tr>
+            <th class="center">#</th>
+            <th>Jogador</th>
+            <th class="center">País</th>
+            <th class="center">Exatos</th>
+            <th class="center">Pts</th>
+          </tr>
+        </thead>
+        <tbody id="rankingBody"></tbody>
+      </table>
+    </div>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px;" data-i18n="tiebreak">Desempate: placares exatos → resultados → campeão → vice → ordem alfabética</p>
+  </div>
+  <div class="pagination" id="pagination" style="display:none;">
+    <button id="pgPrev"><i data-lucide="chevron-left" width="14" height="14"></i> Anterior</button>
+    <span class="page-info" id="pgInfo"></span>
+    <button id="pgNext">Próximo <i data-lucide="chevron-right" width="14" height="14"></i></button>
+  </div>
+
+  <div id="rankingEmpty" style="display:none;">
+    <div class="empty-state">
+      <div class="empty-icon">🏟️</div>
+      <h3>Nenhum pitaqueiro ainda</h3>
+      <p>Seja o primeiro a se cadastrar e fazer seus palpites!</p>
+      <a href="login.html?tab=register" class="btn btn-primary" style="margin-top:20px;">Criar Conta Grátis</a>
+    </div>
+  </div>
+</div>
+
+<footer class="slim-footer">
+  <div>© 2026 PitaCopa · <span data-i18n="footer_disclaimer">Apenas entretenimento. Sem apostas reais.</span></div>
+  <div style="margin-top:6px;">
+    <a href="rules.html" data-i18n="footer_rules">Regras do Bolão</a>
+    <a href="terms.html" data-i18n="footer_terms">Termos de Uso</a>
+    <a href="privacy.html" data-i18n="footer_privacy">Privacidade</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var toggle = document.getElementById('menuToggle');
+  var nav = document.getElementById('mainNav');
+  if(toggle && nav) toggle.addEventListener('click', function(){ nav.classList.toggle('open'); });
+  var activeLang = localStorage.getItem('lang') || 'pt';
+  document.querySelectorAll('.lang-btn').forEach(function(btn){
+    if (btn.dataset.lang === activeLang) btn.classList.add('active');
+    btn.addEventListener('click', function(){ localStorage.setItem('lang', btn.dataset.lang); location.reload(); });
+  });
+})();
+</script>
+
+<script type="module">
+import { auth, db } from './js/config.js';
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  collection, getDocs, query, orderBy, getDoc, doc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const lang = localStorage.getItem('lang') || 'pt';
+const PAGE_SIZE = 25;
+let currentUser = null;
+let allPlayers = [];
+let filteredPlayers = [];
+let currentPage = 1;
+
+// flag-icons HTML from 2-letter ISO code (works on Windows 10 via CSS sprites)
+function flagHtml(code) {
+  if (!code || code.length !== 2) return '';
+  return `<span class="fi fi-${code.toLowerCase()}"></span>`;
+}
+
+if (window.lucide) lucide.createIcons();
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('navAuthLinks').style.display = 'none';
+    document.getElementById('navUserLinks').style.display = 'list-item';
+    document.getElementById('navLogoutLi').style.display = 'list-item';
+  }
+  await loadRanking();
+});
+
+async function loadRanking() {
+  // Reset state each call (handles double-fire of onAuthStateChanged)
+  document.getElementById('rankingLoader').style.display = 'block';
+  document.getElementById('rankingCard').style.display = 'none';
+  document.getElementById('rankingEmpty').style.display = 'none';
+  document.getElementById('podiumSection').style.display = 'none';
+  document.getElementById('pagination').style.display = 'none';
+
+  try {
+    // Users + settings are public; bolao_participants/user_predictions require auth
+    const publicFetches = [
+      getDocs(collection(db, 'users')),
+      getDoc(doc(db, 'settings', 'results')),
+    ];
+    const [usersSnap, resultsSnap] = await Promise.all(publicFetches);
+
+    // Auth-gated reads — skip gracefully if not logged in
+    let partSnap  = { forEach: () => {} };
+    let predsSnap = { forEach: () => {} };
+    if (currentUser) {
+      [partSnap, predsSnap] = await Promise.all([
+        getDocs(collection(db, 'bolao_participants')),
+        getDocs(collection(db, 'user_predictions')),
+      ]);
+    }
+
+    // Tournament actual results (filled after tournament ends)
+    const results      = resultsSnap.exists() ? resultsSnap.data() : {};
+    const actualChamp  = results.champion  || '';
+    const actualRunner = results.runnerUp  || '';
+
+    // User predictions indexed by uid
+    const predsByUid = {};
+    predsSnap.forEach(d => { predsByUid[d.id] = d.data(); });
+
+    // Users map
+    const users = {};
+    usersSnap.forEach(d => { users[d.id] = d.data(); });
+
+    // Aggregate points, exactScores, correctResults from all bolão participations
+    const pointsByUser   = {};
+    const exactsByUser   = {};
+    const resultsByUser  = {};
+    partSnap.forEach(d => {
+      const p = d.data();
+      if (!p.uid) return;
+      pointsByUser[p.uid]  = (pointsByUser[p.uid]  || 0) + (p.points        || 0);
+      exactsByUser[p.uid]  = (exactsByUser[p.uid]  || 0) + (p.exactScores   || 0);
+      resultsByUser[p.uid] = (resultsByUser[p.uid] || 0) + (p.correctResults || 0);
+    });
+
+    // Build player list with tiebreaker fields
+    allPlayers = Object.entries(users).map(([uid, u]) => {
+      const preds = predsByUid[uid] || {};
+      return {
+        uid,
+        name:           u.name    || 'Anônimo',
+        country:        u.country || '',
+        photoURL:       u.photoURL || '',
+        totalPoints:    pointsByUser[uid]  || 0,
+        exactScores:    exactsByUser[uid]  || 0,
+        correctResults: resultsByUser[uid] || 0,
+        championCorrect: actualChamp  && preds.champion === actualChamp  ? 1 : 0,
+        runnerUpCorrect: actualRunner && preds.runnerUp === actualRunner ? 1 : 0,
+      };
+    });
+
+    // Sort: pts → exact scores → correct results → champion → runner-up → alphabetical
+    allPlayers.sort((a, b) => {
+      if (b.totalPoints    !== a.totalPoints)    return b.totalPoints    - a.totalPoints;
+      if (b.exactScores    !== a.exactScores)    return b.exactScores    - a.exactScores;
+      if (b.correctResults !== a.correctResults) return b.correctResults - a.correctResults;
+      if (b.championCorrect !== a.championCorrect) return b.championCorrect - a.championCorrect;
+      if (b.runnerUpCorrect !== a.runnerUpCorrect) return b.runnerUpCorrect - a.runnerUpCorrect;
+      return a.name.localeCompare(b.name);
+    });
+
+    // My position bar
+    if (currentUser) {
+      const myIdx = allPlayers.findIndex(p => p.uid === currentUser.uid);
+      if (myIdx >= 0) {
+        const me = allPlayers[myIdx];
+        document.getElementById('myPositionBar').style.display = 'flex';
+        document.getElementById('myRankDisplay').textContent = '#' + (myIdx + 1);
+        document.getElementById('myNameDisplay').textContent = me.name;
+        document.getElementById('myPtsDisplay').textContent = me.totalPoints + ' pts';
+      }
+    }
+
+    document.getElementById('rankingSubtitle').textContent =
+      `${allPlayers.length} pitaqueiro${allPlayers.length !== 1 ? 's' : ''} · Copa do Mundo 2026`;
+
+    document.getElementById('rankingLoader').style.display = 'none';
+
+    applyFilters();
+    if (window.lucide) lucide.createIcons();
+  } catch(e) {
+    console.error(e);
+    document.getElementById('rankingLoader').style.display = 'none';
+    document.getElementById('rankingEmpty').style.display = 'block';
+  }
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase().trim();
+  filteredPlayers = search
+    ? allPlayers.filter(p => p.name.toLowerCase().includes(search))
+    : allPlayers;
+  currentPage = 1;
+  renderRanking();
+}
+
+function renderRanking() {
+  if (allPlayers.length === 0) {
+    document.getElementById('rankingEmpty').style.display = 'block';
+    return;
+  }
+
+  // Podium (top 3 of full list, only when showing all)
+  const podiumSection = document.getElementById('podiumSection');
+  if (!document.getElementById('searchInput').value) {
+    const top3 = allPlayers.slice(0, 3);
+    if (top3.length >= 2) {
+      podiumSection.style.display = 'flex';
+      const order = top3.length === 3 ? [1, 0, 2] : [0, 1]; // silver, gold, bronze order
+      podiumSection.innerHTML = '';
+      order.forEach(i => {
+        if (!top3[i]) return;
+        const p = top3[i];
+        const rank = i + 1;
+        const cls = ['first','second','third'][i];
+        const medal = ['🥇','🥈','🥉'][i];
+        const flag = p.country ? flagHtml(p.country) : '';
+        const initials = p.name.charAt(0).toUpperCase();
+        const avatarHtml = p.photoURL
+          ? `<img src="${p.photoURL}" alt="${p.name}">`
+          : initials;
+        const slot = document.createElement('div');
+        slot.className = `podium-slot ${cls}`;
+        slot.innerHTML = `
+          <div class="podium-medal">${medal}</div>
+          <div class="podium-avatar">${avatarHtml}</div>
+          <div class="podium-name">${p.name}</div>
+          <div class="podium-country">${flag}</div>
+          <div class="podium-pts">${p.totalPoints}</div>
+          <div class="podium-pts-label">pontos</div>
+        `;
+        podiumSection.appendChild(slot);
+      });
+    } else {
+      podiumSection.style.display = 'none';
+    }
+  } else {
+    podiumSection.style.display = 'none';
+  }
+
+  document.getElementById('rankingCard').style.display = 'block';
+  const tbody = document.getElementById('rankingBody');
+  tbody.innerHTML = '';
+
+  if (filteredPlayers.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:32px;">Nenhum resultado encontrado.</td></tr>`;
+    document.getElementById('pagination').style.display = 'none';
+    return;
+  }
+
+  // Pagination
+  const totalPages = Math.ceil(filteredPlayers.length / PAGE_SIZE);
+  currentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageSlice = filteredPlayers.slice(start, start + PAGE_SIZE);
+
+  pageSlice.forEach(p => {
+    const globalRank = allPlayers.indexOf(p) + 1;
+    const isMe = currentUser && p.uid === currentUser.uid;
+    const medal = globalRank === 1 ? '🥇' : globalRank === 2 ? '🥈' : globalRank === 3 ? '🥉' : globalRank;
+    const flag = p.country ? flagHtml(p.country) : '—';
+    const initials = p.name.charAt(0).toUpperCase();
+    const avatarHtml = p.photoURL
+      ? `<img src="${p.photoURL}" alt="${p.name}">`
+      : initials;
+
+    const tr = document.createElement('tr');
+    tr.className = (isMe ? 'me ' : '') + (globalRank <= 3 ? `rank-${globalRank}` : '');
+    tr.innerHTML = `
+      <td class="pos-cell">${typeof medal === 'string' ? `<span class="pos-medal">${medal}</span>` : medal}</td>
+      <td>
+        <div class="player-cell">
+          <div class="player-avatar">${avatarHtml}</div>
+          <div>
+            <div class="player-name">${p.name}${isMe ? '<span class="player-me">(você)</span>' : ''}</div>
+          </div>
+        </div>
+      </td>
+      <td class="country-cell">${flag}</td>
+      <td class="exact-cell">${p.exactScores}</td>
+      <td class="pts-cell">${p.totalPoints}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Pagination controls
+  const pgEl = document.getElementById('pagination');
+  if (totalPages <= 1) {
+    pgEl.style.display = 'none';
+  } else {
+    pgEl.style.display = 'flex';
+    document.getElementById('pgInfo').textContent =
+      `${lang === 'en' ? 'Page' : 'Página'} ${currentPage} / ${totalPages}`;
+    document.getElementById('pgPrev').disabled = currentPage === 1;
+    document.getElementById('pgNext').disabled = currentPage === totalPages;
+  }
+
+  if (window.lucide) lucide.createIcons();
+}
+
+// Search
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+// Pagination buttons
+document.getElementById('pgPrev').addEventListener('click', () => {
+  if (currentPage > 1) { currentPage--; renderRanking(); window.scrollTo(0, 0); }
+});
+document.getElementById('pgNext').addEventListener('click', () => {
+  const totalPages = Math.ceil(filteredPlayers.length / PAGE_SIZE);
+  if (currentPage < totalPages) { currentPage++; renderRanking(); window.scrollTo(0, 0); }
+});
+
+// Logout
+const btnLogout = document.getElementById('btnLogout');
+if (btnLogout) btnLogout.addEventListener('click', async () => {
+  await signOut(auth);
+  location.reload();
+});
+</script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

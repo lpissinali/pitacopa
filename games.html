@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jogos & Resultados — PitaCopa 2026</title>
+  <meta name="description" content="Todos os 104 jogos da Copa do Mundo 2026 com datas, horários e resultados em tempo real.">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="js/wc2026.js"></script>
+  <style>
+    /* ── Hero ───────────────────────────────── */
+    .games-hero {
+      background: linear-gradient(135deg, var(--navy-2) 0%, var(--navy-4) 100%);
+      color: #fff;
+      padding: 44px 0 36px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .games-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 120%, rgba(245,166,35,.18) 0%, transparent 70%);
+    }
+    .hero-icon-wrap {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 62px; height: 62px;
+      background: var(--gold);
+      border-radius: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 6px 28px rgba(245,166,35,.55);
+      position: relative;
+    }
+    .games-hero h1 { font-size: 30px; font-weight: 800; margin-bottom: 6px; position: relative; }
+    .games-hero p  { font-size: 15px; color: rgba(255,255,255,.6); position: relative; }
+    .hero-stats {
+      display: flex; gap: 32px; justify-content: center; flex-wrap: wrap;
+      margin-top: 20px; position: relative;
+    }
+    .hero-stat-num { font-size: 26px; font-weight: 800; color: var(--gold); }
+    .hero-stat-lbl { font-size: 12px; color: rgba(255,255,255,.5); }
+
+    /* ── Banners ────────────────────────────── */
+    .status-banner {
+      padding: 10px 20px; font-size: 13px; text-align: center; display: none;
+    }
+    .banner-warn  { background: #fef9c3; color: #854d0e; border-bottom: 1px solid #fde047; }
+    .banner-error { background: #fee2e2; color: #dc2626; border-bottom: 1px solid #fecaca; }
+
+    /* ── Filter bar ─────────────────────────── */
+    .filter-bar {
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      position: sticky; top: 64px; z-index: 20;
+    }
+    .filter-inner {
+      max-width: 1120px; margin: 0 auto; padding: 11px 20px;
+      display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+    }
+    .filter-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-right: 4px; flex-shrink: 0; }
+    .filter-chip {
+      padding: 5px 13px; font-size: 12px; font-weight: 600;
+      border: 1.5px solid var(--border-2); border-radius: var(--r-f);
+      background: transparent; cursor: pointer; transition: all .15s;
+      color: var(--text-2); white-space: nowrap;
+    }
+    .filter-chip:hover,.filter-chip.active { border-color: var(--gold); color: var(--gold); background: var(--gold-l); }
+
+    /* ── Search ─────────────────────────────── */
+    .search-wrap { max-width: 1120px; margin: 0 auto; padding: 16px 20px 0; }
+    .search-input-wrap { position: relative; max-width: 320px; }
+    .search-input-wrap input { padding-left: 36px; }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+
+    /* ── Content ────────────────────────────── */
+    .games-wrap { max-width: 1120px; margin: 0 auto; padding: 20px 20px 80px; }
+
+    /* ── Stage section ──────────────────────── */
+    .stage-section { margin-bottom: 36px; }
+    .stage-heading {
+      font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: 12px; padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .stage-heading .sh-name { color: var(--text); font-size: 15px; font-weight: 800; letter-spacing: 0; text-transform: none; }
+    .stage-heading .sh-count { font-size: 11px; font-weight: 400; color: var(--muted-2); }
+    .games-grid { display: grid; gap: 8px; }
+
+    /* ── Game card ──────────────────────────── */
+    .game-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-lg);
+      padding: 13px 16px;
+      display: grid;
+      grid-template-columns: 90px 1fr 72px;
+      align-items: center; gap: 12px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .game-card:hover { border-color: var(--border-2); box-shadow: var(--sh-sm); }
+    .game-card.status-FINISHED { border-left: 3px solid var(--green); }
+    .game-card.status-IN_PLAY,
+    .game-card.status-PAUSED   { border-left: 3px solid var(--gold); }
+
+    /* meta (left column) */
+    .game-meta { flex-shrink: 0; }
+    .game-meta-date { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+      padding: 3px 8px; border-radius: var(--r-f); margin-top: 5px;
+    }
+    .badge-timed,.badge-scheduled { background: var(--bg-3); color: var(--muted); }
+    .badge-live { background: var(--gold-l2); color: var(--gold-d); animation: pulse-badge 1.8s ease infinite; }
+    @keyframes pulse-badge { 0%,100%{opacity:1} 50%{opacity:.5} }
+    .badge-finished { background: var(--green-l); color: var(--green-d); }
+    .badge-postponed { background: #fee2e2; color: #dc2626; }
+
+    /* teams + score (middle column) */
+    .teams-score {
+      display: grid;
+      grid-template-columns: 1fr 72px 1fr;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Each team column */
+    .team-home {
+      display: flex; align-items: center; gap: 7px;
+      justify-content: flex-start; /* name on left */
+      min-width: 0;
+    }
+    .team-away {
+      display: flex; align-items: center; gap: 7px;
+      justify-content: flex-end; /* name on right, flag at far right */
+      min-width: 0;
+    }
+    .team-crest {
+      width: 26px; height: 26px; object-fit: contain;
+      flex-shrink: 0; border-radius: 3px;
+    }
+    .team-flag { font-size: 20px; flex-shrink: 0; line-height: 1; }
+    .team-name {
+      font-size: 13px; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .team-home .team-name { text-align: left; }
+    .team-away .team-name { text-align: right; }
+
+    /* score block */
+    .score-block { text-align: center; flex-shrink: 0; }
+    .score-nums { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1; letter-spacing: 1px; }
+    .score-nums.pending { font-size: 13px; color: var(--muted); font-weight: 500; }
+    .score-sep { color: var(--muted-2); }
+
+    /* prediction (right column) */
+    .pred-col { text-align: center; }
+    .pred-col-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+    .pred-val { font-size: 13px; font-weight: 700; }
+    .pred-val.exact   { color: var(--green); }
+    .pred-val.correct { color: var(--gold-d); }
+    .pred-val.wrong   { color: #dc2626; }
+    .pred-empty { font-size: 12px; color: var(--muted-2); }
+    .pts-chip {
+      display: inline-block; font-size: 10px; font-weight: 700;
+      padding: 2px 6px; border-radius: var(--r-f); margin-top: 3px;
+    }
+    .pts3 { background: var(--gold-l);  color: var(--gold-d); }
+    .pts1 { background: var(--green-l); color: var(--green-d); }
+    .pts0 { background: #fee2e2; color: #dc2626; }
+
+    /* login nudge */
+    .pred-login { font-size: 10px; color: var(--muted-2); text-align: center; line-height: 1.4; }
+    .pred-login a { color: var(--gold); }
+
+    /* states */
+    .spinner-wrap { text-align: center; padding: 80px 0; }
+    .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 14px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-label { font-size: 14px; color: var(--muted); }
+    .error-state { text-align: center; padding: 60px 20px; }
+    .error-icon  { font-size: 40px; margin-bottom: 16px; }
+    .error-state h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+    .error-state p  { font-size: 14px; color: var(--muted); max-width: 400px; margin: 0 auto 20px; }
+    .no-results { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+
+    /* responsive */
+    @media (max-width: 680px) {
+      .game-card { grid-template-columns: 70px 1fr 0px; }
+      .pred-col, .pred-login { display: none; }
+      .team-name { font-size: 12px; }
+      .score-nums { font-size: 17px; }
+      .team-crest, .team-flag { width: 20px; height: 20px; font-size: 16px; }
+      .teams-score { grid-template-columns: 1fr 58px 1fr; gap: 5px; }
+    }
+    @media (max-width: 420px) {
+      .team-name { max-width: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" role="navigation" aria-label="Menu principal">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand" aria-label="PitaCopa">
+      <div class="brand-logo">
+        <img src="img/logo-icon-dark.png" alt="PitaCopa" onerror="this.parentElement.innerHTML='<div class=\'brand-logo-text\'>P</div>'">
+      </div>
+      <div>
+        <div class="brand-name"><span class="pita">pita</span><span class="copa">copa</span></div>
+        <div class="brand-tagline">seu pitaco, sua glória</div>
+      </div>
+    </a>
+    <ul class="navbar-nav" id="mainNav">
+      <li><a href="games.html" style="color:var(--gold);font-weight:700;">
+        <i data-lucide="calendar-days" width="14" height="14"></i> Jogos
+      </a></li>
+      <li><a href="ranking.html"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
+      <li id="navAuthLink"><a href="login.html">Entrar</a></li>
+      <li id="navDashLink" style="display:none;">
+        <a href="dashboard.html"><i data-lucide="layout-grid" width="14" height="14"></i> Meus Bolões</a>
+      </li>
+      <li>
+        <div class="lang-switch">
+          <button class="lang-btn" data-lang="pt">PT</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+      </li>
+      <li id="navLogoutLi" style="display:none;">
+        <button class="btn btn-ghost btn-sm" id="btnLogout">
+          <i data-lucide="log-out" width="14" height="14"></i> Sair
+        </button>
+      </li>
+    </ul>
+    <button class="navbar-toggle" id="menuToggle" aria-label="Abrir menu">
+      <i data-lucide="menu" width="22" height="22"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO — clean SVG ball icon, no Lucide dependency -->
+<div class="games-hero">
+  <div class="container">
+    <div class="hero-icon-wrap">
+      <i data-lucide="calendar-days" width="30" height="30" style="color:#02091b;stroke-width:2;"></i>
+    </div>
+    <h1>Jogos &amp; Resultados</h1>
+    <p>Copa do Mundo 2026 &middot; 11 Jun – 19 Jul &middot; 104 jogos</p>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num" id="statFinished">—</div>
+        <div class="hero-stat-lbl">Finalizados</div>
+      </div>
+      <div>
+        <div class="hero-stat-num" id="statScheduled">—</div>
+        <div class="hero-stat-lbl">Agendados</div>
+      </div>
+      <div>
+        <div class="hero-stat-num" id="statMyPreds">—</div>
+        <div class="hero-stat-lbl">Meus palpites</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS BANNER -->
+<div class="status-banner banner-warn" id="bannerFallback">
+  ⚠️ Usando dados locais — inicie com <code>node server.js</code> para resultados ao vivo.
+</div>
+<div class="status-banner banner-error" id="bannerError"></div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <div class="filter-inner" id="filterBar">
+    <span class="filter-label">Fase</span>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-wrap">
+  <div class="search-input-wrap">
+    <span class="search-icon"><i data-lucide="search" width="14" height="14"></i></span>
+    <input type="search" class="form-control" id="searchInput" placeholder="Buscar seleção...">
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="games-wrap">
+  <div class="spinner-wrap" id="loadingState">
+    <div class="spinner"></div>
+    <p class="spinner-label">Carregando jogos...</p>
+  </div>
+  <div class="error-state" id="errorState" style="display:none;">
+    <div class="error-icon">⚠️</div>
+    <h3>Não foi possível carregar</h3>
+    <p id="errorMsg"></p>
+    <button class="btn btn-primary" onclick="location.reload()">Tentar novamente</button>
+  </div>
+  <div id="gamesWrap" style="display:none;"></div>
+  <div class="no-results" id="noResults" style="display:none;">Nenhuma seleção encontrada.</div>
+</div>
+
+<!-- ── Plain script: nav, lang switch active state, Lucide init ─────────── -->
+<script>
+(function(){
+  /* Mobile menu */
+  var toggle = document.getElementById('menuToggle');
+  var nav    = document.getElementById('mainNav');
+  if (toggle && nav) toggle.addEventListener('click', function(){ nav.classList.toggle('open'); });
+
+  /* Lang switch — mark active + reload on change */
+  var activeLang = localStorage.getItem('lang') || 'pt';
+  document.querySelectorAll('.lang-btn').forEach(function(btn){
+    if (btn.dataset.lang === activeLang) btn.classList.add('active');
+    btn.addEventListener('click', function(){
+      if (btn.dataset.lang === activeLang) return;
+      localStorage.setItem('lang', btn.dataset.lang);
+      location.reload();
+    });
+  });
+
+  /* Lucide — initialize as soon as possible */
+  if (window.lucide) lucide.createIcons();
+})();
+</script>
+
+<!-- ── Module: fetch matches, auth, render ──────────────────────────────── -->
+<script type="module">
+import { auth, db } from './js/config.js';
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const lang = localStorage.getItem('lang') || 'pt';
+
+/* ── Stage metadata ───────────────────────────────────────────────────── */
+const STAGE_ORDER = ['GROUP_STAGE','LAST_32','LAST_16','QUARTER_FINALS','SEMI_FINALS','THIRD_PLACE','FINAL'];
+
+const STAGE_LABEL = {
+  GROUP_STAGE:    { pt: 'Fase de Grupos',     en: 'Group Stage'      },
+  LAST_32:        { pt: 'Rodada de 32',        en: 'Round of 32'      },
+  LAST_16:        { pt: 'Oitavas de Final',    en: 'Round of 16'      },
+  QUARTER_FINALS: { pt: 'Quartas de Final',    en: 'Quarterfinals'    },
+  SEMI_FINALS:    { pt: 'Semifinais',          en: 'Semifinals'       },
+  THIRD_PLACE:    { pt: '3º Lugar',            en: '3rd Place'        },
+  FINAL:          { pt: 'Final',               en: 'Final'            },
+};
+
+const FILTER_CHIPS = [
+  { key: 'ALL',            label: { pt: 'Todos',       en: 'All'   } },
+  { key: 'GROUP_STAGE',    label: { pt: 'Grupos',      en: 'Groups'} },
+  { key: 'LAST_32',        label: { pt: 'Rodada 32',   en: 'R32'  } },
+  { key: 'LAST_16',        label: { pt: 'Oitavas',     en: 'R16'  } },
+  { key: 'QUARTER_FINALS', label: { pt: 'Quartas',     en: 'QF'   } },
+  { key: 'SEMI_FINALS',    label: { pt: 'Semifinais',  en: 'SF'   } },
+  { key: 'THIRD_PLACE',    label: { pt: '3º Lugar',    en: '3rd'  } },
+  { key: 'FINAL',          label: { pt: 'Final',       en: 'Final'} },
+];
+
+/* ── Flag lookup from wc2026.js ───────────────────────────────────────── */
+const flagByName = {};
+if (typeof WC2026_TEAMS !== 'undefined') {
+  Object.values(WC2026_TEAMS).flat().forEach(t => {
+    flagByName[t.name.toLowerCase()]   = t.flag;
+    flagByName[t.nameEn.toLowerCase()] = t.flag;
+    if (t.id) flagByName[t.id.toLowerCase()] = t.flag;
+  });
+}
+
+/* ── State ────────────────────────────────────────────────────────────── */
+let allMatches  = [];
+let userPreds   = {};
+let currentUser = null;
+let activeStage = 'ALL';
+let searchQuery = '';
+
+/* ── Bootstrap: load matches immediately, auth in parallel ───────────── */
+loadMatches();
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('navAuthLink').style.display = 'none';
+    document.getElementById('navDashLink').style.display = 'list-item';
+    document.getElementById('navLogoutLi').style.display = 'list-item';
+    try {
+      const snap = await getDoc(doc(db, 'user_predictions', user.uid));
+      if (snap.exists()) userPreds = snap.data();
+      if (allMatches.length > 0) render(); // re-render with predictions
+    } catch(e) { console.warn('Preds:', e.message); }
+  }
+  if (window.lucide) lucide.createIcons();
+});
+
+document.getElementById('btnLogout').addEventListener('click', async () => {
+  await signOut(auth); location.reload();
+});
+
+/* ── Fetch ────────────────────────────────────────────────────────────── */
+async function loadMatches() {
+  // 5-min session cache
+  try {
+    const cached = sessionStorage.getItem('pitacopa_matches_v3');
+    if (cached) {
+      const { ts, data } = JSON.parse(cached);
+      if (Date.now() - ts < 5 * 60 * 1000) { allMatches = data; buildUI(); return; }
+    }
+  } catch(e) {}
+
+  try {
+    const res = await fetch('/api/matches?season=2026');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    allMatches = data.matches || [];
+    if (!allMatches.length) throw new Error('No matches returned');
+    sessionStorage.setItem('pitacopa_matches_v3', JSON.stringify({ ts: Date.now(), data: allMatches }));
+    buildUI();
+  } catch(err) {
+    console.warn('Proxy failed:', err.message, '— falling back to wc2026.js');
+    loadFallback();
+  }
+}
+
+function loadFallback() {
+  if (typeof ALL_GAMES === 'undefined' || !ALL_GAMES?.length) {
+    showError('Inicie o servidor com <code>node server.js</code> e abra <b>http://localhost:3000</b>.');
+    return;
+  }
+  const now = new Date();
+  allMatches = ALL_GAMES.map(g => {
+    const home = (typeof getTeamById === 'function' && getTeamById(g.homeId)) || { name: g.homeId, nameEn: g.homeId, flag: '🏳' };
+    const away = (typeof getTeamById === 'function' && getTeamById(g.awayId)) || { name: g.awayId, nameEn: g.awayId, flag: '🏳' };
+    return {
+      id: g.id,
+      utcDate: g.date,
+      status: new Date(g.date) < now ? 'FINISHED' : 'TIMED',
+      stage: g.stage === 'group' ? 'GROUP_STAGE' : g.stage,
+      group: g.group ? 'GROUP_' + g.group : null,
+      homeTeam: { name: lang === 'en' ? home.nameEn : home.name, shortName: lang === 'en' ? home.nameEn : home.name, tla: home.id, crest: null, _flag: home.flag },
+      awayTeam: { name: lang === 'en' ? away.nameEn : away.name, shortName: lang === 'en' ? away.nameEn : away.name, tla: away.id, crest: null, _flag: away.flag },
+      score: { fullTime: { home: null, away: null } }
+    };
+  });
+  document.getElementById('bannerFallback').style.display = 'block';
+  buildUI();
+}
+
+/* ── Build UI ─────────────────────────────────────────────────────────── */
+function buildUI() {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('gamesWrap').style.display    = 'block';
+  buildFilters();
+  render();
+  document.getElementById('searchInput').addEventListener('input', e => {
+    searchQuery = e.target.value.toLowerCase().trim();
+    render();
+  });
+  if (window.lucide) lucide.createIcons();
+}
+
+function buildFilters() {
+  const bar = document.getElementById('filterBar');
+  const presentStages = new Set(allMatches.map(m => m.stage));
+  bar.innerHTML = `<span class="filter-label">${lang === 'en' ? 'Phase' : 'Fase'}</span>`;
+  FILTER_CHIPS
+    .filter(c => c.key === 'ALL' || presentStages.has(c.key))
+    .forEach(c => {
+      const btn = document.createElement('button');
+      btn.className    = 'filter-chip' + (c.key === 'ALL' ? ' active' : '');
+      btn.textContent  = c.label[lang] || c.label.pt;
+      btn.dataset.stage = c.key;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeStage = c.key;
+        render();
+      });
+      bar.appendChild(btn);
+    });
+}
+
+function render() {
+  const wrap = document.getElementById('gamesWrap');
+  wrap.innerHTML = '';
+
+  let matches = activeStage === 'ALL' ? allMatches : allMatches.filter(m => m.stage === activeStage);
+  if (searchQuery) {
+    matches = matches.filter(m =>
+      (m.homeTeam.name||'').toLowerCase().includes(searchQuery) ||
+      (m.awayTeam.name||'').toLowerCase().includes(searchQuery) ||
+      (m.homeTeam.shortName||'').toLowerCase().includes(searchQuery) ||
+      (m.awayTeam.shortName||'').toLowerCase().includes(searchQuery)
+    );
+  }
+
+  document.getElementById('noResults').style.display = matches.length === 0 ? 'block' : 'none';
+
+  // Stats
+  document.getElementById('statFinished').textContent  = allMatches.filter(m => m.status === 'FINISHED').length;
+  document.getElementById('statScheduled').textContent = allMatches.filter(m => m.status === 'TIMED' || m.status === 'SCHEDULED').length;
+  const predGames = userPreds.games || {};
+  document.getElementById('statMyPreds').textContent   = Object.values(predGames).filter(p => p && p.home !== '' && p.home !== undefined).length;
+
+  // Group into sections, preserve stage order
+  const sectMap = new Map();
+  matches.forEach(m => {
+    const isGroup = m.stage === 'GROUP_STAGE';
+    const grpCode = isGroup ? (m.group || '').replace('GROUP_', '') : '';
+    const key = isGroup ? 'G_' + grpCode : m.stage;
+    if (!sectMap.has(key)) {
+      const stageIdx = STAGE_ORDER.indexOf(m.stage);
+      const order    = isGroup ? stageIdx * 100 + (grpCode.charCodeAt(0) || 0) : stageIdx * 100;
+      sectMap.set(key, { key, order, stage: m.stage, group: m.group, matches: [] });
+    }
+    sectMap.get(key).matches.push(m);
+  });
+
+  [...sectMap.values()]
+    .sort((a, b) => a.order - b.order)
+    .forEach(sec => {
+      const el       = document.createElement('div');
+      el.className   = 'stage-section';
+      const isGroup  = sec.stage === 'GROUP_STAGE';
+      const grpCode  = isGroup ? (sec.group || '').replace('GROUP_', '') : '';
+      const label    = isGroup
+        ? (lang === 'en' ? 'Group ' : 'Grupo ') + grpCode
+        : ((STAGE_LABEL[sec.stage] || {})[lang] || sec.stage);
+
+      el.innerHTML = `
+        <div class="stage-heading">
+          <i data-lucide="${isGroup ? 'users' : 'zap'}" width="13" height="13"></i>
+          <span class="sh-name">${label}</span>
+          <span class="sh-count">${sec.matches.length} jogo${sec.matches.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div class="games-grid" id="grid_${sec.key.replace(/\W/g, '_')}"></div>
+      `;
+      wrap.appendChild(el);
+      const grid = el.querySelector('.games-grid');
+      sec.matches.forEach(m => grid.appendChild(buildCard(m)));
+    });
+
+  if (window.lucide) lucide.createIcons();
+}
+
+/* ── Build a single game card ─────────────────────────────────────────── */
+function buildCard(m) {
+  const card = document.createElement('div');
+  card.className = 'game-card status-' + m.status;
+
+  const gameDate = new Date(m.utcDate);
+  const dateStr  = gameDate.toLocaleDateString(lang === 'en' ? 'en-US' : 'pt-BR', { weekday: 'short', month: 'short', day: 'numeric' });
+  const timeStr  = gameDate.toLocaleTimeString(lang === 'en' ? 'en-US' : 'pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+  // Status badge
+  const badgeMap = {
+    FINISHED:  `<span class="status-badge badge-finished"><i data-lucide="check" width="10" height="10"></i> FT</span>`,
+    IN_PLAY:   `<span class="status-badge badge-live">⚡ AO VIVO</span>`,
+    PAUSED:    `<span class="status-badge badge-live">⚡ INTERVALO</span>`,
+    POSTPONED: `<span class="status-badge badge-postponed">${lang === 'en' ? 'Postponed' : 'Adiado'}</span>`,
+  };
+  const badgeHtml = badgeMap[m.status] || `<span class="status-badge badge-timed">${timeStr}</span>`;
+
+  // Score
+  const sc         = m.score?.fullTime;
+  const isFinished = m.status === 'FINISHED';
+  const isLive     = m.status === 'IN_PLAY' || m.status === 'PAUSED';
+  const scoreHtml  = (isFinished || isLive) && sc?.home !== null
+    ? `<div class="score-nums">${sc.home}<span class="score-sep"> – </span>${sc.away}</div>`
+    : `<div class="score-nums pending">vs</div>`;
+
+  // Team rendering helper
+  function teamHtml(team, side) {
+    const flag = flagByName[(team.name || '').toLowerCase()]
+              || flagByName[(team.tla  || '').toLowerCase()]
+              || team._flag || '🏳';
+    const name = team.shortName || team.name || '?';
+
+    // Crest image with flag fallback
+    const crestHtml = team.crest
+      ? `<img class="team-crest" src="${team.crest}" alt="${name}" loading="lazy"
+             onerror="this.outerHTML='<span class=\\'team-flag\\'>${flag}</span>'">`
+      : `<span class="team-flag">${flag}</span>`;
+
+    if (side === 'home') {
+      // Home: [crest] [Name →]
+      return `<div class="team-home">${crestHtml}<span class="team-name">${name}</span></div>`;
+    } else {
+      // Away: [← Name] [crest]
+      return `<div class="team-away"><span class="team-name">${name}</span>${crestHtml}</div>`;
+    }
+  }
+
+  // Prediction column
+  let predHtml = '';
+  if (currentUser) {
+    const pred = (userPreds.games || {})[m.id];
+    const has  = pred && pred.home !== undefined && pred.home !== '' && pred.away !== undefined && pred.away !== '';
+    if (has) {
+      let cls = '', ptsHtml = '';
+      if (isFinished && sc?.home !== null) {
+        const win  = s => s.home > s.away, draw = s => s.home === s.away;
+        const exact   = pred.home === sc.home && pred.away === sc.away;
+        const correct = exact || (win(pred) && win(sc)) || (draw(pred) && draw(sc)) || (!win(pred) && !draw(pred) && !win(sc) && !draw(sc));
+        cls = exact ? 'exact' : correct ? 'correct' : 'wrong';
+        const pts = exact ? 3 : correct ? 1 : 0;
+        ptsHtml = `<div><span class="pts-chip pts${pts}">${pts}pt</span></div>`;
+      }
+      predHtml = `<div class="pred-col"><div class="pred-col-label">pitaco</div><div class="pred-val ${cls}">${pred.home}–${pred.away}</div>${ptsHtml}</div>`;
+    } else {
+      predHtml = `<div class="pred-col"><div class="pred-col-label">pitaco</div><div class="pred-empty">—</div></div>`;
+    }
+  } else {
+    predHtml = `<div class="pred-login"><a href="login.html">Entrar</a><br>p/ palpitar</div>`;
+  }
+
+  card.innerHTML = `
+    <div class="game-meta">
+      <div class="game-meta-date">${dateStr}</div>
+      ${badgeHtml}
+    </div>
+    <div class="teams-score">
+      ${teamHtml(m.homeTeam, 'home')}
+      <div class="score-block">${scoreHtml}</div>
+      ${teamHtml(m.awayTeam, 'away')}
+    </div>
+    ${predHtml}
+  `;
+  return card;
+}
+
+function showError(html) {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('errorState').style.display   = 'block';
+  document.getElementById('errorMsg').innerHTML         = html;
+}
+</script>
+
+<footer style="border-top:1px solid var(--border);padding:20px;text-align:center;font-size:12px;color:var(--muted);margin-top:48px;">
+  <div>© 2026 PitaCopa · <span data-i18n="footer_disclaimer">Apenas entretenimento. Sem apostas reais.</span></div>
+  <div style="margin-top:6px;">
+    <a href="rules.html" style="color:var(--muted);margin:0 8px;" data-i18n="footer_rules">Regras do Bolão</a>
+    <a href="terms.html" style="color:var(--muted);margin:0 8px;" data-i18n="footer_terms">Termos de Uso</a>
+    <a href="privacy.html" style="color:var(--muted);margin:0 8px;" data-i18n="footer_privacy">Privacidade</a>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bolão — PitaCopa 2026</title>
+  <meta name="description" content="Acompanhe o ranking, faça seus palpites e convide amigos para o seu bolão da Copa 2026.">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    /* flag-icons sizing */
+    .fi { width:1.4em; line-height:1em; border-radius:2px; }
+    .game-flag .fi { width:20px; height:15px; vertical-align:middle; }
+    #champFlag .fi, #runnerFlag .fi { width:28px; height:21px; border-radius:3px; vertical-align:middle; }
+    /* Delete modal */
+    .delete-modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px; }
+    .delete-modal { background:var(--bg);border-radius:var(--r-lg);padding:28px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3); }
+    .delete-modal h3 { font-size:18px;font-weight:700;margin-bottom:8px;color:#dc2626; }
+    .delete-modal p  { font-size:14px;color:var(--muted);margin-bottom:20px; }
+    .delete-modal-actions { display:flex;gap:10px;justify-content:flex-end; }
+    /* Predictions layout — same as profile.html */
+    .game-pred-row { background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:border .2s; }
+    .game-pred-row:hover { border-color:var(--border-2); }
+    .game-pred-row.locked { opacity:.65;background:var(--bg-2); }
+    .game-date { font-size:11px;color:var(--muted);min-width:80px;flex-shrink:0; }
+    .game-teams { flex:1;display:flex;align-items:center;gap:10px;min-width:0; }
+    .game-team { flex:1;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px; }
+    .game-team.away { justify-content:flex-end; }
+    .game-flag { font-size:16px; }
+    .game-team-name { white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px; }
+    .score-inputs { display:flex;align-items:center;gap:6px;flex-shrink:0; }
+    .score-input { width:42px;height:36px;text-align:center;font-size:15px;font-weight:700;border:1.5px solid var(--border-2);border-radius:var(--r-sm);background:var(--bg);color:var(--text); }
+    .score-input:focus { outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-l); }
+    .score-sep { font-size:14px;font-weight:700;color:var(--muted); }
+    .lock-badge { font-size:11px;background:var(--bg-3);color:var(--muted);padding:3px 8px;border-radius:var(--r-f);white-space:nowrap;flex-shrink:0; }
+    .stage-header { font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:12px 0 8px;margin-top:24px;border-bottom:1px solid var(--border);margin-bottom:12px;display:flex;align-items:center;gap:8px; }
+    .group-filter-btn { padding:5px 12px;font-size:12px;font-weight:600;border:1.5px solid var(--border-2);border-radius:var(--r-f);background:transparent;cursor:pointer;transition:all .15s;color:var(--text-2); }
+    .group-filter-btn:hover,.group-filter-btn.active { border-color:var(--gold);color:var(--gold);background:var(--gold-l); }
+    .alert { padding:12px 16px;border-radius:var(--r);font-size:14px;margin-bottom:16px; }
+    .alert-warning { background:#fef9c3;color:#854d0e;border:1px solid #fde047; }
+    .spinner { width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin:40px auto; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" role="navigation" aria-label="Menu principal">
+  <div class="navbar-inner">
+    <a href="dashboard.html" class="navbar-brand" aria-label="PitaCopa — Meus Bolões">
+      <div class="brand-logo">
+        <img src="img/logo-icon-dark.png" alt="PitaCopa" onerror="this.parentElement.innerHTML='<div class=\'brand-logo-text\'>P</div>'">
+      </div>
+      <div>
+        <div class="brand-name"><span class="pita">pita</span><span class="copa">copa</span></div>
+      </div>
+    </a>
+    <ul class="navbar-nav" id="mainNav">
+      <li>
+        <a href="dashboard.html" class="nav-back-link">
+          <i data-lucide="arrow-left" width="14" height="14"></i>
+          <span data-i18n="nav_dashboard">Meus Bolões</span>
+        </a>
+      </li>
+      <li><a href="games.html"><i data-lucide="calendar" width="14" height="14"></i> Jogos</a></li>
+      <li><a href="ranking.html"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
+      <li><a href="profile.html" id="navUserLink" style="font-weight:600;display:flex;align-items:center;gap:6px;"><i data-lucide="user" width="14" height="14"></i><span id="navUserName">Perfil</span></a></li>
+      <li>
+        <div class="lang-switch">
+          <button class="lang-btn" data-lang="pt">PT</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+        </div>
+      </li>
+      <li>
+        <button class="btn btn-ghost btn-sm" id="btnLogout">
+          <i data-lucide="log-out" width="15" height="15"></i>
+          <span data-i18n="nav_logout">Sair</span>
+        </button>
+      </li>
+    </ul>
+    <button class="navbar-toggle" id="menuToggle" aria-label="Abrir menu">
+      <i data-lucide="menu" width="22" height="22"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header" id="bolaoHeader">
+  <div class="page-header-inner">
+    <div>
+      <h1 id="bolaoTitle" style="color:var(--muted);">Carregando...</h1>
+      <p id="bolaoSubtitle"></p>
+    </div>
+    <div id="headerActions"></div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="bolao-tabs" id="bolaoTabs">
+  <button class="bolao-tab-btn active" data-tab="ranking" data-i18n="bolao_tab_ranking">Ranking</button>
+  <button class="bolao-tab-btn" data-tab="predictions" data-i18n="bolao_tab_predictions">Meus Palpites</button>
+  <button class="bolao-tab-btn" data-tab="invite" data-i18n="bolao_tab_invite">Convidar</button>
+</div>
+
+<!-- AD SLOT -->
+<div class="container" style="padding-top:16px;">
+  <!-- AdSense -->
+  <!-- <ins class="adsbygoogle" ...></ins> -->
+</div>
+
+<!-- CONTENT AREA -->
+<div style="max-width:1400px;margin:0 auto;padding:24px 20px;">
+
+  <!-- RANKING TAB -->
+  <div class="tab-content active" id="tab-ranking">
+    <div id="rankingLoader" class="loader"><div class="spinner"></div></div>
+    <div id="rankingContent" class="hidden">
+      <div class="card mb-3" style="padding:0;overflow:hidden;">
+        <table class="standings-table" id="standingsTable">
+          <thead>
+            <tr>
+              <th style="width:48px" data-i18n="rank_header_pos">#</th>
+              <th data-i18n="rank_header_name">Participante</th>
+              <th style="text-align:center" data-i18n="rank_header_exact">Exatos</th>
+              <th style="text-align:center" data-i18n="rank_header_results">Resultados</th>
+              <th style="text-align:center" data-i18n="rank_header_pts">Pontos</th>
+            </tr>
+          </thead>
+          <tbody id="standingsBody"></tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;text-align:center;margin-top:8px;color:var(--muted);">Desempate: Placares exatos → Resultados corretos</p>
+    </div>
+  </div>
+
+  <!-- PREDICTIONS TAB -->
+  <div class="tab-content" id="tab-predictions">
+    <div id="predLoader" class="loader"><div class="spinner"></div></div>
+    <div id="predContent" class="hidden">
+      <div id="predsAlert"></div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:6px;">
+        <i data-lucide="info" width="13" height="13"></i>
+        Palpites específicos deste bolão. Jogos bloqueiam automaticamente no horário de início.
+      </p>
+
+      <!-- Champion / Runner-up / Top Scorer -->
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;margin-bottom:24px;box-shadow:var(--sh-xs);" id="champSection">
+        <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+          <i data-lucide="trophy" width="16" height="16"></i> Campeão, Vice e Artilheiro
+        </h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+          <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;">
+            <label style="font-size:13px;font-weight:700;display:block;margin-bottom:8px;">🏆 Campeão</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span id="champFlag" style="font-size:22px;min-width:26px;text-align:center;">🏆</span>
+              <select class="form-control" id="pickChampion" style="flex:1;"><option value="">— Selecionar —</option></select>
+            </div>
+          </div>
+          <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;">
+            <label style="font-size:13px;font-weight:700;display:block;margin-bottom:8px;">🥈 Vice-campeão</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span id="runnerFlag" style="font-size:22px;min-width:26px;text-align:center;">🥈</span>
+              <select class="form-control" id="pickRunner" style="flex:1;"><option value="">— Selecionar —</option></select>
+            </div>
+          </div>
+          <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;">
+            <label style="font-size:13px;font-weight:700;display:block;margin-bottom:8px;">⚽ Artilheiro</label>
+            <select class="form-control" id="pickTopScorer"><option value="">— Selecionar —</option></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage filter + game rows -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 style="font-size:16px;font-weight:700;">Palpites dos Jogos</h3>
+        <span style="font-size:12px;color:var(--muted);" id="predProgress"></span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;" id="stageFilter"></div>
+      <div id="gamesContainer"></div>
+
+      <div style="position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--border);padding:16px 20px;text-align:center;z-index:10;margin-top:16px;" id="savePredArea">
+        <button class="btn btn-primary btn-lg" id="btnSavePredictions" style="min-width:200px;">
+          <i data-lucide="save" width="16" height="16"></i> Salvar Palpites
+        </button>
+        <p style="font-size:12px;color:var(--muted);margin-top:6px;">Palpites bloqueiam automaticamente no horário do jogo</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVITE TAB -->
+  <div class="tab-content" id="tab-invite">
+    <div class="card container-sm" style="max-width:520px;">
+      <h2 class="mb-3" data-i18n="invite_title">Convidar Amigos</h2>
+
+      <p class="text-muted mb-2" data-i18n="invite_code_label">Código do bolão:</p>
+      <div class="invite-box mb-3">
+        <div class="invite-code" id="displayInviteCode">——</div>
+        <div class="mt-2">
+          <button class="btn btn-ghost btn-sm" id="btnCopyCode" data-i18n="btn_copy_code">Copiar Código</button>
+        </div>
+      </div>
+
+      <p class="text-muted mb-2" data-i18n="invite_link_label">Link de convite:</p>
+      <div class="d-flex gap-1 mb-3">
+        <input type="text" class="invite-link-input form-control" id="inviteLinkInput" readonly>
+        <button class="btn btn-primary" id="btnCopyLink" data-i18n="btn_copy_link">Copiar</button>
+      </div>
+
+      <button class="btn btn-ghost btn-block" id="btnShare"><i data-lucide="share-2" width="15" height="15"></i> <span data-i18n="btn_share">Compartilhar</span></button>
+
+      <!-- Affiliate in invite tab -->
+      <div style="margin-top:28px;padding:20px;background:var(--gold-l);border:1px solid rgba(245,166,35,.2);border-radius:var(--r-lg);text-align:center;">
+        <p style="font-size:13px;margin-bottom:12px;color:var(--muted-2);">Quer analisar os jogos antes de convidar seus amigos?</p>
+        <a href="https://SEU-LINK-AFILIADO.com" target="_blank" rel="noopener sponsored" class="btn btn-primary btn-sm">Ver Análises da Copa</a>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;">Conteúdo patrocinado. Maiores de 18 anos.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast-container"></div>
+
+<!-- DELETE BOLÃO MODAL -->
+<div class="delete-modal-overlay" id="deleteModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+  <div class="delete-modal">
+    <h3 id="deleteModalTitle">⚠️ Deletar Bolão</h3>
+    <p id="deleteModalMsg">Todos os participantes e palpites serão removidos permanentemente. Essa ação é irreversível.</p>
+    <div class="delete-modal-actions">
+      <button class="btn btn-ghost" id="deleteCancelBtn">Cancelar</button>
+      <button class="btn" style="background:#dc2626;color:#fff;border:none;" id="deleteConfirmBtn">
+        <i data-lucide="trash-2" width="14" height="14"></i> Sim, deletar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db } from './js/config.js';
+  import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import {
+    doc, getDoc, collection, getDocs, setDoc, deleteDoc, serverTimestamp,
+    query, where, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  let currentUser = null;
+  let bolaoData = null;
+  let bolaoId = null;
+  let isDeadlinePassed = false;
+  let predictions = {};
+  let lang = localStorage.getItem('lang') || 'pt';
+
+  bolaoId = new URLSearchParams(window.location.search).get('id');
+  if (!bolaoId) window.location.href = 'dashboard.html';
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+    const navName = document.getElementById('navUserName');
+    if (navName) navName.textContent = user.displayName || user.email || 'Perfil';
+    await loadBolao();
+  });
+
+  async function loadBolao() {
+    try {
+      const snap = await getDoc(doc(db, 'boloes', bolaoId));
+      if (!snap.exists()) { window.location.href = 'dashboard.html'; return; }
+      bolaoData = { id: bolaoId, ...snap.data() };
+
+      document.getElementById('bolaoTitle').textContent = bolaoData.name;
+      document.getElementById('bolaoSubtitle').textContent = bolaoData.description || '';
+
+      // Show delete button for the creator
+      if (bolaoData.createdBy === currentUser.uid) {
+        const headerActions = document.getElementById('headerActions');
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-sm';
+        delBtn.style.cssText = 'background:#fee2e2;color:#dc2626;border:1px solid #fecaca;';
+        delBtn.innerHTML = '<i data-lucide="trash-2" width="14" height="14"></i> Deletar Bolão';
+        delBtn.addEventListener('click', deleteBolao);
+        headerActions.appendChild(delBtn);
+        if (window.lucide) lucide.createIcons();
+      }
+
+      // Check deadline
+      if (bolaoData.deadline) {
+        const deadline = bolaoData.deadline.toDate ? bolaoData.deadline.toDate() : new Date(bolaoData.deadline);
+        isDeadlinePassed = new Date() > deadline;
+      }
+
+      // Invite code
+      document.getElementById('displayInviteCode').textContent = bolaoData.inviteCode;
+      const inviteLink = `${window.location.origin}/bolao2026/join.html?code=${bolaoData.inviteCode}`;
+      document.getElementById('inviteLinkInput').value = inviteLink;
+
+      await loadRanking();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function loadRanking() {
+    try {
+      // Fetch participants, tournament results and bolão predictions in parallel
+      const [partSnap, resultsSnap, predSnap] = await Promise.all([
+        getDocs(query(collection(db, 'bolao_participants'), where('bolaoId', '==', bolaoId))),
+        getDoc(doc(db, 'settings', 'results')),
+        getDocs(query(collection(db, 'bolao_predictions'), where('bolaoId', '==', bolaoId))),
+      ]);
+
+      const participants = partSnap.docs.map(d => d.data());
+
+      // Tournament actual results
+      const results      = resultsSnap.exists() ? resultsSnap.data() : {};
+      const actualChamp  = results.champion  || '';
+      const actualRunner = results.runnerUp  || '';
+
+      // Index bolão predictions by uid for tiebreaker lookup
+      const predsByUid = {};
+      predSnap.forEach(d => { predsByUid[d.data().uid] = d.data(); });
+
+      // Sort: pts → exact scores → correct results → champion → runner-up → alphabetical
+      participants.sort((a, b) => {
+        if ((b.points||0) !== (a.points||0)) return (b.points||0) - (a.points||0);
+        if ((b.exactScores||0) !== (a.exactScores||0)) return (b.exactScores||0) - (a.exactScores||0);
+        if ((b.correctResults||0) !== (a.correctResults||0)) return (b.correctResults||0) - (a.correctResults||0);
+        const aChamp = actualChamp && predsByUid[a.uid]?.champion === actualChamp ? 1 : 0;
+        const bChamp = actualChamp && predsByUid[b.uid]?.champion === actualChamp ? 1 : 0;
+        if (bChamp !== aChamp) return bChamp - aChamp;
+        const aRunner = actualRunner && predsByUid[a.uid]?.runnerUp === actualRunner ? 1 : 0;
+        const bRunner = actualRunner && predsByUid[b.uid]?.runnerUp === actualRunner ? 1 : 0;
+        if (bRunner !== aRunner) return bRunner - aRunner;
+        return (a.name||'').localeCompare(b.name||'');
+      });
+
+      const tbody = document.getElementById('standingsBody');
+      tbody.innerHTML = participants.map((p, i) => {
+        const rank = i + 1;
+        const rankClass = rank <= 3 ? `rank-${rank}` : '';
+        const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+        const isMe = p.uid === currentUser.uid;
+        return `
+          <tr class="${rankClass}${isMe ? ' fw-bold' : ''}">
+            <td><span class="rank-badge">${medal || rank}</span></td>
+            <td>${p.name}${isMe ? ' <span style="font-size:11px;color:var(--primary)">(você)</span>' : ''}</td>
+            <td style="text-align:center">${p.exactScores || 0}</td>
+            <td style="text-align:center">${p.correctResults || 0}</td>
+            <td class="points-cell" style="text-align:center">${p.points || 0}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('rankingLoader').classList.add('hidden');
+      document.getElementById('rankingContent').classList.remove('hidden');
+
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function deleteBolao() {
+    // Show custom modal instead of confirm()
+    const modal = document.getElementById('deleteModal');
+    const msg   = document.getElementById('deleteModalMsg');
+    const title = document.getElementById('deleteModalTitle');
+    title.textContent = lang === 'en' ? `⚠️ Delete "${bolaoData.name}"?` : `⚠️ Deletar "${bolaoData.name}"?`;
+    msg.textContent   = lang === 'en'
+      ? 'All participants and predictions will be permanently removed. This cannot be undone.'
+      : 'Todos os participantes e palpites serão removidos permanentemente. Essa ação é irreversível.';
+    modal.style.display = 'flex';
+    if (window.lucide) lucide.createIcons();
+  }
+
+  document.getElementById('deleteCancelBtn').addEventListener('click', () => {
+    document.getElementById('deleteModal').style.display = 'none';
+  });
+  document.getElementById('deleteModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) document.getElementById('deleteModal').style.display = 'none';
+  });
+
+  document.getElementById('deleteConfirmBtn').addEventListener('click', async () => {
+    const modal  = document.getElementById('deleteModal');
+    const confBtn = document.getElementById('deleteConfirmBtn');
+    confBtn.disabled = true;
+    confBtn.textContent = '⏳...';
+
+    try {
+      // Delete all participants
+      const partSnap = await getDocs(query(collection(db, 'bolao_participants'), where('bolaoId', '==', bolaoId)));
+      for (const d of partSnap.docs) await deleteDoc(d.ref);
+
+      // Delete all predictions
+      const predSnap = await getDocs(query(collection(db, 'bolao_predictions'), where('bolaoId', '==', bolaoId)));
+      for (const d of predSnap.docs) await deleteDoc(d.ref);
+
+      // Delete the bolão itself
+      await deleteDoc(doc(db, 'boloes', bolaoId));
+
+      modal.style.display = 'none';
+      showToast(lang === 'en' ? 'Pool deleted.' : 'Bolão deletado.', 'success');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+    } catch (err) {
+      console.error(err);
+      showToast(lang === 'en' ? 'Error deleting.' : 'Erro ao deletar.', 'error');
+      confBtn.disabled = false;
+      confBtn.innerHTML = '<i data-lucide="trash-2" width="14" height="14"></i> Sim, deletar';
+      if (window.lucide) lucide.createIcons();
+    }
+  });
+
+  // Tab switching
+  document.querySelectorAll('.bolao-tab-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      document.querySelectorAll('.bolao-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      const tab = btn.dataset.tab;
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      if (tab === 'predictions') await loadPredictions();
+    });
+  });
+
+  const STAGE_LABELS_BOLAO = {
+    'group':        { pt:'Fase de Grupos',   en:'Group Stage'    },
+    'round32':      { pt:'Rodada de 32',     en:'Round of 32'    },
+    'round16':      { pt:'Oitavas de Final', en:'Round of 16'    },
+    'quarterfinal': { pt:'Quartas de Final', en:'Quarter-Finals' },
+    'semifinal':    { pt:'Semifinais',       en:'Semi-Finals'    },
+    'third_place':  { pt:'3º Lugar',         en:'Third Place'    },
+    'final':        { pt:'Final',            en:'Final'          },
+  };
+  const TOURNAMENT_START_BOLAO = new Date('2026-06-11T00:00:00');
+  let activeStage = 'all';
+
+  async function loadPredictions() {
+    const loader  = document.getElementById('predLoader');
+    const content = document.getElementById('predContent');
+    if (!content.classList.contains('hidden')) return; // Already loaded
+
+    try {
+      const predSnap = await getDoc(doc(db, 'bolao_predictions', `${bolaoId}_${currentUser.uid}`));
+      if (predSnap.exists()) predictions = predSnap.data();
+
+      loader.classList.add('hidden');
+      content.classList.remove('hidden');
+
+      // Populate team dropdowns for champion/runner-up (no flag in option text — renders as "BR" on Windows)
+      const allTeams = typeof ALL_TEAMS !== 'undefined' ? ALL_TEAMS : [];
+      const teamOptions = allTeams.map(t =>
+        `<option value="${t.id}">${lang === 'en' ? t.nameEn : t.name}</option>`
+      ).join('');
+      const champSel = document.getElementById('pickChampion');
+      const runSel   = document.getElementById('pickRunner');
+      champSel.innerHTML = `<option value="">— ${lang === 'pt' ? 'Selecionar' : 'Select'} —</option>` + teamOptions;
+      runSel.innerHTML   = `<option value="">— ${lang === 'pt' ? 'Selecionar' : 'Select'} —</option>` + teamOptions;
+
+      // Flag span update helpers (uses flag-icons via flagHtml())
+      function updateTeamFlag(selectEl, spanId, defaultHtml) {
+        const team = allTeams.find(t => t.id === selectEl.value);
+        document.getElementById(spanId).innerHTML = team ? flagHtml(team.flag) : defaultHtml;
+      }
+      champSel.addEventListener('change', () => updateTeamFlag(champSel, 'champFlag', '🏆'));
+      runSel.addEventListener('change',   () => updateTeamFlag(runSel,   'runnerFlag', '🥈'));
+
+      if (predictions.champion) { champSel.value = predictions.champion; updateTeamFlag(champSel, 'champFlag', '🏆'); }
+      if (predictions.runnerUp) { runSel.value   = predictions.runnerUp; updateTeamFlag(runSel,   'runnerFlag', '🥈'); }
+
+      // Artilheiro dropdown
+      if (typeof buildPlayerOptions === 'function') {
+        buildPlayerOptions(document.getElementById('pickTopScorer'), lang, predictions.topScorer || '');
+      }
+
+      // Tournament lock
+      const tournamentStarted = new Date() >= TOURNAMENT_START_BOLAO;
+      if (tournamentStarted) {
+        ['pickChampion','pickRunner','pickTopScorer'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.disabled = true;
+        });
+        const champSection = document.getElementById('champSection');
+        if (champSection && !champSection.querySelector('.tournament-lock-note')) {
+          const note = document.createElement('div');
+          note.className = 'alert alert-warning tournament-lock-note';
+          note.style.marginTop = '12px';
+          note.innerHTML = lang === 'en'
+            ? '🔒 The tournament has started. Champion, Runner-up and Top Scorer picks are now locked.'
+            : '🔒 O torneio já começou. As escolhas de Campeão, Vice e Artilheiro estão bloqueadas.';
+          champSection.appendChild(note);
+        }
+      }
+
+      // Build stage filter buttons
+      const stageFilter = document.getElementById('stageFilter');
+      const stageKeys   = ['all', 'group', 'round32', 'round16', 'quarterfinal', 'semifinal', 'third_place', 'final'];
+      stageKeys.forEach(s => {
+        const btn = document.createElement('button');
+        btn.className = 'group-filter-btn' + (s === 'all' ? ' active' : '');
+        btn.textContent = s === 'all'
+          ? (lang === 'en' ? 'All' : 'Todos')
+          : (STAGE_LABELS_BOLAO[s] ? STAGE_LABELS_BOLAO[s][lang] : s);
+        btn.addEventListener('click', () => {
+          stageFilter.querySelectorAll('.group-filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          activeStage = s;
+          renderBolaoGames();
+        });
+        stageFilter.appendChild(btn);
+      });
+
+      renderBolaoGames();
+      if (window.lucide) lucide.createIcons();
+    } catch (err) {
+      console.error(err);
+      loader.classList.add('hidden');
+    }
+  }
+
+  function renderBolaoGames() {
+    const container = document.getElementById('gamesContainer');
+    container.innerHTML = '';
+    const now   = new Date();
+    const games = (typeof ALL_GAMES !== 'undefined') ? ALL_GAMES : [];
+
+    if (games.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);">Nenhum jogo disponível.</div>';
+      return;
+    }
+
+    const filtered = activeStage === 'all' ? games : games.filter(g => g.stage === activeStage);
+
+    // Group by stage + group
+    const sections     = {};
+    const sectionOrder = [];
+    filtered.forEach(g => {
+      const key = g.stage === 'group' ? 'group_' + (g.group || '') : g.stage;
+      if (!sections[key]) { sections[key] = []; sectionOrder.push(key); }
+      sections[key].push(g);
+    });
+
+    let totalPred = 0, totalGames = 0;
+
+    sectionOrder.forEach(key => {
+      const gamesInSection = sections[key];
+      let sectionLabel = '';
+      if (key.startsWith('group_')) {
+        const grp = key.replace('group_', '');
+        sectionLabel = (lang === 'en' ? 'Group ' : 'Grupo ') + grp;
+      } else {
+        sectionLabel = STAGE_LABELS_BOLAO[key] ? STAGE_LABELS_BOLAO[key][lang] : key;
+      }
+      const header = document.createElement('div');
+      header.className = 'stage-header';
+      header.innerHTML = `<i data-lucide="flag" width="14" height="14"></i> ${sectionLabel}`;
+      container.appendChild(header);
+
+      gamesInSection.forEach(game => {
+        totalGames++;
+        const gameDate = new Date(game.date);
+        const isLocked = now >= gameDate;
+        const pred     = predictions.games && predictions.games[game.id];
+        if (pred && pred.home !== undefined && pred.home !== '') totalPred++;
+
+        const homeName = lang === 'en' ? (game.homeNameEn || game.homeName) : game.homeName;
+        const awayName = lang === 'en' ? (game.awayNameEn || game.awayName) : game.awayName;
+        const homeFlag = game.homeFlag || '🏳';
+        const awayFlag = game.awayFlag || '🏳';
+        const dateStr  = gameDate.toLocaleDateString(lang==='en'?'en-US':'pt-BR', { month:'short', day:'numeric' });
+        const timeStr  = gameDate.toLocaleTimeString(lang==='en'?'en-US':'pt-BR', { hour:'2-digit', minute:'2-digit' });
+        const homeVal  = pred && pred.home !== undefined ? pred.home : '';
+        const awayVal  = pred && pred.away !== undefined ? pred.away : '';
+
+        const row = document.createElement('div');
+        row.className = 'game-pred-row' + (isLocked ? ' locked' : '');
+        row.innerHTML = `
+          <div class="game-date">${dateStr}<br><small>${timeStr}</small></div>
+          <div class="game-teams">
+            <div class="game-team">
+              <span class="game-flag">${flagHtml(homeFlag)}</span>
+              <span class="game-team-name">${homeName}</span>
+            </div>
+            <div class="score-inputs">
+              <input type="number" class="score-input" min="0" max="99"
+                value="${homeVal}" data-game="${game.id}" data-side="home"
+                ${isLocked ? 'disabled' : ''} placeholder="—"
+                oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
+              <span class="score-sep">×</span>
+              <input type="number" class="score-input" min="0" max="99"
+                value="${awayVal}" data-game="${game.id}" data-side="away"
+                ${isLocked ? 'disabled' : ''} placeholder="—"
+                oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
+            </div>
+            <div class="game-team away">
+              <span class="game-team-name">${awayName}</span>
+              <span class="game-flag">${flagHtml(awayFlag)}</span>
+            </div>
+          </div>
+          ${isLocked ? '<span class="lock-badge"><i data-lucide="lock" width="11" height="11"></i> Bloqueado</span>' : ''}
+        `;
+        container.appendChild(row);
+      });
+    });
+
+    document.getElementById('predProgress').textContent = `${totalPred}/${totalGames} preenchidos`;
+
+    // Track changes
+    container.querySelectorAll('.score-input').forEach(input => {
+      input.addEventListener('change', () => {
+        const gId  = input.dataset.game;
+        const side = input.dataset.side;
+        const val  = parseInt(input.value);
+        if (!predictions.games) predictions.games = {};
+        if (!predictions.games[gId]) predictions.games[gId] = {};
+        predictions.games[gId][side] = isNaN(val) ? '' : val;
+        // Update counter
+        let filled = 0, total = 0;
+        (typeof ALL_GAMES !== 'undefined' ? ALL_GAMES : []).forEach(g => {
+          total++;
+          const p = predictions.games[g.id];
+          if (p && p.home !== undefined && p.home !== '') filled++;
+        });
+        document.getElementById('predProgress').textContent = `${filled}/${total} preenchidos`;
+      });
+    });
+
+    if (window.lucide) lucide.createIcons();
+  }
+
+  // Save predictions
+  document.getElementById('btnSavePredictions').addEventListener('click', async () => {
+    const btn = document.getElementById('btnSavePredictions');
+    btn.disabled = true;
+    btn.innerHTML = '⏳...';
+    try {
+      predictions.champion  = document.getElementById('pickChampion').value;
+      predictions.runnerUp  = document.getElementById('pickRunner').value;
+      predictions.topScorer = document.getElementById('pickTopScorer').value;
+      predictions.updatedAt = serverTimestamp();
+      await setDoc(
+        doc(db, 'bolao_predictions', `${bolaoId}_${currentUser.uid}`),
+        { ...predictions, uid: currentUser.uid, bolaoId },
+        { merge: true }
+      );
+      showToast((lang === 'pt' ? '✅ Palpites salvos!' : '✅ Predictions saved!'), 'success');
+    } catch (err) {
+      console.error(err);
+      showToast(lang === 'pt' ? 'Erro ao salvar.' : 'Error saving.', 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = `<i data-lucide="save" width="16" height="16"></i> ${lang === 'pt' ? 'Salvar Palpites' : 'Save Predictions'}`;
+    if (window.lucide) lucide.createIcons();
+  });
+
+  // Invite actions
+  document.getElementById('btnCopyCode').addEventListener('click', () => {
+    copyToClipboard(bolaoData.inviteCode, lang === 'pt' ? 'Código copiado!' : 'Code copied!');
+  });
+  document.getElementById('btnCopyLink').addEventListener('click', () => {
+    copyToClipboard(document.getElementById('inviteLinkInput').value, lang === 'pt' ? 'Link copiado!' : 'Link copied!');
+  });
+  document.getElementById('btnShare').addEventListener('click', async () => {
+    const shareData = {
+      title: `Bolão: ${bolaoData?.name}`,
+      text: lang === 'pt'
+        ? `Entre no meu bolão da Copa 2026! Código: ${bolaoData?.inviteCode}`
+        : `Join my 2026 World Cup pool! Code: ${bolaoData?.inviteCode}`,
+      url: document.getElementById('inviteLinkInput').value
+    };
+    if (navigator.share) {
+      await navigator.share(shareData);
+    } else {
+      copyToClipboard(document.getElementById('inviteLinkInput').value);
+    }
+  });
+
+  // Logout
+  document.getElementById('btnLogout').addEventListener('click', async () => {
+    await signOut(auth);
+    window.location.href = 'index.html';
+  });
+</script>
+<script src="js/i18n.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/wc2026.js"></script>
+<script src="js/scoring.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
