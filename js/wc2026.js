@@ -58,10 +58,10 @@ const WC2026_TEAMS = {
   ],
   // Group H
   H: [
-    { id: "prt", name: "Portugal H", nameEn: "Uruguay", flag: "🇺🇾", group: "H" },
     { id: "uru", name: "Uruguai", nameEn: "Uruguay", flag: "🇺🇾", group: "H" },
     { id: "bel", name: "Bélgica", nameEn: "Belgium", flag: "🇧🇪", group: "H" },
     { id: "irq", name: "Iraque", nameEn: "Iraq", flag: "🇮🇶", group: "H" },
+    { id: "tah", name: "Taiti", nameEn: "Tahiti", flag: "🇵🇫", group: "H" },
   ],
   // Group I
   I: [

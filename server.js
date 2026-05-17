@@ -55,7 +55,7 @@ app.get('/api/matches', async (req, res) => {
 // ─── Clean URLs (no .html required) ──────────────────────────────────────────
 // /profile → profile.html, /games → games.html, etc.
 // The .html versions still work via express.static below
-const HTML_PAGES = ['login', 'dashboard', 'bolao', 'join', 'profile', 'games', 'ranking'];
+const HTML_PAGES = ['login', 'dashboard', 'bolao', 'join', 'profile', 'games', 'ranking', 'admin', 'terms', 'privacy', 'rules'];
 HTML_PAGES.forEach(page => {
   app.get(`/${page}`, (req, res) => {
     res.sendFile(path.join(__dirname, `${page}.html`));
