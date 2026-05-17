@@ -96,13 +96,13 @@
       </div>
       <div>
         <div class="brand-name"><span class="pita">pita</span><span class="copa">copa</span></div>
-        <div class="brand-tagline">seu pitaco, sua glória</div>
+        <div class="brand-tagline" data-i18n="brand_tagline">seu pitaco, sua glória</div>
       </div>
     </a>
     <ul class="navbar-nav" id="mainNav">
-      <li><a href="games"><i data-lucide="calendar-days" width="14" height="14"></i> <span>Jogos</span></a></li>
-      <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> <span>Ranking</span></a></li>
-      <li><a href="dashboard"><i data-lucide="layout-grid" width="14" height="14"></i> <span>Meus Bolões</span></a></li>
+      <li><a href="games"><i data-lucide="calendar-days" width="14" height="14"></i> <span data-i18n="nav_games">Jogos</span></a></li>
+      <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> <span data-i18n="nav_ranking">Ranking</span></a></li>
+      <li><a href="dashboard"><i data-lucide="layout-grid" width="14" height="14"></i> <span data-i18n="profile_tab_boloes">Meus Bolões</span></a></li>
       <li><a href="profile" style="font-weight:600;display:flex;align-items:center;gap:6px;color:var(--gold);"><i data-lucide="user" width="14" height="14"></i><span id="navUserName"></span></a></li>
       <li>
         <div class="lang-switch">
@@ -140,15 +140,15 @@
 <div class="profile-tabs" id="profileTabs">
   <button class="profile-tab-btn active" data-tab="profile">
     <i data-lucide="user" width="15" height="15"></i>
-    <span>Meu Perfil</span>
+    <span data-i18n="profile_tab">Meu Perfil</span>
   </button>
   <button class="profile-tab-btn" data-tab="groups">
     <i data-lucide="users" width="15" height="15"></i>
-    <span>Meus Bolões</span>
+    <span data-i18n="profile_tab_boloes">Meus Bolões</span>
   </button>
   <button class="profile-tab-btn" data-tab="preds">
     <i data-lucide="clipboard-list" width="15" height="15"></i>
-    <span>Meus Palpites</span>
+    <span data-i18n="pred_title">Meus Palpites</span>
   </button>
 </div>
 
@@ -158,11 +158,11 @@
     <div id="profileAlert"></div>
 
     <div class="settings-card">
-      <h3><i data-lucide="user-pen" width="16" height="16"></i> Informações Pessoais</h3>
+      <h3><i data-lucide="user-pen" width="16" height="16"></i> <span data-i18n="profile_personal_title">Informações Pessoais</span></h3>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" for="inputName">Nome de exibição</label>
-          <input type="text" class="form-control" id="inputName" placeholder="Seu nome no ranking" maxlength="40">
+          <label class="form-label" for="inputName" data-i18n="label_display_name">Nome de exibição</label>
+          <input type="text" class="form-control" id="inputName" data-i18n-ph="ph_display_name" placeholder="Seu nome no ranking" maxlength="40">
         </div>
         <div class="form-group">
           <label class="form-label" for="inputEmail">E-mail</label>
@@ -171,7 +171,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label" for="inputCountry">País / Região</label>
+        <label class="form-label" for="inputCountry" data-i18n="label_country">País / Região</label>
         <div style="display:flex;align-items:center;gap:10px;">
           <span id="countryFlagDisplay" style="font-size:26px;min-width:30px;text-align:center;" aria-hidden="true">🌍</span>
           <select class="form-control" id="inputCountry" style="flex:1;">
@@ -180,37 +180,37 @@
         </div>
       </div>
       <button class="btn btn-primary" id="btnSaveProfile">
-        <i data-lucide="save" width="15" height="15"></i> Salvar Perfil
+        <i data-lucide="save" width="15" height="15"></i> <span data-i18n="btn_save_profile">Salvar Perfil</span>
       </button>
     </div>
 
     <div class="settings-card" id="passwordCard" style="display:none;">
-      <h3><i data-lucide="lock" width="16" height="16"></i> Alterar Senha</h3>
+      <h3><i data-lucide="lock" width="16" height="16"></i> <span data-i18n="profile_password_title">Alterar Senha</span></h3>
       <div class="form-group">
-        <label class="form-label" for="inputCurrPwd">Senha atual</label>
-        <input type="password" class="form-control" id="inputCurrPwd" placeholder="Senha atual" autocomplete="current-password">
+        <label class="form-label" for="inputCurrPwd" data-i18n="label_curr_password">Senha atual</label>
+        <input type="password" class="form-control" id="inputCurrPwd" placeholder="Senha atual" data-i18n-ph="ph_curr_password" autocomplete="current-password">
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" for="inputNewPwd">Nova senha</label>
-          <input type="password" class="form-control" id="inputNewPwd" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+          <label class="form-label" for="inputNewPwd" data-i18n="label_new_password">Nova senha</label>
+          <input type="password" class="form-control" id="inputNewPwd" data-i18n-ph="ph_new_password" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
         </div>
         <div class="form-group">
-          <label class="form-label" for="inputConfPwd">Confirmar nova senha</label>
-          <input type="password" class="form-control" id="inputConfPwd" placeholder="Repita a nova senha" autocomplete="new-password">
+          <label class="form-label" for="inputConfPwd" data-i18n="label_confirm_new">Confirmar nova senha</label>
+          <input type="password" class="form-control" id="inputConfPwd" data-i18n-ph="ph_confirm_new" placeholder="Repita a nova senha" autocomplete="new-password">
         </div>
       </div>
       <button class="btn btn-primary" id="btnChangePass">
-        <i data-lucide="key" width="15" height="15"></i> Alterar Senha
+        <i data-lucide="key" width="15" height="15"></i> <span data-i18n="btn_change_password">Alterar Senha</span>
       </button>
     </div>
 
     <div class="settings-card" style="border-color:#fecaca;">
-      <h3 style="color:#dc2626;"><i data-lucide="triangle-alert" width="16" height="16"></i> Zona de Perigo</h3>
+      <h3 style="color:#dc2626;"><i data-lucide="triangle-alert" width="16" height="16"></i> <span data-i18n="profile_danger_title">Zona de Perigo</span></h3>
       <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">
         Ao deletar sua conta, todos os seus dados e palpites serão removidos permanentemente.
       </p>
-      <button class="btn btn-danger btn-sm" id="btnDeleteAccount">Deletar minha conta</button>
+      <button class="btn btn-danger btn-sm" id="btnDeleteAccount" data-i18n="btn_delete_account">Deletar minha conta</button>
     </div>
   </div>
 </div>
@@ -221,7 +221,7 @@
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
       <h2 style="font-size:18px;font-weight:700;">Meus Bolões</h2>
       <a href="dashboard" class="btn btn-primary btn-sm">
-        <i data-lucide="plus" width="14" height="14"></i> Novo Bolão
+        <i data-lucide="plus" width="14" height="14"></i> <span data-i18n="dash_new">Novo Bolão</span>
       </a>
     </div>
 
@@ -249,7 +249,7 @@
       <div id="predsAlert"></div>
       <p style="font-size:13px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:6px;">
         <i data-lucide="info" width="13" height="13"></i>
-        Seus palpites globais — válidos para todos os bolões em que você participa. Jogos bloqueiam automaticamente no horário de início.
+        <span data-i18n="pred_global_info">Seus palpites globais — válidos para todos os bolões em que você participa. Jogos bloqueiam automaticamente no horário de início.</span>
       </p>
 
       <div class="settings-card" style="margin-bottom:24px;">
@@ -259,27 +259,26 @@
             <label>🏆 Campeão</label>
             <div style="display:flex;align-items:center;gap:8px;">
               <span id="champFlag" style="font-size:22px;min-width:26px;text-align:center;">🏆</span>
-              <select class="form-control" id="pickChampion" style="flex:1;"><option value="">— Selecionar —</option></select>
+              <select class="form-control" id="pickChampion" style="flex:1;"></select>
             </div>
           </div>
           <div class="champ-card">
             <label>🥈 Vice-campeão</label>
             <div style="display:flex;align-items:center;gap:8px;">
               <span id="runnerFlag" style="font-size:22px;min-width:26px;text-align:center;">🥈</span>
-              <select class="form-control" id="pickRunner" style="flex:1;"><option value="">— Selecionar —</option></select>
+              <select class="form-control" id="pickRunner" style="flex:1;"></select>
             </div>
           </div>
           <div class="champ-card">
             <label>⚽ Artilheiro</label>
             <select class="form-control" id="pickTopScorer">
-              <option value="">— Selecionar —</option>
             </select>
           </div>
         </div>
       </div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <h3 style="font-size:16px;font-weight:700;">Palpites dos Jogos</h3>
+        <h3 style="font-size:16px;font-weight:700;" data-i18n="pred_games">Palpites dos Jogos</h3>
         <span style="font-size:12px;color:var(--muted);" id="predProgress"></span>
       </div>
       <div class="group-filter" id="stageFilter"></div>
@@ -289,9 +288,9 @@
 
   <div class="pred-save-bar" id="predsSaveBar" style="display:none;">
     <button class="btn btn-primary btn-lg" id="btnSavePreds" style="min-width:200px;">
-      <i data-lucide="save" width="16" height="16"></i> Salvar Palpites
+      <i data-lucide="save" width="16" height="16"></i> <span data-i18n="btn_save_preds">Salvar Palpites</span>
     </button>
-    <p style="font-size:12px;color:var(--muted);margin-top:6px;">Palpites bloqueiam automaticamente no horário do jogo</p>
+    <p style="font-size:12px;color:var(--muted);margin-top:6px;" data-i18n="pred_lock_note">Palpites bloqueiam automaticamente no horário do jogo</p>
   </div>
 </div>
 
@@ -558,9 +557,7 @@ document.getElementById('btnSaveProfile').addEventListener('click', async () => 
 
     if (nameChanged && userData.nameChanges >= 1) lockNameField();
 
-    showAlert('profileAlert',
-      lang === 'en' ? '✅ Profile updated!' : '✅ Perfil atualizado com sucesso!',
-      'success');
+    showAlert('profileAlert', t('toast_profile_saved'), 'success');
   } catch(e) {
     showAlert('profileAlert', 'Erro: ' + e.message, 'error');
   }
@@ -690,13 +687,13 @@ window._loadGroups = async function() {
           <div>
             <h4 style="font-size:15px;font-weight:700;margin-bottom:4px;">${bolao.name}</h4>
             <p style="font-size:13px;color:var(--muted);">
-              ${bolao.description ? bolao.description + ' · ' : ''}${all.length} participante${all.length!==1?'s':''}
+              ${bolao.description ? bolao.description + ' · ' : ''}${all.length} ${t('label_participant_s')}${all.length!==1?'s':''}
             </p>
           </div>
           <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
             <div style="text-align:center;">
               <div style="font-size:24px;font-weight:800;color:var(--gold);">${myRank > 0 ? '#'+myRank : '—'}</div>
-              <div style="font-size:11px;color:var(--muted);">posição</div>
+              <div style="font-size:11px;color:var(--muted);">${t('label_position')}</div>
             </div>
             <div style="text-align:center;margin-right:4px;">
               <div style="font-size:16px;font-weight:700;">${myEntry ? (myEntry.points||0) : 0}</div>
@@ -704,17 +701,17 @@ window._loadGroups = async function() {
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;">
               <a href="bolao?id=${p.bolaoId}" class="btn btn-primary btn-sm">
-                <i data-lucide="arrow-right" width="13" height="13"></i> Ver Bolão
+                <i data-lucide="arrow-right" width="13" height="13"></i> ${t('dash_view')}
               </a>
               ${inviteCode ? `<button class="btn btn-ghost btn-sm copy-invite-btn" data-code="${inviteCode}" data-link="${inviteLink}" data-name="${bolao.name}">
-                <i data-lucide="share-2" width="13" height="13"></i> Convidar
+                <i data-lucide="share-2" width="13" height="13"></i> ${t('btn_invite')}
               </button>` : ''}
-              <button class="leave-btn" data-bolao-id="${p.bolaoId}" data-bolao-name="${bolao.name}">Sair</button>
+              <button class="leave-btn" data-bolao-id="${p.bolaoId}" data-bolao-name="${bolao.name}">${t('btn_signout_short')}</button>
             </div>
           </div>
         </div>
         <div class="bolao-card-ranking">
-          <div class="bolao-card-ranking-label">Ranking do Bolão</div>
+          <div class="bolao-card-ranking-label">${t('pool_ranking_label')}</div>
           <table class="mini-rank-table"><tbody>${rankRows}</tbody></table>
         </div>
       `;
@@ -795,9 +792,12 @@ window._loadPreds = async function() {
     const allTeams = Object.values(typeof WC2026_TEAMS !== 'undefined' ? WC2026_TEAMS : {}).flat();
     const champSel = document.getElementById('pickChampion');
     const runSel   = document.getElementById('pickRunner');
-    allTeams.forEach(t => {
-      const name = lang === 'en' ? t.nameEn : t.name;
-      const opt  = `<option value="${t.id}">${name}</option>`;  // no flag in option text (renders as "BR" on Windows)
+    const blankOpt = `<option value="">— ${t('btn_select')} —</option>`;
+    champSel.innerHTML = blankOpt;
+    runSel.innerHTML   = blankOpt;
+    allTeams.forEach(tm => {
+      const name = lang === 'en' ? tm.nameEn : tm.name;
+      const opt  = `<option value="${tm.id}">${name}</option>`;  // no flag in option text (renders as "BR" on Windows)
       champSel.innerHTML += opt;
       runSel.innerHTML   += opt;
     });
@@ -845,7 +845,7 @@ window._loadPreds = async function() {
       const btn = document.createElement('button');
       btn.className = 'group-filter-btn' + (s === 'all' ? ' active' : '');
       btn.textContent = s === 'all'
-        ? (lang === 'en' ? 'All' : 'Todos')
+        ? t('label_all')
         : (STAGE_LABELS_PRED[s] ? STAGE_LABELS_PRED[s][lang] : s);
       btn.addEventListener('click', () => {
         stageFilter.querySelectorAll('.group-filter-btn').forEach(b => b.classList.remove('active'));
@@ -897,7 +897,7 @@ function renderGames() {
     let sectionLabel = '';
     if (key.startsWith('group_')) {
       const grp = key.replace('group_', '');
-      sectionLabel = (lang === 'en' ? 'Group ' : 'Grupo ') + grp;
+      sectionLabel = t('label_group') + ' ' + grp;
     } else {
       sectionLabel = STAGE_LABELS_PRED[key] ? STAGE_LABELS_PRED[key][lang] : key;
     }
@@ -955,7 +955,7 @@ function renderGames() {
     });
   });
 
-  document.getElementById('predProgress').textContent = `${totalPred}/${totalGames} preenchidos`;
+  document.getElementById('predProgress').textContent = `${totalPred}/${totalGames} ` + t('label_filled');
 
   // Track changes
   container.querySelectorAll('.score-input').forEach(input => {
@@ -973,7 +973,7 @@ function renderGames() {
         const p = userPreds.games[g.id];
         if (p && p.home !== undefined && p.home !== '') filled++;
       });
-      document.getElementById('predProgress').textContent = `${filled}/${total} preenchidos`;
+      document.getElementById('predProgress').textContent = `${filled}/${total} ` + t('label_filled');
     });
   });
 
@@ -988,9 +988,9 @@ document.getElementById('btnSavePreds').addEventListener('click', async () => {
     userPreds.topScorer = document.getElementById('pickTopScorer').value.trim();
     userPreds.updatedAt = serverTimestamp();
     await setDoc(doc(db, 'user_predictions', currentUser.uid), userPreds, { merge: true });
-    showAlert('predsAlert', lang === 'en' ? '✅ Predictions saved!' : '✅ Palpites salvos com sucesso!', 'success');
+    showAlert('predsAlert', t('toast_preds_saved'), 'success');
   } catch(e) {
-    showAlert('predsAlert', 'Erro ao salvar: ' + e.message, 'error');
+    showAlert('predsAlert', t('toast_save_error') + ' ' + e.message, 'error');
   }
 });
 
@@ -1003,7 +1003,5 @@ function showAlert(containerId, msg, type) {
 }
 </script>
 
-<script src="js/i18n.js"></script>
-<script>lucide.createIcons();</script>
-</body>
-</html>
+<script src="js/i18n.js?v=6"></script>
+<script>lucide.createIcons();</scr

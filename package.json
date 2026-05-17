@@ -11,4 +11,7 @@
   },
   "dependencies": {
     "express": "^5.2.1",
-    "firebase": "^12.
+    "firebase": "^12.13.0",
+    "node-fetch": "^2.7.0"
+  }
+}

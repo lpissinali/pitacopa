@@ -89,13 +89,13 @@
       </div>
       <div>
         <div class="brand-name"><span class="pita">pita</span><span class="copa">copa</span></div>
-        <div class="brand-tagline">seu pitaco, sua glória</div>
+        <div class="brand-tagline" data-i18n="brand_tagline">seu pitaco, sua glória</div>
       </div>
     </a>
     <ul class="navbar-nav" id="mainNav">
-      <li><a href="games"><i data-lucide="calendar-days" width="14" height="14"></i> Jogos</a></li>
-      <li><a href="ranking" style="color:var(--gold);font-weight:700;"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
-      <li id="navAuthLinks"><a href="login">Entrar</a></li>
+      <li><a href="games"><i data-lucide="calendar-days" width="14" height="14"></i> <span data-i18n="nav_games">Jogos</span></a></li>
+      <li><a href="ranking" style="color:var(--gold);font-weight:700;"><i data-lucide="trophy" width="14" height="14"></i> <span data-i18n="nav_ranking">Ranking</span></a></li>
+      <li id="navAuthLinks"><a href="login" data-i18n="nav_enter">Entrar</a></li>
       <li id="navUserLinks" style="display:none;">
         <a href="dashboard"><i data-lucide="layout-grid" width="14" height="14"></i> Meus Bolões</a>
       </li>
@@ -120,7 +120,7 @@
 <!-- HEADER -->
 <div class="ranking-header">
   <div class="container">
-    <h1><i data-lucide="trophy" width="34" height="34" style="vertical-align:middle;margin-right:10px;stroke-width:2;"></i>Ranking Global</h1>
+    <h1><i data-lucide="trophy" width="34" height="34" style="vertical-align:middle;margin-right:10px;stroke-width:2;"></i> <span data-i18n="ranking_heading">Ranking Global</span></h1>
     <p id="rankingSubtitle">Os maiores pitaqueiros da Copa 2026</p>
   </div>
 </div>
@@ -149,7 +149,7 @@
 
   <!-- SEARCH & FILTER -->
   <div class="search-bar">
-    <input type="text" class="form-control" id="searchInput" placeholder="🔍 Buscar jogador...">
+    <input type="text" class="form-control" id="searchInput" placeholder="🔍 Buscar jogador..." data-i18n-ph="ph_search_player">
   </div>
 
   <div id="rankingLoader"><div class="spinner"></div></div>
@@ -449,7 +449,7 @@ function renderRanking() {
   } else {
     pgEl.style.display = 'flex';
     document.getElementById('pgInfo').textContent =
-      `${lang === 'en' ? 'Page' : 'Página'} ${currentPage} / ${totalPages}`;
+      `${t('label_page')} ${currentPage} / ${totalPages}`;
     document.getElementById('pgPrev').disabled = currentPage === 1;
     document.getElementById('pgNext').disabled = currentPage === totalPages;
   }
@@ -476,6 +476,8 @@ if (btnLogout) btnLogout.addEventListener('click', async () => {
   location.reload();
 });
 </script>
+<script src="js/i18n.js?v=6"></script>
 <script>lucide.createIcons();</script>
 </body>
 </html>
+                   

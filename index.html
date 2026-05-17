@@ -28,12 +28,12 @@
       </div>
       <div>
         <div class="brand-name"><span class="pita">pita</span><span class="copa">copa</span></div>
-        <div class="brand-tagline">seu pitaco, sua glória</div>
+        <div class="brand-tagline" data-i18n="brand_tagline">seu pitaco, sua glória</div>
       </div>
     </a>
     <ul class="navbar-nav" id="mainNav">
-      <li><a href="games"><i data-lucide="calendar" width="14" height="14"></i> Jogos</a></li>
-      <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
+      <li><a href="games"><i data-lucide="calendar" width="14" height="14"></i> <span data-i18n="nav_games">Jogos</span></a></li>
+      <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> <span data-i18n="nav_ranking">Ranking</span></a></li>
       <li>
         <div class="lang-switch">
           <button class="lang-btn" data-lang="pt">PT</button>
@@ -59,9 +59,9 @@
     <img src="img/logo.png" alt="PitaCopa" class="hero-logo" onerror="this.style.display='none'">
     <div class="hero-eyebrow">
       <i data-lucide="zap" width="12" height="12"></i>
-      Copa do Mundo 2026 · 11 Jun – 26 Jul
+      <span data-i18n="hero_eyebrow">Copa do Mundo 2026 · 11 Jun – 26 Jul</span>
     </div>
-    <h1 class="hero-title">
+    <h1 class="hero-title" data-i18n="hero_heading">
       Seu <span class="gold">pitaco</span>,<br>sua <span class="green">glória.</span>
     </h1>
     <p class="hero-sub" data-i18n="hero_sub">
@@ -264,7 +264,7 @@
             <span class="pita">pita</span><span class="copa">copa</span>
           </span>
         </div>
-        <p>Seu bolão da Copa do Mundo 2026. Gratuito, fácil e divertido. Sem dinheiro real.</p>
+        <p data-i18n="footer_tagline_brand">Seu bolão da Copa do Mundo 2026. Gratuito, fácil e divertido. Sem dinheiro real.</p>
       </div>
       <div class="footer-col">
         <div class="footer-col-title" data-i18n="footer_product">Produto</div>
@@ -279,7 +279,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 PitaCopa. Feito com ⚽ para a Copa.</span>
+      <span>© 2026 PitaCopa. <span data-i18n="footer_made_with">Feito com ⚽ para a Copa.</span></span>
       <span style="font-size:11px;color:var(--muted);" data-i18n="footer_disclaimer">Apenas entretenimento. Sem apostas reais.</span>
     </div>
   </div>
@@ -292,11 +292,5 @@
     if (user) window.location.href = 'dashboard';
   });
 </script>
-<script src="js/i18n.js"></script>
-<script src="js/utils.js"></script>
-<script>
-  initMobileMenu();
-  lucide.createIcons();
-</script>
-</body>
-</html>
+<script src="js/i18n.js?v=6"></script>
+<script src="js/utils.js">

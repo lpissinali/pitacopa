@@ -19,6 +19,10 @@ const TRANSLATIONS = {
     // Hero
     hero_badge: "🏆 Copa do Mundo 2026 • EUA / Canadá / México",
     hero_title: "O Melhor <span class='highlight'>Bolão</span> da Copa 2026",
+    hero_eyebrow: "Copa do Mundo 2026 · 11 Jun – 26 Jul",
+    hero_heading: "Seu <span class=\"gold\">pitaco</span>,<br>sua <span class=\"green\">glória.</span>",
+    label_match: "jogo",
+    label_matches: "jogos",
     hero_sub: "Crie bolões, faça palpites nos 104 jogos e mostre pra galera quem manja mais de futebol. 100% gratuito.",
     hero_cta_1: "🚀 Criar Bolão Grátis",
     hero_cta_2: "Como Funciona",
@@ -52,7 +56,7 @@ const TRANSLATIONS = {
     // How it works
     how_eyebrow: "Como funciona",
     how_title: "3 passos e você já está no jogo",
-    how_sub: "Em 4 passos simples você já está jogando.",
+    how_sub: "Em 3 passos simples você já está jogando.",
     step1_title: "Crie sua conta grátis",
     step1_desc: "Cadastro em segundos com Google ou e-mail. Sem cartão, sem taxa.",
     step2_title: "Monte o bolão e convide",
@@ -125,9 +129,14 @@ const TRANSLATIONS = {
     ph_email: "seu@email.com",
     ph_password: "Mínimo 6 caracteres",
     ph_confirm: "Repita a senha",
+    ph_display_name: "Seu nome no ranking",
+    ph_new_password: "Mínimo 6 caracteres",
+    ph_confirm_new: "Repita a nova senha",
+    label_new_password: "Nova senha",
+    label_confirm_new: "Confirmar nova senha",
     label_nickname: "Seu apelido de pitaqueiro",
     password_mismatch: "As senhas não coincidem.",
-    terms_agree: 'Ao criar conta você concorda com os <a href="terms.html" style="color:var(--gold);">Termos de Uso</a> e <a href="privacy.html" style="color:var(--gold);">Política de Privacidade</a>.',
+    terms_agree: 'Ao criar conta você concorda com os <a href="terms" style="color:var(--gold);">Termos de Uso</a> e <a href="privacy" style="color:var(--gold);">Política de Privacidade</a>.',
     btn_login: "Entrar",
     btn_register: "Criar Conta",
     btn_google: "Continuar com Google",
@@ -159,6 +168,8 @@ const TRANSLATIONS = {
     label_bolao_desc: "Descrição (opcional)",
     ph_bolao_name: "Ex: Bolão do Trampo, Família Silva...",
     ph_bolao_desc: "Uma breve descrição do bolão",
+    bolao_name_error: "⚠️ Por favor, escolha um nome para o bolão.",
+    pred_deadline_hint: "📅 Os palpites ficam disponíveis até o início de cada jogo. Campeão, vice e artilheiro podem ser escolhidos até <strong>11 de junho de 2026</strong>, primeiro dia da Copa.",
     label_deadline: "Prazo para palpites",
     hint_deadline: "Após esta data, os palpites serão bloqueados.",
     btn_create: "Criar Bolão",
@@ -205,6 +216,79 @@ const TRANSLATIONS = {
     aff_btn_short: "Ver Odds da Copa",
     aff_disclaimer_short: "Conteúdo patrocinado. +18. Jogue com responsabilidade.",
 
+
+    // Page headings
+    games_heading: "Jogos & Resultados",
+    ranking_heading: "Ranking Global",
+
+    // Profile page
+    profile_tab: "Meu Perfil",
+    profile_tab_boloes: "Meus Bolões",
+    btn_save_profile: "Salvar Perfil",
+
+    // Games page
+    games_sub: "Copa do Mundo 2026 · 11 Jun – 19 Jul · 104 jogos",
+    games_loading: "Carregando jogos...",
+    ph_search_team: "Buscar seleção...",
+    status_finished: "Finalizados",
+    status_scheduled: "Agendados",
+    games_my_preds: "Meus palpites",
+    pred_to_predict: "p/ palpitar",
+    pred_label: "pitaco",
+    brand_tagline: "seu pitaco, sua glória",
+    footer_tagline_brand: "Seu bolão da Copa do Mundo 2026. Gratuito, fácil e divertido. Sem dinheiro real.",
+    footer_made_with: "Feito com ⚽ para a Copa.",
+
+    // Bolão page
+    tiebreak_short: "Desempate: Placares exatos → Resultados corretos",
+    pred_info_bolao: "Palpites específicos deste bolão. Jogos bloqueiam automaticamente no horário de início.",
+    pred_champions_title: "Campeão, Vice e Artilheiro",
+    pred_runner_label: "Vice-campeão",
+    pred_lock_note: "Palpites bloqueiam automaticamente no horário do jogo",
+    tournament_locked: "🔒 O torneio já começou. As escolhas de Campeão, Vice e Artilheiro estão bloqueadas.",
+    delete_bolao_title: "⚠️ Deletar Bolão",
+    aff_bolao_title: "Quer analisar os jogos antes de convidar seus amigos?",
+    aff_bolao_btn: "Ver Análises da Copa",
+    pool_pitaqueiros: "pitaqueiros",
+    pool_ranking_label: "Ranking do Bolão",
+    label_position: "posição",
+    label_participant_s: "participante",
+    label_filled: "preenchidos",
+    ph_search_player: "Buscar jogador...",
+    btn_select: "Selecionar",
+    label_phase: "Fase",
+    label_group: "Grupo",
+    label_page: "Página",
+    label_postponed: "Adiado",
+    label_all: "Todos",
+    delete_confirm_verb: "Deletar",
+    toast_pool_deleted: "Bolão deletado.",
+    toast_delete_error: "Erro ao deletar.",
+    toast_profile_saved: "✅ Perfil atualizado com sucesso!",
+    toast_preds_saved: "✅ Palpites salvos!",
+    toast_save_error: "Erro ao salvar.",
+    toast_code_copied: "Código copiado!",
+    toast_link_copied: "Link copiado!",
+    pred_deadline_modal: "Os palpites ficam disponíveis até o início de cada jogo. Campeão, vice e artilheiro podem ser escolhidos até 11 de junho de 2026, primeiro dia da Copa.",
+
+    // Profile page
+    profile_personal_title: "Informações Pessoais",
+    label_display_name: "Nome de exibição",
+    label_country: "País / Região",
+    profile_password_title: "Alterar Senha",
+    label_curr_password: "Senha atual",
+    ph_curr_password: "Senha atual",
+    btn_change_password: "Alterar Senha",
+    profile_danger_title: "Zona de Perigo",
+    profile_danger_desc: "Ao deletar sua conta, todos os seus dados e palpites serão removidos permanentemente.",
+    btn_delete_account: "Deletar minha conta",
+    pred_global_info: "Seus palpites globais — válidos para todos os bolões em que você participa. Jogos bloqueiam automaticamente no horário de início.",
+    pred_deadline_note: "Os palpites ficam disponíveis até o início de cada jogo. Campeão, vice e artilheiro podem ser escolhidos até 11 de junho de 2026, primeiro dia da Copa.",
+
+    // Shared
+    label_you: "você",
+    btn_invite: "convidar",
+    btn_signout_short: "sair",
     // Toasts
     toast_copied: "Copiado!",
     toast_saved: "Salvo com sucesso!",
@@ -231,6 +315,10 @@ const TRANSLATIONS = {
     // Hero
     hero_badge: "🏆 2026 FIFA World Cup • USA / Canada / Mexico",
     hero_title: "The Best <span class='highlight'>World Cup Pool</span> of 2026",
+    hero_eyebrow: "2026 World Cup · Jun 11 – Jul 26",
+    hero_heading: "Your <span class=\"gold\">pick</span>,<br>your <span class=\"green\">glory.</span>",
+    label_match: "match",
+    label_matches: "matches",
     hero_sub: "Create pools with friends, predict all 104 matches, and prove who knows football best. 100% free.",
     hero_cta_1: "🚀 Create Free Pool",
     hero_cta_2: "How It Works",
@@ -264,7 +352,7 @@ const TRANSLATIONS = {
     // How it works
     how_eyebrow: "How it works",
     how_title: "3 steps and you're in",
-    how_sub: "4 simple steps to get started.",
+    how_sub: "3 simple steps to get started.",
     step1_title: "Create your free account",
     step1_desc: "Sign up in seconds with Google or email. No card, no fee.",
     step2_title: "Build your pool and invite",
@@ -337,9 +425,14 @@ const TRANSLATIONS = {
     ph_email: "you@email.com",
     ph_password: "Minimum 6 characters",
     ph_confirm: "Repeat your password",
+    ph_display_name: "Your display name",
+    ph_new_password: "Minimum 6 characters",
+    ph_confirm_new: "Repeat your new password",
+    label_new_password: "New password",
+    label_confirm_new: "Confirm new password",
     label_nickname: "Your nickname",
     password_mismatch: "Passwords do not match.",
-    terms_agree: 'By creating an account you agree to our <a href="terms.html" style="color:var(--gold);">Terms of Use</a> and <a href="privacy.html" style="color:var(--gold);">Privacy Policy</a>.',
+    terms_agree: 'By creating an account you agree to our <a href="terms" style="color:var(--gold);">Terms of Use</a> and <a href="privacy" style="color:var(--gold);">Privacy Policy</a>.',
     btn_login: "Sign In",
     btn_register: "Create Account",
     btn_google: "Continue with Google",
@@ -371,6 +464,8 @@ const TRANSLATIONS = {
     label_bolao_desc: "Description (optional)",
     ph_bolao_name: "E.g. Office Pool, Smith Family...",
     ph_bolao_desc: "A brief description",
+    bolao_name_error: "⚠️ Please choose a name for your pool.",
+    pred_deadline_hint: "📅 Predictions are open until each match kicks off. Champion, Runner-up and Top Scorer can be picked until <strong>June 11, 2026</strong>, the first day of the Cup.",
     label_deadline: "Prediction deadline",
     hint_deadline: "After this date, predictions will be locked.",
     btn_create: "Create Pool",
@@ -417,6 +512,79 @@ const TRANSLATIONS = {
     aff_btn_short: "See World Cup Odds",
     aff_disclaimer_short: "Sponsored content. 18+. Please gamble responsibly.",
 
+
+    // Page headings
+    games_heading: "Matches & Results",
+    ranking_heading: "Global Standings",
+
+    // Profile page
+    profile_tab: "My Profile",
+    profile_tab_boloes: "My Pools",
+    btn_save_profile: "Save Profile",
+
+    // Games page
+    games_sub: "2026 World Cup · Jun 11 – Jul 19 · 104 matches",
+    games_loading: "Loading matches...",
+    ph_search_team: "Search team...",
+    status_finished: "Finished",
+    status_scheduled: "Scheduled",
+    games_my_preds: "My predictions",
+    pred_to_predict: "to predict",
+    pred_label: "pick",
+    brand_tagline: "your pick, your glory",
+    footer_tagline_brand: "Your 2026 World Cup pool. Free, easy and fun. No real money.",
+    footer_made_with: "Made with ⚽ for the Cup.",
+
+    // Bolão page
+    tiebreak_short: "Tiebreak: Exact scores → Correct results",
+    pred_info_bolao: "Pool-specific predictions. Matches lock automatically at kick-off.",
+    pred_champions_title: "Champion, Runner-up & Top Scorer",
+    pred_runner_label: "Runner-up",
+    pred_lock_note: "Predictions lock automatically at match time",
+    tournament_locked: "🔒 The tournament has started. Champion, Runner-up and Top Scorer picks are locked.",
+    delete_bolao_title: "⚠️ Delete Pool",
+    aff_bolao_title: "Want to analyze matches before inviting your friends?",
+    aff_bolao_btn: "See World Cup Analysis",
+    pool_pitaqueiros: "predictors",
+    pool_ranking_label: "Pool Standings",
+    label_position: "position",
+    label_participant_s: "participant",
+    label_filled: "filled",
+    ph_search_player: "Search player...",
+    btn_select: "Select",
+    label_phase: "Phase",
+    label_group: "Group",
+    label_page: "Page",
+    label_postponed: "Postponed",
+    label_all: "All",
+    delete_confirm_verb: "Delete",
+    toast_pool_deleted: "Pool deleted.",
+    toast_delete_error: "Error deleting.",
+    toast_profile_saved: "✅ Profile updated!",
+    toast_preds_saved: "✅ Predictions saved!",
+    toast_save_error: "Error saving.",
+    toast_code_copied: "Code copied!",
+    toast_link_copied: "Link copied!",
+    pred_deadline_modal: "Predictions are open until each match kicks off. Champion, Runner-up and Top Scorer can be picked until June 11, 2026, the first day of the Cup.",
+
+    // Profile page
+    profile_personal_title: "Personal Information",
+    label_display_name: "Display name",
+    label_country: "Country / Region",
+    profile_password_title: "Change Password",
+    label_curr_password: "Current password",
+    ph_curr_password: "Current password",
+    btn_change_password: "Change Password",
+    profile_danger_title: "Danger Zone",
+    profile_danger_desc: "Deleting your account will permanently remove all your data and predictions.",
+    btn_delete_account: "Delete my account",
+    pred_global_info: "Your global predictions — valid for all pools you\'re in. Matches lock automatically at kick-off.",
+    pred_deadline_note: "Predictions are open until each match kicks off. Champion, Runner-up and Top Scorer can be picked until June 11, 2026.",
+
+    // Shared
+    label_you: "you",
+    btn_invite: "Invite",
+    btn_signout_short: "Sign out",
     // Toasts
     toast_copied: "Copied!",
     toast_saved: "Saved successfully!",
@@ -437,3 +605,62 @@ function t(key) {
   return TRANSLATIONS[currentLang][key] || TRANSLATIONS['pt'][key] || key;
 }
 
+
+// =============================================
+// i18n runtime — apply translations & lang UI
+// =============================================
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n');
+    var val = (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key])
+           || (TRANSLATIONS['pt']        && TRANSLATIONS['pt'][key])
+           || key;
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.placeholder = val;
+    } else {
+      el.innerHTML = val;
+    }
+  });
+  // Placeholder-only translations
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el) {
+    var key = el.getAttribute('data-i18n-ph');
+    el.placeholder = (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key])
+                  || (TRANSLATIONS['pt']         && TRANSLATIONS['pt'][key])
+                  || key;
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(function(el) {
+    el.title = t(el.getAttribute('data-i18n-title'));
+  });
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('lang', lang);
+  document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en';
+  applyTranslations();
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+}
+
+function initI18n() {
+  // Apply all [data-i18n] elements
+  applyTranslations();
+  // Wire lang toggle buttons — clone to remove any pre-existing listeners
+  document.querySelectorAll('.lang-btn').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.lang === currentLang);
+    var fresh = btn.cloneNode(true);
+    btn.parentNode.replaceChild(fresh, btn);
+    fresh.addEventListener('click', function() { setLang(fresh.dataset.lang); });
+  });
+  // Set <html lang=""> attribute
+  document.documentElement.lang = currentLang === 'pt' ? 'pt-BR' : 'en';
+}
+
+// Auto-run when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initI18n);
+} else {
+  initI18n();
+}

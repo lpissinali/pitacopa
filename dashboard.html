@@ -22,8 +22,8 @@
       </div>
     </a>
     <ul class="navbar-nav" id="mainNav">
-      <li><a href="games"><i data-lucide="calendar" width="14" height="14"></i> Jogos</a></li>
-      <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> Ranking</a></li>
+      <li><a href="games"><i data-lucide="calendar" width="14" height="14"></i> <span data-i18n="nav_games">Jogos</span></a></li>
+      <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> <span data-i18n="nav_ranking">Ranking</span></a></li>
       <li><a href="profile" id="navUserLink" style="font-weight:600;display:flex;align-items:center;gap:6px;"><i data-lucide="user" width="14" height="14"></i><span id="navUserName">Perfil</span></a></li>
       <li>
         <div class="lang-switch">
@@ -104,17 +104,17 @@
       <form id="createForm">
         <div class="form-group">
           <label class="form-label" data-i18n="label_bolao_name">Nome do bolão</label>
-          <input type="text" id="bolaoName" class="form-control" placeholder="Ex: Bolão do Trampo" required maxlength="60">
-          <div id="bolaoNameError" style="display:none;color:#dc2626;font-size:13px;margin-top:6px;font-weight:600;">
+          <input type="text" id="bolaoName" class="form-control" data-i18n-ph="ph_bolao_name" placeholder="Ex: Bolão do Trampo" required maxlength="60">
+          <div id="bolaoNameError" data-i18n="bolao_name_error" style="display:none;color:#dc2626;font-size:13px;margin-top:6px;font-weight:600;">
             ⚠️ Por favor, escolha um nome para o bolão.
           </div>
         </div>
         <div class="form-group">
           <label class="form-label" data-i18n="label_bolao_desc">Descrição (opcional)</label>
-          <textarea id="bolaoDesc" class="form-control" placeholder="Uma breve descrição" rows="2" maxlength="200"></textarea>
+          <textarea id="bolaoDesc" class="form-control" data-i18n-ph="ph_bolao_desc" placeholder="Uma breve descrição" rows="2" maxlength="200"></textarea>
         </div>
         <div class="form-group">
-          <p class="form-hint" style="background:var(--gold-l);border:1px solid var(--gold-l2);border-radius:var(--r);padding:10px 14px;color:#92400e;margin:0;">
+          <p class="form-hint" data-i18n="pred_deadline_hint" style="background:var(--gold-l);border:1px solid var(--gold-l2);border-radius:var(--r);padding:10px 14px;color:#92400e;margin:0;">
             📅 Os palpites ficam disponíveis até o início de cada jogo. Campeão, vice e artilheiro podem ser escolhidos até <strong>11 de junho de 2026</strong>, primeiro dia da Copa.
           </p>
         </div>
@@ -223,8 +223,7 @@
     const pts = b.myData.points || 0;
     const rank = b.myData.rank || '-';
     const participants = b.participantCount || 1;
-    const lang = localStorage.getItem('lang') || 'pt';
-    return '<div class="bolao-card" onclick="window.location.href=\'bolao?id=' + b.id + '\'"><div class="bolao-card-header"><h3>' + b.name + '</h3><p>' + (b.description || '') + '</p></div><div class="bolao-card-body"><div class="bolao-meta"><span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> ' + participants + ' ' + (lang === 'pt' ? 'participantes' : 'participants') + '</span><span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ' + pts + ' pts</span></div><div class="bolao-rank"><div class="bolao-rank-pos">' + rank + 'º</div><div class="bolao-rank-label">' + (lang === 'pt' ? 'Sua posição' : 'Your position') + '</div></div><a href="bolao?id=' + b.id + '" class="btn btn-primary btn-block btn-sm">' + (lang === 'pt' ? 'Ver Bolão' : 'View Pool') + '</a></div></div>';
+    return '<div class="bolao-card" onclick="window.location.href=\'bolao?id=' + b.id + '\'"><div class="bolao-card-header"><h3>' + b.name + '</h3><p>' + (b.description || '') + '</p></div><div class="bolao-card-body"><div class="bolao-meta"><span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> ' + participants + ' ' + t('label_participant_s') + (participants !== 1 ? 's' : '') + '</span><span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ' + pts + ' pts</span></div><div class="bolao-rank"><div class="bolao-rank-pos">' + rank + 'º</div><div class="bolao-rank-label">' + t('dash_rank_label') + '</div></div><a href="bolao?id=' + b.id + '" class="btn btn-primary btn-block btn-sm">' + t('dash_view') + '</a></div></div>';
   }
 
   window.openCreateModal = () => document.getElementById('createModal').classList.add('show');
@@ -332,8 +331,7 @@
     });
   });
 </script>
-<script src="js/i18n.js"></script>
+<script src="js/i18n.js?v=6"></script>
 <script src="js/utils.js"></script>
 <script>initMobileMenu(); lucide.createIcons();</script>
-</body>
-</html>
+</body
