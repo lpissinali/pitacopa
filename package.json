@@ -1,0 +1,17 @@
+{
+  "name": "pitacopa",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "firebase": "^12.13.0",
+    "node-fetch": "^2.7.0"
+  }
+}

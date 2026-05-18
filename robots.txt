@@ -1,0 +1,14 @@
+User-agent: *
+
+# Private / auth-only pages — do not index
+Disallow: /dashboard
+Disallow: /bolao
+Disallow: /profile
+Disallow: /join
+Disallow: /admin
+Disallow: /seed
+
+# Everything else is allowed by default
+Allow: /
+
+Sitemap: https://pitacopa.com/sitemap.xml

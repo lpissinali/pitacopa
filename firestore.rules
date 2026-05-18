@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Admin helper ──────────────────────────────────────────────────────────
+    // Checks the verified email on the Firebase Auth token.
+    // Add more admin emails to the list as needed.
+    function isAdmin() {
+      return request.auth != null &&
+             request.auth.token.email in ['pissinali@gmail.com'];
+    }
+
+    // ── Users ─────────────────────────────────────────────────────────────────
+    // Public read: anyone can see the ranking (name, country, photoURL).
+    // Write: owner updates their own profile; admin can update any user (e.g. disable).
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null &&
+                      (request.auth.uid == userId || isAdmin());
+    }
+
+    // ── Bolões ────────────────────────────────────────────────────────────────
+    // Any authenticated user can read and create.
+    // Creator or admin can update or delete.
+    match /boloes/{bolaoId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null &&
+                               (request.auth.uid == resource.data.createdBy || isAdmin());
+    }
+
+    // ── Bolão participants ─────────────────────────────────────────────────────
+    // Any authenticated user can read (needed for ranking + point aggregation).
+    // Each participant can write their own entry; admin can also write.
+    match /bolao_participants/{partId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null &&
+                               (request.auth.uid == resource.data.uid || isAdmin());
+    }
+
+    // ── User predictions ──────────────────────────────────────────────────────
+    // Any authenticated user can read (needed for tiebreaker on ranking page).
+    // Only the owner or admin can write.
+    match /user_predictions/{userId} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null &&
+                      (request.auth.uid == userId || isAdmin());
+    }
+
+    // ── Bolão predictions ─────────────────────────────────────────────────────
+    // Any authenticated user can read (needed for bolão ranking tiebreaker).
+    // Only the owner or admin can write.
+    match /bolao_predictions/{predId} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null &&
+                               (request.auth.uid == resource.data.uid || isAdmin());
+    }
+
+    // ── Settings / tournament results ─────────────────────────────────────────
+    // Public read so ranking tiebreaker works even for unauthenticated visitors.
+    // Only admin can write (via admin.html CMS).
+    match /settings/{document} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── Moderation log ────────────────────────────────────────────────────────
+    // Admin-only: records deletions, renames, and other moderation actions.
+    match /moderation_log/{logId} {
+      allow read, write: if isAdmin();
+    }
+
+  }
+}

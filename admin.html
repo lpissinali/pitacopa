@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — PitaCopa</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/img/logo-icon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/img/logo-icon.png">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    body { background: var(--bg-2); min-height: 100vh; }
+
+    /* ── Auth gate ── */
+    #authGate {
+      position: fixed; inset: 0; background: var(--navy);
+      display: flex; align-items: center; justify-content: center; z-index: 9999;
+    }
+    .gate-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-xl);
+      padding: 40px; text-align: center; max-width: 380px; width: 100%;
+    }
+    .gate-logo { font-size: 40px; margin-bottom: 16px; }
+    .gate-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+    .gate-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+    .gate-error { color: #ef4444; font-size: 13px; margin-top: 12px; }
+
+    /* ── Admin Layout ── */
+    .admin-wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 80px; }
+    .admin-header {
+      background: var(--navy); color: #fff; padding: 16px 24px;
+      display: flex; align-items: center; gap: 16px; margin-bottom: 28px;
+      border-radius: var(--r-xl);
+    }
+    .admin-header h1 { font-size: 18px; font-weight: 800; margin: 0; flex: 1; }
+    .admin-badge { background: var(--gold); color: var(--navy); font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 20px; }
+    .admin-user-info { font-size: 13px; color: rgba(255,255,255,.7); }
+
+    /* ── Tabs ── */
+    .admin-tabs { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 6px; margin-bottom: 24px; }
+    .admin-tab {
+      flex: 1; padding: 10px 8px; font-size: 13px; font-weight: 700; border: none;
+      background: none; border-radius: var(--r-lg); cursor: pointer; color: var(--muted);
+      transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .admin-tab.active { background: var(--navy); color: #fff; }
+    .admin-tab:hover:not(.active) { background: var(--bg-2); color: var(--text); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Cards ── */
+    .admin-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--sh-sm); margin-bottom: 20px; }
+    .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--bg-2); }
+    .card-header h3 { font-size: 15px; font-weight: 700; margin: 0; flex: 1; }
+    .card-body { padding: 20px; }
+
+    /* ── Stat chips ── */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .stat-chip { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 16px 20px; }
+    .stat-chip .val { font-size: 28px; font-weight: 800; color: var(--gold); }
+    .stat-chip .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* ── Tables ── */
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .admin-table th { padding: 10px 14px; background: var(--bg-2); font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; text-align: left; border-bottom: 2px solid var(--border); }
+    .admin-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .admin-table tr:last-child td { border-bottom: none; }
+    .admin-table tr:hover td { background: var(--bg-2); }
+    .admin-table .center { text-align: center; }
+
+    /* ── Badges ── */
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .badge-green { background: #dcfce7; color: #16a34a; }
+    .badge-red { background: #fee2e2; color: #dc2626; }
+    .badge-gray { background: var(--bg-2); color: var(--muted); }
+
+    /* ── Toggle switch ── */
+    .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0; background: #d1d5db; border-radius: 24px;
+      cursor: pointer; transition: .2s;
+    }
+    .toggle-slider:before {
+      content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background: white; border-radius: 50%; transition: .2s;
+    }
+    input:checked + .toggle-slider { background: #22c55e; }
+    input:disabled + .toggle-slider { opacity: .4; cursor: not-allowed; }
+    input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    /* ── Search ── */
+    .search-row { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
+    .search-row input { flex: 1; }
+
+    /* ── Form groups ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .form-group select, .form-group input { width: 100%; }
+
+    /* ── Player list ── */
+    .player-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .player-row:last-child { border-bottom: none; }
+    .player-team-badge { font-size: 11px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; color: var(--muted); }
+    .player-del { background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px 8px; border-radius: var(--r-f); font-size: 20px; line-height: 1; }
+    .player-del:hover { background: #fee2e2; }
+
+    /* ── Tournament results form ── */
+    .results-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    @media(max-width:600px) { .results-grid { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr; } }
+
+    /* ── Bolão rows ── */
+    .bolao-row-info { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .spinner { width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; margin: 40px auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .save-row { display: flex; justify-content: flex-end; margin-top: 20px; }
+    .toast {
+      position: fixed; bottom: 30px; right: 24px; background: var(--navy); color: #fff;
+      padding: 12px 20px; border-radius: var(--r-lg); font-size: 13px; font-weight: 600;
+      box-shadow: var(--sh); transform: translateY(80px); opacity: 0;
+      transition: all .3s; z-index: 9000;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .avatar-sm { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: var(--gold-l); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--gold); overflow: hidden; flex-shrink: 0; }
+    .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ── Moderation modal ── */
+    .mod-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 8000;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mod-overlay.hidden { display: none; }
+    .mod-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-xl);
+      padding: 28px; width: 100%; max-width: 440px; box-shadow: var(--sh);
+    }
+    .mod-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+    .mod-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .mod-tabs { display: flex; gap: 4px; background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 4px; margin-bottom: 20px; }
+    .mod-tab { flex: 1; padding: 8px; font-size: 12px; font-weight: 700; border: none;
+      background: none; border-radius: var(--r-f); cursor: pointer; color: var(--muted); transition: all .15s; }
+    .mod-tab.active { background: var(--navy); color: #fff; }
+    .mod-section { display: none; }
+    .mod-section.active { display: block; }
+    .mod-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+<!-- ── AUTH GATE ─────────────────────────────────────────────────── -->
+<div id="authGate">
+  <div class="gate-card">
+    <div class="gate-logo">🔐</div>
+    <div class="gate-title">Admin — PitaCopa</div>
+    <div class="gate-sub">Acesse com sua conta de administrador</div>
+    <div id="gateLoader"><div class="spinner"></div></div>
+    <div id="gateLoginSection" style="display:none;">
+      <button class="btn btn-ghost btn-block" id="gateGoogleBtn" style="justify-content:center;margin-bottom:14px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" style="flex-shrink:0"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        <span style="margin-left:8px;">Entrar com Google</span>
+      </button>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <span style="font-size:11px;color:var(--muted);">ou</span>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
+      <input type="email" id="gateEmail" class="form-control" placeholder="E-mail" style="margin-bottom:10px;">
+      <input type="password" id="gatePass" class="form-control" placeholder="Senha" style="margin-bottom:16px;">
+      <button class="btn btn-primary" style="width:100%;" id="gateLoginBtn">Entrar com E-mail</button>
+      <div class="gate-error" id="gateError"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADMIN APP ──────────────────────────────────────────────────── -->
+<div id="adminApp" style="display:none;">
+  <div class="admin-wrap">
+
+    <!-- Header -->
+    <div class="admin-header">
+      <div>
+        <div style="font-size:10px;color:rgba(255,255,255,.5);font-weight:700;text-transform:uppercase;letter-spacing:.1em;">PitaCopa</div>
+        <h1>Painel de Administração</h1>
+      </div>
+      <span class="admin-badge">ADMIN</span>
+      <div class="admin-user-info" id="adminUserInfo"></div>
+      <button class="btn btn-ghost btn-sm" id="adminLogout" style="color:rgba(255,255,255,.7);">
+        <i data-lucide="log-out" width="14" height="14"></i> Sair
+      </button>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-row">
+      <div class="stat-chip"><div class="val" id="statUsers">—</div><div class="lbl">Usuários</div></div>
+      <div class="stat-chip"><div class="val" id="statBoloes">—</div><div class="lbl">Bolões</div></div>
+      <div class="stat-chip"><div class="val" id="statDisabled">—</div><div class="lbl">Desabilitados</div></div>
+      <div class="stat-chip"><div class="val" id="statPlayers">—</div><div class="lbl">Jogadores (artilheiro)</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" data-tab="users">
+        <i data-lucide="users" width="14" height="14"></i> Usuários
+      </button>
+      <button class="admin-tab" data-tab="boloes">
+        <i data-lucide="layers" width="14" height="14"></i> Bolões
+      </button>
+      <button class="admin-tab" data-tab="tournament">
+        <i data-lucide="trophy" width="14" height="14"></i> Torneio
+      </button>
+      <button class="admin-tab" data-tab="players">
+        <i data-lucide="user-plus" width="14" height="14"></i> Artilheiros
+      </button>
+    </div>
+
+    <!-- ── USERS TAB ─────────────────────────────────────────── -->
+    <div class="tab-panel active" id="tab-users">
+      <div class="admin-card">
+        <div class="card-header">
+          <i data-lucide="users" width="16" height="16"></i>
+          <h3>Gerenciar Usuários</h3>
+          <span class="badge badge-gray" id="usersCountBadge">—</span>
+        </div>
+        <div class="card-body" style="padding-bottom:0;">
+          <div class="search-row">
+            <input type="text" class="form-control" id="userSearch" placeholder="🔍 Buscar por nome ou e-mail…">
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Usuário</th>
+                <th>E-mail</th>
+                <th class="center">País</th>
+                <th class="center">Pts</th>
+                <th class="center">Bolões</th>
+                <th class="center">Status</th>
+                <th class="center">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="7"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BOLÕES TAB ─────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-boloes">
+      <div class="admin-card">
+        <div class="card-header">
+          <i data-lucide="layers" width="16" height="16"></i>
+          <h3>Todos os Bolões</h3>
+          <span class="badge badge-gray" id="boloesCountBadge">—</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Criador</th>
+                <th class="center">Participantes</th>
+                <th class="center">Criado em</th>
+                <th class="center">Privado</th>
+                <th class="center">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="boloesTableBody">
+              <tr><td colspan="6"><div class="spinner"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TOURNAMENT TAB ─────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-tournament">
+      <div class="admin-card">
+        <div class="card-header">
+          <i data-lucide="trophy" width="16" height="16"></i>
+          <h3>Resultados do Torneio</h3>
+          <span class="badge badge-gray">settings/results</span>
+        </div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
+            Estes dados são usados para calcular pontos de tiebreaker. Preencha após o torneio terminar.
+          </p>
+          <div class="results-grid">
+            <div class="form-group">
+              <label>🥇 Campeão (team id)</label>
+              <select class="form-control" id="rChampion">
+                <option value="">— Não definido —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>🥈 Vice-campeão (team id)</label>
+              <select class="form-control" id="rRunnerUp">
+                <option value="">— Não definido —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>⚽ Artilheiro da Copa</label>
+              <select class="form-control" id="rTopScorer">
+                <option value="">— Não definido —</option>
+              </select>
+            </div>
+          </div>
+          <div class="save-row">
+            <button class="btn btn-primary" id="saveTournamentBtn">
+              <i data-lucide="save" width="14" height="14"></i> Salvar Resultados
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-header">
+          <i data-lucide="list" width="16" height="16"></i>
+          <h3>Grupos da Copa 2026</h3>
+        </div>
+        <div class="card-body" id="groupsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PLAYERS TAB ─────────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-players">
+      <div class="admin-card">
+        <div class="card-header">
+          <i data-lucide="user-plus" width="16" height="16"></i>
+          <h3>Adicionar Jogador ao Dropdown de Artilheiro</h3>
+        </div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:20px;">
+            Jogadores adicionados aqui aparecem no dropdown de artilheiro nos bolões, além dos jogadores já cadastrados.
+          </p>
+          <div class="form-grid" style="margin-bottom:16px;">
+            <div class="form-group">
+              <label>Nome do Jogador</label>
+              <input type="text" class="form-control" id="newPlayerName" placeholder="ex: Neymar Jr.">
+            </div>
+            <div class="form-group">
+              <label>Seleção (team id)</label>
+              <select class="form-control" id="newPlayerTeam">
+                <option value="">— Escolha a seleção —</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="addPlayerBtn">
+            <i data-lucide="plus" width="14" height="14"></i> Adicionar Jogador
+          </button>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="card-header">
+          <i data-lucide="list" width="16" height="16"></i>
+          <h3>Jogadores Extras Cadastrados</h3>
+          <span class="badge badge-gray" id="extraPlayersCount">0</span>
+        </div>
+        <div class="card-body" id="extraPlayersList" style="padding-top:8px;">
+          <div class="spinner"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── MODERATION MODAL ──────────────────────────────────────────── -->
+<div class="mod-overlay hidden" id="modOverlay" onclick="if(event.target===this)closeModModal()">
+  <div class="mod-card">
+    <div class="mod-title">Moderar Bolão</div>
+    <div class="mod-sub" id="modBolaoName">—</div>
+
+    <div class="mod-tabs">
+      <button class="mod-tab active" onclick="switchModTab('rename')">
+        <i data-lucide="pencil" width="12" height="12"></i> Renomear
+      </button>
+      <button class="mod-tab" onclick="switchModTab('delete')">
+        <i data-lucide="trash-2" width="12" height="12"></i> Excluir
+      </button>
+    </div>
+
+    <!-- Rename section -->
+    <div class="mod-section active" id="modRenameSection">
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Novo nome</label>
+        <input type="text" class="form-control" id="modNewName" placeholder="Nome do bolão…">
+      </div>
+      <div class="mod-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeModModal()">Cancelar</button>
+        <button class="btn btn-primary btn-sm" onclick="confirmRename()">
+          <i data-lucide="check" width="14" height="14"></i> Salvar
+        </button>
+      </div>
+    </div>
+
+    <!-- Delete section -->
+    <div class="mod-section" id="modDeleteSection">
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Motivo da exclusão</label>
+        <input type="text" class="form-control" id="modReason" placeholder="ex: linguagem ofensiva…">
+      </div>
+      <p style="font-size:12px;color:#ef4444;margin-top:12px;margin-bottom:0;">
+        ⚠️ Esta ação remove o bolão e todos os participantes permanentemente.
+      </p>
+      <div class="mod-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeModModal()">Cancelar</button>
+        <button class="btn btn-sm" style="background:#ef4444;color:#fff;" onclick="confirmDelete()">
+          <i data-lucide="trash-2" width="14" height="14"></i> Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { auth, db } from './js/config.js';
+import {
+  onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup,
+  GoogleAuthProvider, signOut
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  collection, getDocs, getDoc, doc, updateDoc, setDoc, deleteDoc, query, orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── Load wc2026 data (teams + players) ───────────────────────────────────────
+// We access window.WC2026_TEAMS / window.WC2026_PLAYERS from the script below
+// They are set via a classic (non-module) script tag loaded after this module.
+
+// ── Admin emails whitelist ────────────────────────────────────────────────────
+const ADMIN_EMAILS = ['pissinali@gmail.com'];
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function toast(msg, ok = true) {
+  const el = document.getElementById('toast');
+  el.textContent = (ok ? '✓ ' : '✗ ') + msg;
+  el.style.background = ok ? 'var(--navy)' : '#dc2626';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function fmtDate(ts) {
+  if (!ts) return '—';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleDateString('pt-BR');
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let currentAdmin = null;
+let allUsers = [];
+let allBoloes = [];
+let allParticipants = [];
+let extraPlayers = [];
+let dataLoaded = false;
+
+// ── Auth Gate ─────────────────────────────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    // Show login form
+    document.getElementById('gateLoader').style.display = 'none';
+    document.getElementById('gateLoginSection').style.display = 'block';
+    return;
+  }
+  if (!ADMIN_EMAILS.includes(user.email)) {
+    document.getElementById('gateLoader').style.display = 'none';
+    document.getElementById('gateLoginSection').style.display = 'block';
+    document.getElementById('gateError').textContent = 'Acesso negado. Conta sem privilégios de admin.';
+    await signOut(auth);
+    return;
+  }
+  // Authenticated admin
+  currentAdmin = user;
+  document.getElementById('authGate').style.display = 'none';
+  document.getElementById('adminApp').style.display = 'block';
+  document.getElementById('adminUserInfo').textContent = user.email;
+  if (window.lucide) lucide.createIcons();
+  if (!dataLoaded) await loadAllData();
+});
+
+// Gate — Google login
+document.getElementById('gateGoogleBtn').addEventListener('click', async () => {
+  const errEl = document.getElementById('gateError');
+  errEl.textContent = '';
+  try {
+    await signInWithPopup(auth, new GoogleAuthProvider());
+  } catch(e) {
+    errEl.textContent = 'Falha no login com Google.';
+  }
+});
+
+// Gate — email/password login
+document.getElementById('gateLoginBtn').addEventListener('click', async () => {
+  const email = document.getElementById('gateEmail').value.trim();
+  const pass  = document.getElementById('gatePass').value;
+  const errEl = document.getElementById('gateError');
+  errEl.textContent = '';
+  if (!email || !pass) { errEl.textContent = 'Preencha e-mail e senha.'; return; }
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    errEl.textContent = 'Credenciais inválidas.';
+  }
+});
+document.getElementById('gatePass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('gateLoginBtn').click();
+});
+
+// Logout
+document.getElementById('adminLogout').addEventListener('click', async () => {
+  await signOut(auth);
+  location.reload();
+});
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+document.querySelectorAll('.admin-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (window.lucide) lucide.createIcons();
+  });
+});
+
+// ── Load all data ─────────────────────────────────────────────────────────────
+async function loadAllData() {
+  try {
+    const [usersSnap, boloesSnap, partSnap, resultsSnap, extraSnap] = await Promise.all([
+      getDocs(collection(db, 'users')),
+      getDocs(collection(db, 'boloes')),
+      getDocs(collection(db, 'bolao_participants')),
+      getDoc(doc(db, 'settings', 'results')),
+      getDoc(doc(db, 'settings', 'players_extra')),
+    ]);
+
+    allUsers = usersSnap.docs.map(d => ({ uid: d.id, ...d.data() }));
+    allBoloes = boloesSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    allParticipants = partSnap.docs.map(d => d.data());
+    extraPlayers = (extraSnap.exists() ? extraSnap.data().players : null) || [];
+
+    // Stats
+    document.getElementById('statUsers').textContent = allUsers.length;
+    document.getElementById('statBoloes').textContent = allBoloes.length;
+    document.getElementById('statDisabled').textContent = allUsers.filter(u => u.disabled).length;
+
+    // Count base players + extras
+    const basePlayers = (typeof WC2026_PLAYERS !== 'undefined' ? WC2026_PLAYERS : []).length;
+    document.getElementById('statPlayers').textContent = basePlayers + extraPlayers.length;
+
+    renderUsers();
+    renderBoloes();
+    renderTournament(resultsSnap);
+    renderGroups();
+    renderExtraPlayers();
+    populateTeamSelects();
+
+    dataLoaded = true;
+    if (window.lucide) lucide.createIcons();
+  } catch(e) {
+    console.error('loadAllData error:', e);
+    toast('Erro ao carregar dados: ' + e.message, false);
+  }
+}
+
+// ── USERS ─────────────────────────────────────────────────────────────────────
+function renderUsers(filter = '') {
+  const tbody = document.getElementById('usersTableBody');
+  const lc = filter.toLowerCase();
+  const visible = filter
+    ? allUsers.filter(u => (u.name||'').toLowerCase().includes(lc) || (u.email||'').toLowerCase().includes(lc))
+    : allUsers;
+
+  document.getElementById('usersCountBadge').textContent = visible.length;
+
+  if (!visible.length) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;">Nenhum usuário encontrado.</td></tr>`;
+    return;
+  }
+
+  // Aggregate points per user
+  const ptsByUid = {};
+  const boloesByUid = {};
+  allParticipants.forEach(p => {
+    if (!p.uid) return;
+    ptsByUid[p.uid] = (ptsByUid[p.uid] || 0) + (p.points || 0);
+    boloesByUid[p.uid] = (boloesByUid[p.uid] || 0) + 1;
+  });
+
+  tbody.innerHTML = visible.map(u => {
+    const pts = ptsByUid[u.uid] || 0;
+    const bols = boloesByUid[u.uid] || 0;
+    const disabled = !!u.disabled;
+    const isAdmin = ADMIN_EMAILS.includes(u.email);
+    const initials = (u.name || '?').charAt(0).toUpperCase();
+    const avatarHtml = u.photoURL
+      ? `<img src="${u.photoURL}" alt="${u.name}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">`
+      : `<div class="avatar-sm">${initials}</div>`;
+
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${u.photoURL ? `<img src="${u.photoURL}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">` : `<div class="avatar-sm" style="background:var(--gold-l);color:var(--gold);font-weight:700;font-size:12px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;">${initials}</div>`}
+          <div>
+            <div style="font-weight:700;">${u.name || '—'}${isAdmin ? ' <span class="badge badge-gray" style="font-size:9px;">ADMIN</span>' : ''}</div>
+            <div style="font-size:11px;color:var(--muted);">${u.uid.slice(0,8)}…</div>
+          </div>
+        </div>
+      </td>
+      <td style="font-size:12px;">${u.email || '—'}</td>
+      <td class="center">${u.country || '—'}</td>
+      <td class="center" style="font-weight:700;">${pts}</td>
+      <td class="center">${bols}</td>
+      <td class="center">
+        <span class="badge ${disabled ? 'badge-red' : 'badge-green'}">${disabled ? 'Desabilitado' : 'Ativo'}</span>
+      </td>
+      <td class="center">
+        ${isAdmin
+          ? `<span style="font-size:11px;color:var(--muted);">Protegido</span>`
+          : `<label class="toggle" title="${disabled ? 'Habilitar' : 'Desabilitar'}">
+              <input type="checkbox" ${disabled ? '' : 'checked'} onchange="toggleUser('${u.uid}', this.checked, this)" title="${disabled ? 'Habilitar usuário' : 'Desabilitar usuário'}">
+              <span class="toggle-slider"></span>
+             </label>`
+        }
+      </td>
+    </tr>`;
+  }).join('');
+  if (window.lucide) lucide.createIcons();
+}
+
+window.toggleUser = async function(uid, enabled, checkboxEl) {
+  // Optimistically update UI
+  const u = allUsers.find(u => u.uid === uid);
+  if (u) u.disabled = !enabled;
+  document.getElementById('statDisabled').textContent = allUsers.filter(u => u.disabled).length;
+  try {
+    await setDoc(doc(db, 'users', uid), { disabled: !enabled }, { merge: true });
+    toast(enabled ? 'Usuário habilitado.' : 'Usuário desabilitado.');
+    renderUsers(document.getElementById('userSearch').value);
+  } catch(e) {
+    // Roll back optimistic update
+    if (u) u.disabled = enabled;
+    document.getElementById('statDisabled').textContent = allUsers.filter(u => u.disabled).length;
+    if (checkboxEl) checkboxEl.checked = !enabled; // restore previous state
+    console.error('toggleUser error:', e);
+    const msg = (e.code === 'permission-denied' || (e.message||'').includes('permission'))
+      ? 'Sem permissão. Deploy as regras do Firestore: firebase deploy --only firestore:rules'
+      : 'Erro ao alterar usuário: ' + e.message;
+    toast(msg, false);
+  }
+};
+
+document.getElementById('userSearch').addEventListener('input', e => {
+  renderUsers(e.target.value);
+});
+
+// ── BOLÕES ────────────────────────────────────────────────────────────────────
+function renderBoloes() {
+  const tbody = document.getElementById('boloesTableBody');
+  document.getElementById('boloesCountBadge').textContent = allBoloes.length;
+
+  if (!allBoloes.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;">Nenhum bolão encontrado.</td></tr>`;
+    return;
+  }
+
+  const partCountById = {};
+  allParticipants.forEach(p => {
+    if (!p.bolaoId) return;
+    partCountById[p.bolaoId] = (partCountById[p.bolaoId] || 0) + 1;
+  });
+
+  const usersByUid = {};
+  allUsers.forEach(u => { usersByUid[u.uid] = u; });
+
+  tbody.innerHTML = allBoloes.sort((a,b) => {
+    const ta = a.createdAt?.toDate?.()?.getTime() || 0;
+    const tb = b.createdAt?.toDate?.()?.getTime() || 0;
+    return tb - ta;
+  }).map(b => {
+    const creator = usersByUid[b.createdBy];
+    const parts = partCountById[b.id] || 0;
+    return `<tr>
+      <td>
+        <div style="font-weight:700;">${b.name || '—'}</div>
+        <div style="font-size:11px;color:var(--muted);">ID: ${b.id}</div>
+      </td>
+      <td>${creator ? creator.name : (b.createdBy || '—').slice(0,8) + '…'}</td>
+      <td class="center">${parts}</td>
+      <td class="center">${fmtDate(b.createdAt)}</td>
+      <td class="center"><span class="badge ${b.isPrivate ? 'badge-gray' : 'badge-green'}">${b.isPrivate ? 'Privado' : 'Público'}</span></td>
+      <td class="center" style="white-space:nowrap;">
+        <button onclick="viewBolao('${b.id}')" class="btn btn-ghost btn-sm" style="font-size:11px;">
+          Ver
+        </button>
+        <button onclick="openModModal('${b.id}')" class="btn btn-sm" style="font-size:11px;background:var(--bg-2);color:var(--text);border:1px solid var(--border);margin-left:4px;">
+          Moderar
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+window.viewBolao = function(id) {
+  window.open(`bolao?id=${id}`, '_blank');
+};
+
+// ── Moderation modal ──────────────────────────────────────────────────────────
+let _modBolaoId = null;
+
+window.openModModal = function(id) {
+  const b = allBoloes.find(b => b.id === id);
+  if (!b) return;
+  _modBolaoId = id;
+  document.getElementById('modBolaoName').textContent = b.name || id;
+  document.getElementById('modNewName').value = b.name || '';
+  document.getElementById('modReason').value = '';
+  switchModTab('rename');
+  document.getElementById('modOverlay').classList.remove('hidden');
+  if (window.lucide) lucide.createIcons();
+};
+
+window.closeModModal = function() {
+  document.getElementById('modOverlay').classList.add('hidden');
+  _modBolaoId = null;
+};
+
+window.switchModTab = function(tab) {
+  document.querySelectorAll('.mod-tab').forEach((btn, i) => {
+    const tabs = ['rename', 'delete'];
+    btn.classList.toggle('active', tabs[i] === tab);
+  });
+  document.getElementById('modRenameSection').classList.toggle('active', tab === 'rename');
+  document.getElementById('modDeleteSection').classList.toggle('active', tab === 'delete');
+};
+
+window.confirmRename = async function() {
+  const newName = document.getElementById('modNewName').value.trim();
+  if (!newName) { toast('Insira um nome para o bolão.', false); return; }
+  if (!_modBolaoId) return;
+  try {
+    await updateDoc(doc(db, 'boloes', _modBolaoId), { name: newName });
+    const b = allBoloes.find(b => b.id === _modBolaoId);
+    if (b) b.name = newName;
+    closeModModal();
+    renderBoloes();
+    toast('Bolão renomeado com sucesso.');
+  } catch(e) {
+    console.error('rename error:', e);
+    toast('Erro ao renomear: ' + e.message, false);
+  }
+};
+
+window.confirmDelete = async function() {
+  const reason = document.getElementById('modReason').value.trim();
+  if (!reason) { toast('Informe o motivo da exclusão.', false); return; }
+  if (!_modBolaoId) return;
+  try {
+    // Log moderation action
+    await setDoc(doc(db, 'moderation_log', `${_modBolaoId}_${Date.now()}`), {
+      action: 'delete_bolao',
+      bolaoId: _modBolaoId,
+      bolaoName: allBoloes.find(b => b.id === _modBolaoId)?.name || '',
+      reason,
+      adminUid: currentAdmin.uid,
+      adminEmail: currentAdmin.email,
+      timestamp: new Date(),
+    });
+    // Delete participants
+    const parts = allParticipants.filter(p => p.bolaoId === _modBolaoId);
+    await Promise.all(parts.map(p =>
+      deleteDoc(doc(db, 'bolao_participants', `${p.bolaoId}_${p.uid}`))
+    ));
+    // Delete bolão doc
+    await deleteDoc(doc(db, 'boloes', _modBolaoId));
+    // Update local state
+    allBoloes = allBoloes.filter(b => b.id !== _modBolaoId);
+    allParticipants = allParticipants.filter(p => p.bolaoId !== _modBolaoId);
+    document.getElementById('statBoloes').textContent = allBoloes.length;
+    closeModModal();
+    renderBoloes();
+    toast('Bolão excluído e ação registrada.');
+  } catch(e) {
+    console.error('delete error:', e);
+    toast('Erro ao excluir: ' + e.message, false);
+  }
+};
+
+// ── TOURNAMENT ────────────────────────────────────────────────────────────────
+function renderTournament(snap) {
+  const data = snap.exists() ? snap.data() : {};
+  if (data.champion)  { const el = document.getElementById('rChampion');  if (el) el.value = data.champion; }
+  if (data.runnerUp)  { const el = document.getElementById('rRunnerUp');  if (el) el.value = data.runnerUp; }
+  if (data.topScorer) { const el = document.getElementById('rTopScorer'); if (el) el.value = data.topScorer; }
+}
+
+function renderGroups() {
+  const grid = document.getElementById('groupsGrid');
+  const teams = typeof WC2026_TEAMS !== 'undefined' ? WC2026_TEAMS : null;
+  if (!teams) { grid.innerHTML = '<p style="color:var(--muted);font-size:13px;">Dados de grupos não disponíveis.</p>'; return; }
+
+  grid.innerHTML = Object.entries(teams).map(([group, teamArr]) => `
+    <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;">
+      <div style="font-weight:800;font-size:13px;color:var(--gold);margin-bottom:10px;">Grupo ${group}</div>
+      ${teamArr.map(t => `
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 0;">
+          <span style="font-size:16px;">${t.flag}</span>
+          <span>${t.name}</span>
+          <span style="color:var(--muted);margin-left:auto;font-size:10px;">${t.id}</span>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+document.getElementById('saveTournamentBtn').addEventListener('click', async () => {
+  const champion  = document.getElementById('rChampion').value;
+  const runnerUp  = document.getElementById('rRunnerUp').value;
+  const topScorer = document.getElementById('rTopScorer').value;
+  try {
+    await setDoc(doc(db, 'settings', 'results'), { champion, runnerUp, topScorer }, { merge: true });
+    toast('Resultados salvos!');
+  } catch(e) {
+    toast('Erro ao salvar: ' + e.message, false);
+  }
+});
+
+// ── EXTRA PLAYERS ─────────────────────────────────────────────────────────────
+function renderExtraPlayers() {
+  const el = document.getElementById('extraPlayersList');
+  document.getElementById('extraPlayersCount').textContent = extraPlayers.length;
+  if (!extraPlayers.length) {
+    el.innerHTML = `<p style="color:var(--muted);font-size:13px;text-align:center;padding:24px 0;">Nenhum jogador extra cadastrado ainda.</p>`;
+    return;
+  }
+  const teams = typeof WC2026_TEAMS !== 'undefined' ? Object.values(WC2026_TEAMS).flat() : [];
+  el.innerHTML = extraPlayers.map((p, i) => {
+    const team = teams.find(t => t.id === p.team);
+    return `<div class="player-row">
+      <span style="flex:1;font-weight:600;">${p.name}</span>
+      <span class="player-team-badge">${team ? (team.flag + ' ' + team.name) : p.team}</span>
+      <button class="player-del" onclick="removeExtraPlayer(${i})" title="Remover">×</button>
+    </div>`;
+  }).join('');
+}
+
+window.removeExtraPlayer = async function(idx) {
+  extraPlayers.splice(idx, 1);
+  await saveExtraPlayers();
+  renderExtraPlayers();
+  document.getElementById('statPlayers').textContent = (typeof WC2026_PLAYERS !== 'undefined' ? WC2026_PLAYERS : []).length + extraPlayers.length;
+};
+
+document.getElementById('addPlayerBtn').addEventListener('click', async () => {
+  const name   = document.getElementById('newPlayerName').value.trim();
+  const nameEn = name;
+  const team   = document.getElementById('newPlayerTeam').value;
+  if (!name || !team) { toast('Preencha nome e seleção.', false); return; }
+  extraPlayers.push({ name, nameEn, team });
+  await saveExtraPlayers();
+  document.getElementById('newPlayerName').value = '';
+  document.getElementById('newPlayerTeam').value = '';
+  renderExtraPlayers();
+  document.getElementById('statPlayers').textContent = (typeof WC2026_PLAYERS !== 'undefined' ? WC2026_PLAYERS : []).length + extraPlayers.length;
+  toast('Jogador adicionado!');
+});
+
+async function saveExtraPlayers() {
+  try {
+    await setDoc(doc(db, 'settings', 'players_extra'), { players: extraPlayers }, { merge: false });
+  } catch(e) {
+    toast('Erro ao salvar: ' + e.message, false);
+  }
+}
+
+// ── Populate selects with team data ──────────────────────────────────────────
+function populateTeamSelects() {
+  const teams = typeof WC2026_TEAMS !== 'undefined' ? Object.values(WC2026_TEAMS).flat() : [];
+  teams.sort((a,b) => a.name.localeCompare(b.name));
+
+  const teamSel = document.getElementById('newPlayerTeam');
+  teams.forEach(t => {
+    const o = document.createElement('option');
+    o.value = t.id; o.textContent = t.flag + ' ' + t.name;
+    teamSel.appendChild(o);
+  });
+
+  ['rChampion', 'rRunnerUp'].forEach(id => {
+    const sel = document.getElementById(id);
+    teams.forEach(t => {
+      const o = document.createElement('option');
+      o.value = t.id; o.textContent = t.flag + ' ' + t.name;
+      sel.appendChild(o);
+    });
+  });
+
+  // Artilheiro options (all players)
+  const allPlayersForSel = [...(typeof WC2026_PLAYERS !== 'undefined' ? WC2026_PLAYERS : []), ...extraPlayers];
+  const artSel = document.getElementById('rTopScorer');
+  allPlayersForSel.sort((a,b) => a.name.localeCompare(b.name)).forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.name; o.textContent = p.name;
+    artSel.appendChild(o);
+  });
+}
+</script>
+
+<!-- Load wc2026 data — classic script runs before deferred module, globals accessible by name -->
+<script src="js/wc2026.js"></script>
+<script>if (window.lucide) lucide.createIcons();</script>
+</body>
+</html>
