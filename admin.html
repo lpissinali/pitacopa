@@ -122,6 +122,27 @@
     .toast.show { transform: translateY(0); opacity: 1; }
     .avatar-sm { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: var(--gold-l); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--gold); overflow: hidden; flex-shrink: 0; }
     .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* ── Moderation modal ── */
+    .mod-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 8000;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mod-overlay.hidden { display: none; }
+    .mod-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-xl);
+      padding: 28px; width: 100%; max-width: 440px; box-shadow: var(--sh);
+    }
+    .mod-title { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+    .mod-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .mod-tabs { display: flex; gap: 4px; background: var(--bg-2); border: 1px solid var(--border);
+      border-radius: var(--r-lg); padding: 4px; margin-bottom: 20px; }
+    .mod-tab { flex: 1; padding: 8px; font-size: 12px; font-weight: 700; border: none;
+      background: none; border-radius: var(--r-f); cursor: pointer; color: var(--muted); transition: all .15s; }
+    .mod-tab.active { background: var(--navy); color: #fff; }
+    .mod-section { display: none; }
+    .mod-section.active { display: block; }
+    .mod-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -349,6 +370,54 @@
   </div>
 </div>
 
+<!-- ── MODERATION MODAL ──────────────────────────────────────────── -->
+<div class="mod-overlay hidden" id="modOverlay" onclick="if(event.target===this)closeModModal()">
+  <div class="mod-card">
+    <div class="mod-title">Moderar Bolão</div>
+    <div class="mod-sub" id="modBolaoName">—</div>
+
+    <div class="mod-tabs">
+      <button class="mod-tab active" onclick="switchModTab('rename')">
+        <i data-lucide="pencil" width="12" height="12"></i> Renomear
+      </button>
+      <button class="mod-tab" onclick="switchModTab('delete')">
+        <i data-lucide="trash-2" width="12" height="12"></i> Excluir
+      </button>
+    </div>
+
+    <!-- Rename section -->
+    <div class="mod-section active" id="modRenameSection">
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Novo nome</label>
+        <input type="text" class="form-control" id="modNewName" placeholder="Nome do bolão…">
+      </div>
+      <div class="mod-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeModModal()">Cancelar</button>
+        <button class="btn btn-primary btn-sm" onclick="confirmRename()">
+          <i data-lucide="check" width="14" height="14"></i> Salvar
+        </button>
+      </div>
+    </div>
+
+    <!-- Delete section -->
+    <div class="mod-section" id="modDeleteSection">
+      <div class="form-group" style="margin-bottom:0;">
+        <label>Motivo da exclusão</label>
+        <input type="text" class="form-control" id="modReason" placeholder="ex: linguagem ofensiva…">
+      </div>
+      <p style="font-size:12px;color:#ef4444;margin-top:12px;margin-bottom:0;">
+        ⚠️ Esta ação remove o bolão e todos os participantes permanentemente.
+      </p>
+      <div class="mod-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeModModal()">Cancelar</button>
+        <button class="btn btn-sm" style="background:#ef4444;color:#fff;" onclick="confirmDelete()">
+          <i data-lucide="trash-2" width="14" height="14"></i> Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Toast notification -->
 <div class="toast" id="toast"></div>
 
@@ -556,7 +625,7 @@ function renderUsers(filter = '') {
         ${isAdmin
           ? `<span style="font-size:11px;color:var(--muted);">Protegido</span>`
           : `<label class="toggle" title="${disabled ? 'Habilitar' : 'Desabilitar'}">
-              <input type="checkbox" ${disabled ? '' : 'checked'} onchange="toggleUser('${u.uid}', this.checked)" title="${disabled ? 'Habilitar usuário' : 'Desabilitar usuário'}">
+              <input type="checkbox" ${disabled ? '' : 'checked'} onchange="toggleUser('${u.uid}', this.checked, this)" title="${disabled ? 'Habilitar usuário' : 'Desabilitar usuário'}">
               <span class="toggle-slider"></span>
              </label>`
         }
@@ -566,16 +635,25 @@ function renderUsers(filter = '') {
   if (window.lucide) lucide.createIcons();
 }
 
-window.toggleUser = async function(uid, enabled) {
+window.toggleUser = async function(uid, enabled, checkboxEl) {
+  // Optimistically update UI
+  const u = allUsers.find(u => u.uid === uid);
+  if (u) u.disabled = !enabled;
+  document.getElementById('statDisabled').textContent = allUsers.filter(u => u.disabled).length;
   try {
-    await updateDoc(doc(db, 'users', uid), { disabled: !enabled });
-    const u = allUsers.find(u => u.uid === uid);
-    if (u) u.disabled = !enabled;
-    document.getElementById('statDisabled').textContent = allUsers.filter(u => u.disabled).length;
+    await setDoc(doc(db, 'users', uid), { disabled: !enabled }, { merge: true });
     toast(enabled ? 'Usuário habilitado.' : 'Usuário desabilitado.');
     renderUsers(document.getElementById('userSearch').value);
   } catch(e) {
-    toast('Erro: ' + e.message, false);
+    // Roll back optimistic update
+    if (u) u.disabled = enabled;
+    document.getElementById('statDisabled').textContent = allUsers.filter(u => u.disabled).length;
+    if (checkboxEl) checkboxEl.checked = !enabled; // restore previous state
+    console.error('toggleUser error:', e);
+    const msg = (e.code === 'permission-denied' || (e.message||'').includes('permission'))
+      ? 'Sem permissão. Deploy as regras do Firestore: firebase deploy --only firestore:rules'
+      : 'Erro ao alterar usuário: ' + e.message;
+    toast(msg, false);
   }
 };
 
@@ -618,9 +696,12 @@ function renderBoloes() {
       <td class="center">${parts}</td>
       <td class="center">${fmtDate(b.createdAt)}</td>
       <td class="center"><span class="badge ${b.isPrivate ? 'badge-gray' : 'badge-green'}">${b.isPrivate ? 'Privado' : 'Público'}</span></td>
-      <td class="center">
+      <td class="center" style="white-space:nowrap;">
         <button onclick="viewBolao('${b.id}')" class="btn btn-ghost btn-sm" style="font-size:11px;">
-          Ver bolão
+          Ver
+        </button>
+        <button onclick="openModModal('${b.id}')" class="btn btn-sm" style="font-size:11px;background:var(--bg-2);color:var(--text);border:1px solid var(--border);margin-left:4px;">
+          Moderar
         </button>
       </td>
     </tr>`;
@@ -629,6 +710,87 @@ function renderBoloes() {
 
 window.viewBolao = function(id) {
   window.open(`bolao?id=${id}`, '_blank');
+};
+
+// ── Moderation modal ──────────────────────────────────────────────────────────
+let _modBolaoId = null;
+
+window.openModModal = function(id) {
+  const b = allBoloes.find(b => b.id === id);
+  if (!b) return;
+  _modBolaoId = id;
+  document.getElementById('modBolaoName').textContent = b.name || id;
+  document.getElementById('modNewName').value = b.name || '';
+  document.getElementById('modReason').value = '';
+  switchModTab('rename');
+  document.getElementById('modOverlay').classList.remove('hidden');
+  if (window.lucide) lucide.createIcons();
+};
+
+window.closeModModal = function() {
+  document.getElementById('modOverlay').classList.add('hidden');
+  _modBolaoId = null;
+};
+
+window.switchModTab = function(tab) {
+  document.querySelectorAll('.mod-tab').forEach((btn, i) => {
+    const tabs = ['rename', 'delete'];
+    btn.classList.toggle('active', tabs[i] === tab);
+  });
+  document.getElementById('modRenameSection').classList.toggle('active', tab === 'rename');
+  document.getElementById('modDeleteSection').classList.toggle('active', tab === 'delete');
+};
+
+window.confirmRename = async function() {
+  const newName = document.getElementById('modNewName').value.trim();
+  if (!newName) { toast('Insira um nome para o bolão.', false); return; }
+  if (!_modBolaoId) return;
+  try {
+    await updateDoc(doc(db, 'boloes', _modBolaoId), { name: newName });
+    const b = allBoloes.find(b => b.id === _modBolaoId);
+    if (b) b.name = newName;
+    closeModModal();
+    renderBoloes();
+    toast('Bolão renomeado com sucesso.');
+  } catch(e) {
+    console.error('rename error:', e);
+    toast('Erro ao renomear: ' + e.message, false);
+  }
+};
+
+window.confirmDelete = async function() {
+  const reason = document.getElementById('modReason').value.trim();
+  if (!reason) { toast('Informe o motivo da exclusão.', false); return; }
+  if (!_modBolaoId) return;
+  try {
+    // Log moderation action
+    await setDoc(doc(db, 'moderation_log', `${_modBolaoId}_${Date.now()}`), {
+      action: 'delete_bolao',
+      bolaoId: _modBolaoId,
+      bolaoName: allBoloes.find(b => b.id === _modBolaoId)?.name || '',
+      reason,
+      adminUid: currentAdmin.uid,
+      adminEmail: currentAdmin.email,
+      timestamp: new Date(),
+    });
+    // Delete participants
+    const parts = allParticipants.filter(p => p.bolaoId === _modBolaoId);
+    await Promise.all(parts.map(p =>
+      deleteDoc(doc(db, 'bolao_participants', `${p.bolaoId}_${p.uid}`))
+    ));
+    // Delete bolão doc
+    await deleteDoc(doc(db, 'boloes', _modBolaoId));
+    // Update local state
+    allBoloes = allBoloes.filter(b => b.id !== _modBolaoId);
+    allParticipants = allParticipants.filter(p => p.bolaoId !== _modBolaoId);
+    document.getElementById('statBoloes').textContent = allBoloes.length;
+    closeModModal();
+    renderBoloes();
+    toast('Bolão excluído e ação registrada.');
+  } catch(e) {
+    console.error('delete error:', e);
+    toast('Erro ao excluir: ' + e.message, false);
+  }
 };
 
 // ── TOURNAMENT ────────────────────────────────────────────────────────────────

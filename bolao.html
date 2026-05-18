@@ -294,14 +294,24 @@
       const actualChamp  = results.champion || '';
       const actualRunner = results.runnerUp  || '';
 
-      // Fetch each participant's global predictions (user_predictions/{uid})
-      const predsByUid = {};
+      // Fetch each participant's global predictions + user profile (to check disabled)
+      const predsByUid  = {};
+      const disabledSet = new Set();
       await Promise.all(participants.map(async p => {
         try {
-          const predSnap = await getDoc(doc(db, 'user_predictions', p.uid));
+          const [predSnap, userSnap] = await Promise.all([
+            getDoc(doc(db, 'user_predictions', p.uid)),
+            getDoc(doc(db, 'users', p.uid)),
+          ]);
           if (predSnap.exists()) predsByUid[p.uid] = predSnap.data();
+          if (userSnap.exists() && userSnap.data().disabled) disabledSet.add(p.uid);
         } catch (e) { /* non-blocking */ }
       }));
+
+      // Remove disabled users from the ranking
+      const activeParticipants = participants.filter(p => !disabledSet.has(p.uid));
+      participants.length = 0;
+      activeParticipants.forEach(p => participants.push(p));
 
       // Sort: pts → exact scores → correct results → champion → runner-up → alphabetical
       participants.sort((a, b) => {

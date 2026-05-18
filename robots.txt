@@ -1,28 +1,14 @@
 User-agent: *
 
-# Public pages — allow indexing
-Allow: /
-Allow: /index.html
-Allow: /games.html
-Allow: /games
-Allow: /ranking.html
-Allow: /ranking
-Allow: /login.html
-Allow: /login
-Allow: /terms.html
-Allow: /terms
-Allow: /privacy.html
-Allow: /privacy
-Allow: /rules.html
-Allow: /rules
-
-# Private pages — auth-only, do not index
-Disallow: /dashboard.html
+# Private / auth-only pages — do not index
 Disallow: /dashboard
-Disallow: /bolao.html
 Disallow: /bolao
-Disallow: /profile.html
 Disallow: /profile
-Disallow: /join.html
 Disallow: /join
-Disallow: /seed.html
+Disallow: /admin
+Disallow: /seed
+
+# Everything else is allowed by default
+Allow: /
+
+Sitemap: https://pitacopa.com/sitemap.xml

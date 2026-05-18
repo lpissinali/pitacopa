@@ -297,8 +297,8 @@ async function loadRanking() {
       resultsByUser[p.uid] = (resultsByUser[p.uid] || 0) + (p.correctResults || 0);
     });
 
-    // Build player list with tiebreaker fields
-    allPlayers = Object.entries(users).map(([uid, u]) => {
+    // Build player list with tiebreaker fields — exclude disabled accounts
+    allPlayers = Object.entries(users).filter(([, u]) => !u.disabled).map(([uid, u]) => {
       const preds = predsByUid[uid] || {};
       return {
         uid,

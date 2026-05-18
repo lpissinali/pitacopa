@@ -817,9 +817,14 @@ window._loadPreds = async function() {
     if (userPreds.runnerUp) { runSel.value   = userPreds.runnerUp; updateTeamFlag(runSel,   'runnerFlag', '🥈'); }
     // topScorer value is restored inside buildPlayerOptions
 
-    // Populate artilheiro dropdown
+    // Populate artilheiro dropdown — merge static list + Firestore extras
     if (typeof buildPlayerOptions === 'function') {
-      buildPlayerOptions(document.getElementById('pickTopScorer'), lang, userPreds.topScorer || '');
+      let extraPlayers = [];
+      try {
+        const extSnap = await getDoc(doc(db, 'settings', 'players_extra'));
+        if (extSnap.exists()) extraPlayers = extSnap.data().players || [];
+      } catch(e) { /* non-fatal — extras simply won't appear */ }
+      buildPlayerOptions(document.getElementById('pickTopScorer'), lang, userPreds.topScorer || '', extraPlayers);
     }
 
     // Tournament start lock
