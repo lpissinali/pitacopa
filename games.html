@@ -378,6 +378,9 @@ if (typeof ALL_GAMES !== 'undefined') {
   });
 }
 function remapMatchId(m) {
+  // Normalize stage string
+  if (m.stage) m.stage = normalizeStage(m.stage);
+  // Remap numeric API ID → wc2026 ID
   const homeTla  = (m.homeTeam?.tla  || '').toLowerCase();
   const awayTla  = (m.awayTeam?.tla  || '').toLowerCase();
   const homeName = (m.homeTeam?.name || '').toLowerCase();
@@ -449,10 +452,34 @@ async function loadMatches() {
       else allMatches.push(m);
     });
     sessionStorage.setItem('pitacopa_matches_v4', JSON.stringify({ ts: Date.now(), data: allMatches }));
+    buildFilters();
     render();
   } catch(err) {
     console.warn('API unavailable:', err.message, '— showing static schedule');
   }
+}
+
+/* ── Stage string normalizer (wc2026.js → API-style keys used in FILTER_CHIPS) */
+function normalizeStage(s) {
+  const map = {
+    group:        'GROUP_STAGE',
+    round32:      'LAST_32',
+    round16:      'LAST_16',
+    quarterfinal: 'QUARTER_FINALS',
+    semifinal:    'SEMI_FINALS',
+    third_place:  'THIRD_PLACE',
+    final:        'FINAL',
+    // Also handle football-data.org variants in case they differ
+    LAST_32:           'LAST_32',
+    LAST_16:           'LAST_16',
+    QUARTER_FINALS:    'QUARTER_FINALS',
+    SEMI_FINALS:       'SEMI_FINALS',
+    THIRD_PLACE:       'THIRD_PLACE',
+    THIRD_PLACE_PLAYOFF: 'THIRD_PLACE',
+    FINAL:             'FINAL',
+    GROUP_STAGE:       'GROUP_STAGE',
+  };
+  return map[s] || s;
 }
 
 function loadFallback() {
@@ -468,7 +495,7 @@ function loadFallback() {
       id: g.id,
       utcDate: g.date,
       status: new Date(g.date) < now ? 'FINISHED' : 'TIMED',
-      stage: g.stage === 'group' ? 'GROUP_STAGE' : g.stage,
+      stage: normalizeStage(g.stage),
       group: g.group ? 'GROUP_' + g.group : null,
       homeTeam: { name: home.name, shortName: home.name, tla: home.id, crest: null, _flag: home.flag },
       awayTeam: { name: away.name, shortName: away.name, tla: away.id, crest: null, _flag: away.flag },
@@ -632,16 +659,4 @@ function buildCard(m) {
     if (has) {
       let cls = '', ptsHtml = '';
       if (isFinished && sc?.home !== null) {
-        const win  = s => s.home > s.away, draw = s => s.home === s.away;
-        const exact   = pred.home === sc.home && pred.away === sc.away;
-        const correct = exact || (win(pred) && win(sc)) || (draw(pred) && draw(sc)) || (!win(pred) && !draw(pred) && !win(sc) && !draw(sc));
-        cls = exact ? 'exact' : correct ? 'correct' : 'wrong';
-        const pts = exact ? 3 : correct ? 1 : 0;
-        ptsHtml = `<div><span class="pts-chip pts${pts}">${pts}pt</span></div>`;
-      }
-      predHtml = `<div class="pred-col"><div class="pred-col-label">${t('pred_label')}</div><div class="pred-val ${cls}">${pred.home}–${pred.away}</div>${ptsHtml}</div>`;
-    } else {
-      predHtml = `<div class="pred-col"><div class="pred-col-label">${t('pred_label')}</div><div class="pred-empty">—</div></div>`;
-    }
-  } else {
-    predHtml = `<div class="pred-login"><a href="login">${t(
+        const win  = s =
