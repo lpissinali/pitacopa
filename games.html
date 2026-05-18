@@ -360,6 +360,37 @@ if (typeof WC2026_TEAMS !== 'undefined') {
   });
 }
 
+/* ── ID remapping: API numeric IDs → wc2026.js IDs (used for predictions) */
+// Build team-name/TLA → wc2026 team ID map
+const teamIdByName = {};
+if (typeof ALL_TEAMS !== 'undefined') {
+  ALL_TEAMS.forEach(t => {
+    teamIdByName[t.id.toLowerCase()]       = t.id;
+    teamIdByName[t.name.toLowerCase()]     = t.id;
+    teamIdByName[t.nameEn.toLowerCase()]   = t.id;
+  });
+}
+// Build "homeId_awayId" → wc2026 game ID map
+const gameIdByTeams = {};
+if (typeof ALL_GAMES !== 'undefined') {
+  ALL_GAMES.forEach(g => {
+    if (g.homeId && g.awayId) gameIdByTeams[`${g.homeId}_${g.awayId}`] = g.id;
+  });
+}
+function remapMatchId(m) {
+  const homeTla  = (m.homeTeam?.tla  || '').toLowerCase();
+  const awayTla  = (m.awayTeam?.tla  || '').toLowerCase();
+  const homeName = (m.homeTeam?.name || '').toLowerCase();
+  const awayName = (m.awayTeam?.name || '').toLowerCase();
+  const homeId = teamIdByName[homeTla] || teamIdByName[homeName];
+  const awayId = teamIdByName[awayTla] || teamIdByName[awayName];
+  if (homeId && awayId) {
+    const wc2026Id = gameIdByTeams[`${homeId}_${awayId}`];
+    if (wc2026Id) m.id = wc2026Id;
+  }
+  return m;
+}
+
 /* ── State ────────────────────────────────────────────────────────────── */
 let allMatches  = [];
 let userPreds   = {};
@@ -405,7 +436,7 @@ async function loadMatches() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    allMatches = data.matches || [];
+    allMatches = (data.matches || []).map(remapMatchId);
     if (!allMatches.length) throw new Error('No matches returned');
     sessionStorage.setItem('pitacopa_matches_v3', JSON.stringify({ ts: Date.now(), data: allMatches }));
     buildUI();
@@ -621,24 +652,3 @@ function buildCard(m) {
   `;
   return card;
 }
-
-function showError(html) {
-  document.getElementById('loadingState').style.display = 'none';
-  document.getElementById('errorState').style.display   = 'block';
-  document.getElementById('errorMsg').innerHTML         = html;
-}
-</script>
-
-<footer style="border-top:1px solid var(--border);padding:20px;text-align:center;font-size:12px;color:var(--muted);margin-top:48px;">
-  <div>© 2026 PitaCopa · <span data-i18n="footer_disclaimer">Apenas entretenimento. Sem apostas reais.</span></div>
-  <div style="margin-top:6px;">
-    <a href="rules" style="color:var(--muted);margin:0 8px;" data-i18n="footer_rules">Regras do Bolão</a>
-    <a href="terms" style="color:var(--muted);margin:0 8px;" data-i18n="footer_terms">Termos de Uso</a>
-    <a href="privacy" style="color:var(--muted);margin:0 8px;" data-i18n="footer_privacy">Privacidade</a>
-  </div>
-</footer>
-<script src="js/i18n.js?v=8"></script>
-<script>if(window.lucide)lucide.createIcons();</script>
-</body>
-</html>
-                                                                                                                                                                                                    
