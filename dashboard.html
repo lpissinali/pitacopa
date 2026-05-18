@@ -195,22 +195,61 @@
     const grid   = document.getElementById('boloesGrid');
     const empty  = document.getElementById('emptyState');
     try {
+      // 1) Get all bolão IDs where the user is a participant
       const participantSnaps = await getDocs(
         query(collection(db, 'bolao_participants'), where('uid', '==', currentUser.uid))
       );
-      const bolaoIds = participantSnaps.docs.map(d => d.data().bolaoId);
-      if (bolaoIds.length === 0) { loader.classList.add('hidden'); empty.classList.remove('hidden'); return; }
-      const bolaoData = [];
-      for (const bid of bolaoIds) {
-        const bSnap = await getDoc(doc(db, 'boloes', bid));
-        const pSnap = await getDoc(doc(db, 'bolao_participants', bid + '_' + currentUser.uid));
-        if (bSnap.exists()) bolaoData.push({ id: bid, ...bSnap.data(), myData: pSnap.data() || {} });
+      const participantIds = participantSnaps.docs
+        .map(d => d.data().bolaoId)
+        .filter(Boolean); // remove any null/undefined
+
+      // 2) Also get bolões the user created (covers edge case where participant doc failed to save)
+      const createdSnaps = await getDocs(
+        query(collection(db, 'boloes'), where('createdBy', '==', currentUser.uid))
+      );
+      const createdIds = createdSnaps.docs.map(d => d.id);
+
+      // 3) Merge and deduplicate
+      const allIds = [...new Set([...participantIds, ...createdIds])];
+
+      if (allIds.length === 0) {
+        loader.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
       }
+
+      // 4) Fetch each bolão individually — skip failures instead of aborting the whole list
+      const bolaoData = [];
+      await Promise.all(allIds.map(async (bid) => {
+        try {
+          const [bSnap, pSnap] = await Promise.all([
+            getDoc(doc(db, 'boloes', bid)),
+            getDoc(doc(db, 'bolao_participants', bid + '_' + currentUser.uid))
+          ]);
+          if (bSnap.exists()) {
+            bolaoData.push({ id: bid, ...bSnap.data(), myData: pSnap.data() || {} });
+          }
+        } catch (e) {
+          console.warn('Falha ao carregar bolão', bid, e.message);
+        }
+      }));
+
+      // Sort: most recently created first
+      bolaoData.sort((a, b) => {
+        const ta = a.createdAt?.seconds || 0;
+        const tb = b.createdAt?.seconds || 0;
+        return tb - ta;
+      });
+
       loader.classList.add('hidden');
       if (bolaoData.length === 0) { empty.classList.remove('hidden'); return; }
       grid.classList.remove('hidden');
       grid.innerHTML = bolaoData.map(b => renderBolaoCard(b)).join('');
-    } catch (err) { loader.classList.add('hidden'); empty.classList.remove('hidden'); console.error(err); }
+    } catch (err) {
+      loader.classList.add('hidden');
+      empty.classList.remove('hidden');
+      console.error('Erro ao carregar bolões:', err);
+    }
   }
 
   function renderBolaoCard(b) {
@@ -325,4 +364,15 @@
     });
   });
 </script>
-<footer style="border-top:1px solid var(--border);padding:20px;text-align:center;font-size:12px;color:var(--muted);margin-top:48px;
+<footer style="border-top:1px solid var(--border);padding:20px;text-align:center;font-size:12px;color:var(--muted);margin-top:48px;">
+  <div>© 2026 PitaCopa · <span data-i18n="footer_disclaimer">Apenas entretenimento. Sem apostas reais.</span></div>
+  <div style="margin-top:6px;">
+    <a href="rules" style="color:var(--muted);margin:0 8px;" data-i18n="footer_rules">Regras do Bolão</a>
+    <a href="terms" style="color:var(--muted);margin:0 8px;" data-i18n="footer_terms">Termos de Uso</a>
+    <a href="privacy" style="color:var(--muted);margin:0 8px;" data-i18n="footer_privacy">Privacidade</a>
+  </div>
+</footer>
+<script src="js/i18n.js?v=8"></script>
+<script src="js/utils.js"></script>
+<script>initMobileMenu(); lucide.createIcons();</script>
+</body>

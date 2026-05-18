@@ -4,44 +4,88 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bolão — PitaCopa 2026</title>
-  <meta name="description" content="Acompanhe o ranking, faça seus palpites e convide amigos para o seu bolão da Copa 2026.">
+  <meta name="description" content="Acompanhe o ranking e convide amigos para o seu bolão da Copa 2026.">
   <meta name="robots" content="noindex">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <style>
-    /* flag-icons sizing */
-    .fi { width:1.4em; line-height:1em; border-radius:2px; }
-    .game-flag .fi { width:20px; height:15px; vertical-align:middle; }
-    #champFlag .fi, #runnerFlag .fi { width:28px; height:21px; border-radius:3px; vertical-align:middle; }
-    /* Delete modal */
+    /* ── Layout ─────────────────────────────────── */
+    .bolao-body {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px 80px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 860px) {
+      .bolao-body { grid-template-columns: 1fr; }
+    }
+
+    /* ── Ranking section ─────────────────────────── */
+    .ranking-section {}
+    .section-title {
+      font-size: 16px; font-weight: 800; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px;
+      color: var(--text);
+    }
+
+    /* ── Invite card ─────────────────────────────── */
+    .invite-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 24px;
+      box-shadow: var(--sh-sm);
+    }
+    .invite-card h3 {
+      font-size: 16px; font-weight: 800;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .invite-code-display {
+      text-align: center;
+      background: var(--bg-2);
+      border: 2px dashed var(--border-2);
+      border-radius: var(--r-lg);
+      padding: 20px 16px;
+      margin-bottom: 16px;
+    }
+    .invite-code-display .code-value {
+      font-size: 32px; font-weight: 900; letter-spacing: 8px;
+      color: var(--gold); font-family: monospace;
+      display: block; margin-bottom: 12px;
+    }
+    .invite-link-row {
+      display: flex; gap: 8px; margin-bottom: 16px;
+    }
+    .invite-link-row input {
+      flex: 1; font-size: 12px;
+    }
+
+    /* ── Spinner ─────────────────────────────────── */
+    .spinner { width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin:40px auto; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── Delete modal ────────────────────────────── */
     .delete-modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:16px; }
     .delete-modal { background:var(--bg);border-radius:var(--r-lg);padding:28px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3); }
     .delete-modal h3 { font-size:18px;font-weight:700;margin-bottom:8px;color:#dc2626; }
     .delete-modal p  { font-size:14px;color:var(--muted);margin-bottom:20px; }
     .delete-modal-actions { display:flex;gap:10px;justify-content:flex-end; }
-    /* Predictions layout — same as profile.html */
-    .game-pred-row { background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:border .2s; }
-    .game-pred-row:hover { border-color:var(--border-2); }
-    .game-pred-row.locked { opacity:.65;background:var(--bg-2); }
-    .game-date { font-size:11px;color:var(--muted);min-width:80px;flex-shrink:0; }
-    .game-teams { flex:1;display:flex;align-items:center;gap:10px;min-width:0; }
-    .game-team { flex:1;font-size:13px;font-weight:600;display:flex;align-items:center;gap:5px; }
-    .game-team.away { justify-content:flex-end; }
-    .game-flag { font-size:16px; }
-    .game-team-name { white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px; }
-    .score-inputs { display:flex;align-items:center;gap:6px;flex-shrink:0; }
-    .score-input { width:42px;height:36px;text-align:center;font-size:15px;font-weight:700;border:1.5px solid var(--border-2);border-radius:var(--r-sm);background:var(--bg);color:var(--text); }
-    .score-input:focus { outline:none;border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-l); }
-    .score-sep { font-size:14px;font-weight:700;color:var(--muted); }
-    .lock-badge { font-size:11px;background:var(--bg-3);color:var(--muted);padding:3px 8px;border-radius:var(--r-f);white-space:nowrap;flex-shrink:0; }
-    .stage-header { font-size:14px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:12px 0 8px;margin-top:24px;border-bottom:1px solid var(--border);margin-bottom:12px;display:flex;align-items:center;gap:8px; }
-    .group-filter-btn { padding:5px 12px;font-size:12px;font-weight:600;border:1.5px solid var(--border-2);border-radius:var(--r-f);background:transparent;cursor:pointer;transition:all .15s;color:var(--text-2); }
-    .group-filter-btn:hover,.group-filter-btn.active { border-color:var(--gold);color:var(--gold);background:var(--gold-l); }
-    .alert { padding:12px 16px;border-radius:var(--r);font-size:14px;margin-bottom:16px; }
-    .alert-warning { background:#fef9c3;color:#854d0e;border:1px solid #fde047; }
-    .spinner { width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite;margin:40px auto; }
-    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── Affiliate ───────────────────────────────── */
+    .aff-mini {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--gold-l);
+      border: 1px solid rgba(245,166,35,.2);
+      border-radius: var(--r-lg);
+      text-align: center;
+    }
+    .aff-mini p { font-size: 12px; color: var(--muted-2); margin-bottom: 10px; }
+    .aff-mini .disclaimer { font-size: 11px; color: var(--muted); margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -85,35 +129,30 @@
   <div class="page-header-inner">
     <div>
       <h1 id="bolaoTitle" style="color:var(--muted);">Carregando...</h1>
-      <p id="bolaoSubtitle"></p>
+      <p id="bolaoSubtitle" style="color:rgba(255,255,255,.55);font-size:14px;margin-top:4px;"></p>
     </div>
-    <div id="headerActions"></div>
+    <div id="headerActions" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;"></div>
   </div>
 </div>
 
-<!-- TABS -->
-<div class="bolao-tabs" id="bolaoTabs">
-  <div class="bolao-tabs-inner">
-    <button class="bolao-tab-btn active" data-tab="ranking" data-i18n="bolao_tab_ranking">Ranking</button>
-    <button class="bolao-tab-btn" data-tab="predictions" data-i18n="bolao_tab_predictions">Meus Palpites</button>
-    <button class="bolao-tab-btn" data-tab="invite" data-i18n="bolao_tab_invite">Convidar</button>
-  </div>
+<!-- PALPITES CTA BANNER -->
+<div style="background:var(--gold-l);border-bottom:1px solid rgba(245,166,35,.3);padding:10px 20px;text-align:center;font-size:13px;color:#92400e;display:flex;align-items:center;justify-content:center;gap:10px;">
+  <i data-lucide="pencil" width="14" height="14"></i>
+  <span>Os seus palpites valem para todos os bolões. <strong><a href="profile#palpites" style="color:#92400e;text-decoration:underline;">Registre-os no seu perfil →</a></strong></span>
 </div>
 
-<!-- AD SLOT -->
-<div class="container" style="padding-top:16px;">
-  <!-- AdSense -->
-  <!-- <ins class="adsbygoogle" ...></ins> -->
-</div>
+<!-- MAIN CONTENT -->
+<div class="bolao-body">
 
-<!-- CONTENT AREA -->
-<div style="max-width:1400px;margin:0 auto;padding:24px 20px;">
-
-  <!-- RANKING TAB -->
-  <div class="tab-content active" id="tab-ranking">
-    <div id="rankingLoader" class="loader"><div class="spinner"></div></div>
+  <!-- LEFT: RANKING TABLE -->
+  <div class="ranking-section">
+    <div class="section-title">
+      <i data-lucide="bar-chart-2" width="18" height="18" style="color:var(--gold);"></i>
+      Classificação
+    </div>
+    <div id="rankingLoader"><div class="spinner"></div></div>
     <div id="rankingContent" class="hidden">
-      <div class="card mb-3" style="padding:0;overflow:hidden;">
+      <div class="card mb-2" style="padding:0;overflow:hidden;">
         <table class="standings-table" id="standingsTable">
           <thead>
             <tr>
@@ -127,95 +166,50 @@
           <tbody id="standingsBody"></tbody>
         </table>
       </div>
-      <p style="font-size:12px;text-align:center;margin-top:8px;color:var(--muted);"><span data-i18n="tiebreak_short">Desempate: Placares exatos → Resultados corretos</span></p>
-    </div>
-  </div>
-
-  <!-- PREDICTIONS TAB -->
-  <div class="tab-content" id="tab-predictions">
-    <div id="predLoader" class="loader"><div class="spinner"></div></div>
-    <div id="predContent" class="hidden">
-      <div id="predsAlert"></div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:6px;">
-        <i data-lucide="info" width="13" height="13"></i>
-        <span data-i18n="pred_info_bolao">Palpites específicos deste bolão. Jogos bloqueiam automaticamente no horário de início.</span>
+      <p style="font-size:12px;text-align:center;color:var(--muted);margin-top:6px;">
+        <span data-i18n="tiebreak_short">Desempate: Placares exatos → Resultados corretos</span>
       </p>
+    </div>
+  </div>
 
-      <!-- Champion / Runner-up / Top Scorer -->
-      <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px;margin-bottom:24px;box-shadow:var(--sh-xs);" id="champSection">
-        <h3 style="font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
-          <i data-lucide="trophy" width="16" height="16"></i> <span data-i18n="pred_champions_title">Campeão, Vice e Artilheiro</span>
-        </h3>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
-          <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;">
-            <label style="font-size:13px;font-weight:700;display:block;margin-bottom:8px;">🏆 Campeão</label>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span id="champFlag" style="font-size:22px;min-width:26px;text-align:center;">🏆</span>
-              <select class="form-control" id="pickChampion" style="flex:1;"><option value="">— Selecionar —</option></select>
-            </div>
-          </div>
-          <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;">
-            <label style="font-size:13px;font-weight:700;display:block;margin-bottom:8px;" data-i18n="pred_runner">🥈 Vice-campeão</label>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span id="runnerFlag" style="font-size:22px;min-width:26px;text-align:center;">🥈</span>
-              <select class="form-control" id="pickRunner" style="flex:1;"><option value="">— Selecionar —</option></select>
-            </div>
-          </div>
-          <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;">
-            <label style="font-size:13px;font-weight:700;display:block;margin-bottom:8px;">⚽ Artilheiro</label>
-            <select class="form-control" id="pickTopScorer"><option value="">— Selecionar —</option></select>
-          </div>
-        </div>
-      </div>
+  <!-- RIGHT: INVITE CARD -->
+  <div>
+    <div class="invite-card">
+      <h3>
+        <i data-lucide="share-2" width="16" height="16" style="color:var(--gold);"></i>
+        Convidar Amigos
+      </h3>
 
-      <!-- Stage filter + game rows -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <h3 style="font-size:16px;font-weight:700;" data-i18n="pred_games">Palpites dos Jogos</h3>
-        <span style="font-size:12px;color:var(--muted);" id="predProgress"></span>
-      </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;" id="stageFilter"></div>
-      <div id="gamesContainer"></div>
-
-      <div style="position:sticky;bottom:0;background:var(--bg);border-top:1px solid var(--border);padding:16px 20px;text-align:center;z-index:10;margin-top:16px;" id="savePredArea">
-        <button class="btn btn-primary btn-lg" id="btnSavePredictions" style="min-width:200px;">
-          <i data-lucide="save" width="16" height="16"></i> <span data-i18n="btn_save_preds">Salvar Palpites</span>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;" data-i18n="invite_code_label">Código do bolão:</p>
+      <div class="invite-code-display">
+        <span class="code-value" id="displayInviteCode">——</span>
+        <button class="btn btn-ghost btn-sm" id="btnCopyCode">
+          <i data-lucide="copy" width="13" height="13"></i>
+          <span data-i18n="btn_copy_code">Copiar Código</span>
         </button>
-        <p style="font-size:12px;color:var(--muted);margin-top:6px;"><span data-i18n="pred_lock_note">Palpites bloqueiam automaticamente no horário do jogo</span></p>
       </div>
+
+      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;" data-i18n="invite_link_label">Link de convite:</p>
+      <div class="invite-link-row">
+        <input type="text" class="form-control" id="inviteLinkInput" readonly>
+        <button class="btn btn-primary btn-sm" id="btnCopyLink" data-i18n="btn_copy_link">Copiar</button>
+      </div>
+
+      <button class="btn btn-ghost btn-block" id="btnShare" style="width:100%;">
+        <i data-lucide="share-2" width="15" height="15"></i>
+        <span data-i18n="btn_share">Compartilhar</span>
+      </button>
+    </div>
+
+    <!-- Affiliate mini -->
+    <div class="aff-mini">
+      <p data-i18n="aff_bolao_title">Quer analisar os jogos antes de convidar seus amigos?</p>
+      <a href="https://SEU-LINK-AFILIADO.com" target="_blank" rel="noopener sponsored" class="btn btn-primary btn-sm" data-i18n="aff_bolao_btn">Ver Análises da Copa</a>
+      <p class="disclaimer">Conteúdo patrocinado. Maiores de 18 anos.</p>
     </div>
   </div>
 
-  <!-- INVITE TAB -->
-  <div class="tab-content" id="tab-invite">
-    <div class="card container-sm" style="max-width:520px;">
-      <h2 class="mb-3" data-i18n="invite_title">Convidar Amigos</h2>
-
-      <p class="text-muted mb-2" data-i18n="invite_code_label">Código do bolão:</p>
-      <div class="invite-box mb-3">
-        <div class="invite-code" id="displayInviteCode">——</div>
-        <div class="mt-2">
-          <button class="btn btn-ghost btn-sm" id="btnCopyCode" data-i18n="btn_copy_code">Copiar Código</button>
-        </div>
-      </div>
-
-      <p class="text-muted mb-2" data-i18n="invite_link_label">Link de convite:</p>
-      <div class="d-flex gap-1 mb-3">
-        <input type="text" class="invite-link-input form-control" id="inviteLinkInput" readonly>
-        <button class="btn btn-primary" id="btnCopyLink" data-i18n="btn_copy_link">Copiar</button>
-      </div>
-
-      <button class="btn btn-ghost btn-block" id="btnShare"><i data-lucide="share-2" width="15" height="15"></i> <span data-i18n="btn_share">Compartilhar</span></button>
-
-      <!-- Affiliate in invite tab -->
-      <div style="margin-top:28px;padding:20px;background:var(--gold-l);border:1px solid rgba(245,166,35,.2);border-radius:var(--r-lg);text-align:center;">
-        <p style="font-size:13px;margin-bottom:12px;color:var(--muted-2);"><span data-i18n="aff_bolao_title">Quer analisar os jogos antes de convidar seus amigos?</span></p>
-        <a href="https://SEU-LINK-AFILIADO.com" target="_blank" rel="noopener sponsored" class="btn btn-primary btn-sm" data-i18n="aff_bolao_btn">Ver Análises da Copa</a>
-        <p style="font-size:11px;color:var(--muted);margin-top:8px;">Conteúdo patrocinado. Maiores de 18 anos.</p>
-      </div>
-    </div>
-  </div>
-
-</div>
+</div><!-- /.bolao-body -->
 
 <div class="toast-container"></div>
 
@@ -223,7 +217,7 @@
 <div class="delete-modal-overlay" id="deleteModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
   <div class="delete-modal">
     <h3 id="deleteModalTitle" data-i18n="delete_bolao_title">⚠️ Deletar Bolão</h3>
-    <p id="deleteModalMsg">Todos os participantes e palpites serão removidos permanentemente. Essa ação é irreversível.</p>
+    <p id="deleteModalMsg">Todos os participantes serão removidos permanentemente. Essa ação é irreversível.</p>
     <div class="delete-modal-actions">
       <button class="btn btn-ghost" id="deleteCancelBtn">Cancelar</button>
       <button class="btn" style="background:#dc2626;color:#fff;border:none;" id="deleteConfirmBtn">
@@ -237,18 +231,13 @@
   import { auth, db } from './js/config.js';
   import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import {
-    doc, getDoc, collection, getDocs, setDoc, deleteDoc, serverTimestamp,
-    query, where, orderBy
+    doc, getDoc, collection, getDocs, deleteDoc, serverTimestamp,
+    query, where
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   let currentUser = null;
-  let bolaoData = null;
-  let bolaoId = null;
-  let isDeadlinePassed = false;
-  let predictions = {};
-  let lang = 'pt';
-
-  bolaoId = new URLSearchParams(window.location.search).get('id');
+  let bolaoData   = null;
+  const bolaoId   = new URLSearchParams(window.location.search).get('id');
   if (!bolaoId) window.location.href = 'dashboard';
 
   onAuthStateChanged(auth, async (user) => {
@@ -265,7 +254,7 @@
       if (!snap.exists()) { window.location.href = 'dashboard'; return; }
       bolaoData = { id: bolaoId, ...snap.data() };
 
-      document.getElementById('bolaoTitle').textContent = bolaoData.name;
+      document.getElementById('bolaoTitle').textContent    = bolaoData.name;
       document.getElementById('bolaoSubtitle').textContent = bolaoData.description || '';
 
       // Show delete button for the creator
@@ -275,20 +264,14 @@
         delBtn.className = 'btn btn-sm';
         delBtn.style.cssText = 'background:#fee2e2;color:#dc2626;border:1px solid #fecaca;';
         delBtn.innerHTML = '<i data-lucide="trash-2" width="14" height="14"></i> Deletar Bolão';
-        delBtn.addEventListener('click', deleteBolao);
+        delBtn.addEventListener('click', openDeleteModal);
         headerActions.appendChild(delBtn);
         if (window.lucide) lucide.createIcons();
       }
 
-      // Check deadline
-      if (bolaoData.deadline) {
-        const deadline = bolaoData.deadline.toDate ? bolaoData.deadline.toDate() : new Date(bolaoData.deadline);
-        isDeadlinePassed = new Date() > deadline;
-      }
-
-      // Invite code
+      // Invite code + link
       document.getElementById('displayInviteCode').textContent = bolaoData.inviteCode;
-      const inviteLink = `${window.location.origin}/bolao2026/join.html?code=${bolaoData.inviteCode}`;
+      const inviteLink = `${window.location.origin}/join?code=${bolaoData.inviteCode}`;
       document.getElementById('inviteLinkInput').value = inviteLink;
 
       await loadRanking();
@@ -299,28 +282,31 @@
 
   async function loadRanking() {
     try {
-      // Fetch participants, tournament results and bolão predictions in parallel
-      const [partSnap, resultsSnap, predSnap] = await Promise.all([
-        getDocs(query(collection(db, 'bolao_participants'), where('bolaoId', '==', bolaoId))),
-        getDoc(doc(db, 'settings', 'results')),
-        getDocs(query(collection(db, 'bolao_predictions'), where('bolaoId', '==', bolaoId))),
-      ]);
-
+      // Fetch participants
+      const partSnap = await getDocs(
+        query(collection(db, 'bolao_participants'), where('bolaoId', '==', bolaoId))
+      );
       const participants = partSnap.docs.map(d => d.data());
 
-      // Tournament actual results
+      // Fetch tournament actual results (for tiebreakers)
+      const resultsSnap  = await getDoc(doc(db, 'settings', 'results'));
       const results      = resultsSnap.exists() ? resultsSnap.data() : {};
-      const actualChamp  = results.champion  || '';
+      const actualChamp  = results.champion || '';
       const actualRunner = results.runnerUp  || '';
 
-      // Index bolão predictions by uid for tiebreaker lookup
+      // Fetch each participant's global predictions (user_predictions/{uid})
       const predsByUid = {};
-      predSnap.forEach(d => { predsByUid[d.data().uid] = d.data(); });
+      await Promise.all(participants.map(async p => {
+        try {
+          const predSnap = await getDoc(doc(db, 'user_predictions', p.uid));
+          if (predSnap.exists()) predsByUid[p.uid] = predSnap.data();
+        } catch (e) { /* non-blocking */ }
+      }));
 
       // Sort: pts → exact scores → correct results → champion → runner-up → alphabetical
       participants.sort((a, b) => {
-        if ((b.points||0) !== (a.points||0)) return (b.points||0) - (a.points||0);
-        if ((b.exactScores||0) !== (a.exactScores||0)) return (b.exactScores||0) - (a.exactScores||0);
+        if ((b.points||0)        !== (a.points||0))        return (b.points||0)        - (a.points||0);
+        if ((b.exactScores||0)   !== (a.exactScores||0))   return (b.exactScores||0)   - (a.exactScores||0);
         if ((b.correctResults||0) !== (a.correctResults||0)) return (b.correctResults||0) - (a.correctResults||0);
         const aChamp = actualChamp && predsByUid[a.uid]?.champion === actualChamp ? 1 : 0;
         const bChamp = actualChamp && predsByUid[b.uid]?.champion === actualChamp ? 1 : 0;
@@ -333,36 +319,57 @@
 
       const tbody = document.getElementById('standingsBody');
       tbody.innerHTML = participants.map((p, i) => {
-        const rank = i + 1;
+        const rank      = i + 1;
         const rankClass = rank <= 3 ? `rank-${rank}` : '';
-        const medal = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
-        const isMe = p.uid === currentUser.uid;
+        const medal     = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+        const isMe      = p.uid === currentUser.uid;
         return `
           <tr class="${rankClass}${isMe ? ' fw-bold' : ''}">
             <td><span class="rank-badge">${medal || rank}</span></td>
             <td>${p.name}${isMe ? ` <span style="font-size:11px;color:var(--primary)">(${t('label_you')})</span>` : ''}</td>
-            <td style="text-align:center">${p.exactScores || 0}</td>
+            <td style="text-align:center">${p.exactScores    || 0}</td>
             <td style="text-align:center">${p.correctResults || 0}</td>
             <td class="points-cell" style="text-align:center">${p.points || 0}</td>
           </tr>
         `;
       }).join('');
 
-      document.getElementById('rankingLoader').classList.add('hidden');
+      document.getElementById('rankingLoader').style.display = 'none';
       document.getElementById('rankingContent').classList.remove('hidden');
 
     } catch (err) {
-      console.error(err);
+      console.error('Ranking error:', err);
+      document.getElementById('rankingLoader').style.display = 'none';
     }
   }
 
-  function deleteBolao() {
-    // Show custom modal instead of confirm()
+  /* ── Invite actions ──────────────────────────────────────── */
+  document.getElementById('btnCopyCode').addEventListener('click', () => {
+    copyToClipboard(bolaoData.inviteCode, t('toast_code_copied'));
+  });
+  document.getElementById('btnCopyLink').addEventListener('click', () => {
+    copyToClipboard(document.getElementById('inviteLinkInput').value, t('toast_link_copied'));
+  });
+  document.getElementById('btnShare').addEventListener('click', async () => {
+    const shareData = {
+      title: `Bolão: ${bolaoData?.name}`,
+      text:  `Entre no meu bolão da Copa 2026! Código: ${bolaoData?.inviteCode}`,
+      url:   document.getElementById('inviteLinkInput').value
+    };
+    if (navigator.share) {
+      try { await navigator.share(shareData); } catch(e) {}
+    } else {
+      copyToClipboard(document.getElementById('inviteLinkInput').value);
+    }
+  });
+
+  /* ── Delete bolão ────────────────────────────────────────── */
+  function openDeleteModal() {
     const modal = document.getElementById('deleteModal');
-    const msg   = document.getElementById('deleteModalMsg');
-    const title = document.getElementById('deleteModalTitle');
-    title.textContent = `⚠️ ${t('delete_confirm_verb')} "${bolaoData.name}"?`;
-    msg.textContent   = 'Todos os participantes e palpites serão removidos permanentemente. Essa ação é irreversível.';
+    document.getElementById('deleteModalTitle').textContent =
+      `⚠️ ${t('delete_confirm_verb')} "${bolaoData.name}"?`;
+    document.getElementById('deleteModalMsg').textContent =
+      'Todos os participantes serão removidos permanentemente. Essa ação é irreversível.';
     modal.style.display = 'flex';
     if (window.lucide) lucide.createIcons();
   }
@@ -375,24 +382,20 @@
   });
 
   document.getElementById('deleteConfirmBtn').addEventListener('click', async () => {
-    const modal  = document.getElementById('deleteModal');
     const confBtn = document.getElementById('deleteConfirmBtn');
-    confBtn.disabled = true;
+    confBtn.disabled    = true;
     confBtn.textContent = '⏳...';
-
     try {
-      // Delete all participants
-      const partSnap = await getDocs(query(collection(db, 'bolao_participants'), where('bolaoId', '==', bolaoId)));
+      // Delete all participant records for this bolão
+      const partSnap = await getDocs(
+        query(collection(db, 'bolao_participants'), where('bolaoId', '==', bolaoId))
+      );
       for (const d of partSnap.docs) await deleteDoc(d.ref);
 
-      // Delete all predictions
-      const predSnap = await getDocs(query(collection(db, 'bolao_predictions'), where('bolaoId', '==', bolaoId)));
-      for (const d of predSnap.docs) await deleteDoc(d.ref);
-
-      // Delete the bolão itself
+      // Delete the bolão document itself
       await deleteDoc(doc(db, 'boloes', bolaoId));
 
-      modal.style.display = 'none';
+      document.getElementById('deleteModal').style.display = 'none';
       showToast(t('toast_pool_deleted'), 'success');
       setTimeout(() => { window.location.href = 'dashboard'; }, 1000);
     } catch (err) {
@@ -404,287 +407,23 @@
     }
   });
 
-  // Tab switching
-  document.querySelectorAll('.bolao-tab-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      document.querySelectorAll('.bolao-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      btn.classList.add('active');
-      const tab = btn.dataset.tab;
-      document.getElementById(`tab-${tab}`).classList.add('active');
-      if (tab === 'predictions') await loadPredictions();
-    });
-  });
-
-  const STAGE_LABELS_BOLAO = {
-    'group':        { pt:'Fase de Grupos',   en:'Group Stage'    },
-    'round32':      { pt:'Rodada de 32',     en:'Round of 32'    },
-    'round16':      { pt:'Oitavas de Final', en:'Round of 16'    },
-    'quarterfinal': { pt:'Quartas de Final', en:'Quarter-Finals' },
-    'semifinal':    { pt:'Semifinais',       en:'Semi-Finals'    },
-    'third_place':  { pt:'3º Lugar',         en:'Third Place'    },
-    'final':        { pt:'Final',            en:'Final'          },
-  };
-  const TOURNAMENT_START_BOLAO = new Date('2026-06-11T00:00:00');
-  let activeStage = 'all';
-
-  async function loadPredictions() {
-    const loader  = document.getElementById('predLoader');
-    const content = document.getElementById('predContent');
-    if (!content.classList.contains('hidden')) return; // Already loaded
-
-    try {
-      const predSnap = await getDoc(doc(db, 'bolao_predictions', `${bolaoId}_${currentUser.uid}`));
-      if (predSnap.exists()) predictions = predSnap.data();
-
-      loader.classList.add('hidden');
-      content.classList.remove('hidden');
-
-      // Populate team dropdowns for champion/runner-up (no flag in option text — renders as "BR" on Windows)
-      const allTeams = typeof ALL_TEAMS !== 'undefined' ? ALL_TEAMS : [];
-      const teamOptions = allTeams.map(t =>
-        `<option value="${t.id}">${t.name}</option>`
-      ).join('');
-      const champSel = document.getElementById('pickChampion');
-      const runSel   = document.getElementById('pickRunner');
-      champSel.innerHTML = `<option value="">— ${t('btn_select')} —</option>` + teamOptions;
-      runSel.innerHTML   = `<option value="">— ${t('btn_select')} —</option>` + teamOptions;
-
-      // Flag span update helpers (uses flag-icons via flagHtml())
-      function updateTeamFlag(selectEl, spanId, defaultHtml) {
-        const team = allTeams.find(t => t.id === selectEl.value);
-        document.getElementById(spanId).innerHTML = team ? flagHtml(team.flag) : defaultHtml;
-      }
-      champSel.addEventListener('change', () => updateTeamFlag(champSel, 'champFlag', '🏆'));
-      runSel.addEventListener('change',   () => updateTeamFlag(runSel,   'runnerFlag', '🥈'));
-
-      if (predictions.champion) { champSel.value = predictions.champion; updateTeamFlag(champSel, 'champFlag', '🏆'); }
-      if (predictions.runnerUp) { runSel.value   = predictions.runnerUp; updateTeamFlag(runSel,   'runnerFlag', '🥈'); }
-
-      // Artilheiro dropdown
-      if (typeof buildPlayerOptions === 'function') {
-        buildPlayerOptions(document.getElementById('pickTopScorer'), lang, predictions.topScorer || '');
-      }
-
-      // Tournament lock
-      const tournamentStarted = new Date() >= TOURNAMENT_START_BOLAO;
-      if (tournamentStarted) {
-        ['pickChampion','pickRunner','pickTopScorer'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.disabled = true;
-        });
-        const champSection = document.getElementById('champSection');
-        if (champSection && !champSection.querySelector('.tournament-lock-note')) {
-          const note = document.createElement('div');
-          note.className = 'alert alert-warning tournament-lock-note';
-          note.style.marginTop = '12px';
-          note.innerHTML = t('tournament_locked');
-          champSection.appendChild(note);
-        }
-      }
-
-      // Build stage filter buttons
-      const stageFilter = document.getElementById('stageFilter');
-      const stageKeys   = ['all', 'group', 'round32', 'round16', 'quarterfinal', 'semifinal', 'third_place', 'final'];
-      stageKeys.forEach(s => {
-        const btn = document.createElement('button');
-        btn.className = 'group-filter-btn' + (s === 'all' ? ' active' : '');
-        btn.textContent = s === 'all'
-          ? t('label_all')
-          : (STAGE_LABELS_BOLAO[s] ? STAGE_LABELS_BOLAO[s][lang] : s);
-        btn.addEventListener('click', () => {
-          stageFilter.querySelectorAll('.group-filter-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          activeStage = s;
-          renderBolaoGames();
-        });
-        stageFilter.appendChild(btn);
-      });
-
-      renderBolaoGames();
-      if (window.lucide) lucide.createIcons();
-    } catch (err) {
-      console.error(err);
-      loader.classList.add('hidden');
-    }
-  }
-
-  function renderBolaoGames() {
-    const container = document.getElementById('gamesContainer');
-    container.innerHTML = '';
-    const now   = new Date();
-    const games = (typeof ALL_GAMES !== 'undefined') ? ALL_GAMES : [];
-
-    if (games.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);">Nenhum jogo disponível.</div>';
-      return;
-    }
-
-    const filtered = activeStage === 'all' ? games : games.filter(g => g.stage === activeStage);
-
-    // Group by stage + group
-    const sections     = {};
-    const sectionOrder = [];
-    filtered.forEach(g => {
-      const key = g.stage === 'group' ? 'group_' + (g.group || '') : g.stage;
-      if (!sections[key]) { sections[key] = []; sectionOrder.push(key); }
-      sections[key].push(g);
-    });
-
-    let totalPred = 0, totalGames = 0;
-
-    sectionOrder.forEach(key => {
-      const gamesInSection = sections[key];
-      let sectionLabel = '';
-      if (key.startsWith('group_')) {
-        const grp = key.replace('group_', '');
-        sectionLabel = t('label_group') + ' ' + grp;
-      } else {
-        sectionLabel = STAGE_LABELS_BOLAO[key] ? STAGE_LABELS_BOLAO[key][lang] : key;
-      }
-      const header = document.createElement('div');
-      header.className = 'stage-header';
-      header.innerHTML = `<i data-lucide="flag" width="14" height="14"></i> ${sectionLabel}`;
-      container.appendChild(header);
-
-      gamesInSection.forEach(game => {
-        totalGames++;
-        const gameDate = new Date(game.date);
-        const isLocked = now >= gameDate;
-        const pred     = predictions.games && predictions.games[game.id];
-        if (pred && pred.home !== undefined && pred.home !== '') totalPred++;
-
-        const homeName = game.homeName;
-        const awayName = game.awayName;
-        const homeFlag = game.homeFlag || '🏳';
-        const awayFlag = game.awayFlag || '🏳';
-        const dateStr  = gameDate.toLocaleDateString('pt-BR', { month:'short', day:'numeric' });
-        const timeStr  = gameDate.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
-        const homeVal  = pred && pred.home !== undefined ? pred.home : '';
-        const awayVal  = pred && pred.away !== undefined ? pred.away : '';
-
-        const row = document.createElement('div');
-        row.className = 'game-pred-row' + (isLocked ? ' locked' : '');
-        row.innerHTML = `
-          <div class="game-date">${dateStr}<br><small>${timeStr}</small></div>
-          <div class="game-teams">
-            <div class="game-team">
-              <span class="game-flag">${flagHtml(homeFlag)}</span>
-              <span class="game-team-name">${homeName}</span>
-            </div>
-            <div class="score-inputs">
-              <input type="number" class="score-input" min="0" max="99"
-                value="${homeVal}" data-game="${game.id}" data-side="home"
-                ${isLocked ? 'disabled' : ''} placeholder="—"
-                oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
-              <span class="score-sep">×</span>
-              <input type="number" class="score-input" min="0" max="99"
-                value="${awayVal}" data-game="${game.id}" data-side="away"
-                ${isLocked ? 'disabled' : ''} placeholder="—"
-                oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
-            </div>
-            <div class="game-team away">
-              <span class="game-team-name">${awayName}</span>
-              <span class="game-flag">${flagHtml(awayFlag)}</span>
-            </div>
-          </div>
-          ${isLocked ? '<span class="lock-badge"><i data-lucide="lock" width="11" height="11"></i> Bloqueado</span>' : ''}
-        `;
-        container.appendChild(row);
-      });
-    });
-
-    document.getElementById('predProgress').textContent = `${totalPred}/${totalGames} ` + t('label_filled');
-
-    // Track changes
-    container.querySelectorAll('.score-input').forEach(input => {
-      input.addEventListener('change', () => {
-        const gId  = input.dataset.game;
-        const side = input.dataset.side;
-        const val  = parseInt(input.value);
-        if (!predictions.games) predictions.games = {};
-        if (!predictions.games[gId]) predictions.games[gId] = {};
-        predictions.games[gId][side] = isNaN(val) ? '' : val;
-        // Update counter
-        let filled = 0, total = 0;
-        (typeof ALL_GAMES !== 'undefined' ? ALL_GAMES : []).forEach(g => {
-          total++;
-          const p = predictions.games[g.id];
-          if (p && p.home !== undefined && p.home !== '') filled++;
-        });
-        document.getElementById('predProgress').textContent = `${filled}/${total} ` + t('label_filled');
-      });
-    });
-
-    if (window.lucide) lucide.createIcons();
-  }
-
-  // Save predictions
-  document.getElementById('btnSavePredictions').addEventListener('click', async () => {
-    const btn = document.getElementById('btnSavePredictions');
-    btn.disabled = true;
-    btn.innerHTML = '⏳...';
-    try {
-      predictions.champion  = document.getElementById('pickChampion').value;
-      predictions.runnerUp  = document.getElementById('pickRunner').value;
-      predictions.topScorer = document.getElementById('pickTopScorer').value;
-      predictions.updatedAt = serverTimestamp();
-      await setDoc(
-        doc(db, 'bolao_predictions', `${bolaoId}_${currentUser.uid}`),
-        { ...predictions, uid: currentUser.uid, bolaoId },
-        { merge: true }
-      );
-      showToast(t('toast_preds_saved'), 'success');
-    } catch (err) {
-      console.error(err);
-      showToast(t('toast_save_error'), 'error');
-    }
-    btn.disabled = false;
-    btn.innerHTML = `<i data-lucide="save" width="16" height="16"></i> ${t('btn_save_preds')}`;
-    if (window.lucide) lucide.createIcons();
-  });
-
-  // Invite actions
-  document.getElementById('btnCopyCode').addEventListener('click', () => {
-    copyToClipboard(bolaoData.inviteCode, t('toast_code_copied'));
-  });
-  document.getElementById('btnCopyLink').addEventListener('click', () => {
-    copyToClipboard(document.getElementById('inviteLinkInput').value, t('toast_link_copied'));
-  });
-  document.getElementById('btnShare').addEventListener('click', async () => {
-    const shareData = {
-      title: `Bolão: ${bolaoData?.name}`,
-      text: lang === 'pt'
-        ? `Entre no meu bolão da Copa 2026! Código: ${bolaoData?.inviteCode}`
-        : `Join my 2026 World Cup pool! Code: ${bolaoData?.inviteCode}`,
-      url: document.getElementById('inviteLinkInput').value
-    };
-    if (navigator.share) {
-      await navigator.share(shareData);
-    } else {
-      copyToClipboard(document.getElementById('inviteLinkInput').value);
-    }
-  });
-
-  // Logout
+  /* ── Logout ──────────────────────────────────────────────── */
   document.getElementById('btnLogout').addEventListener('click', async () => {
     await signOut(auth);
     window.location.href = '/';
   });
 </script>
+
 <footer style="border-top:1px solid var(--border);padding:20px;text-align:center;font-size:12px;color:var(--muted);margin-top:48px;">
   <div>© 2026 PitaCopa · <span data-i18n="footer_disclaimer">Apenas entretenimento. Sem apostas reais.</span></div>
   <div style="margin-top:6px;">
-    <a href="rules" style="color:var(--muted);margin:0 8px;" data-i18n="footer_rules">Regras do Bolão</a>
-    <a href="terms" style="color:var(--muted);margin:0 8px;" data-i18n="footer_terms">Termos de Uso</a>
+    <a href="rules"   style="color:var(--muted);margin:0 8px;" data-i18n="footer_rules">Regras do Bolão</a>
+    <a href="terms"   style="color:var(--muted);margin:0 8px;" data-i18n="footer_terms">Termos de Uso</a>
     <a href="privacy" style="color:var(--muted);margin:0 8px;" data-i18n="footer_privacy">Privacidade</a>
   </div>
 </footer>
 <script src="js/i18n.js?v=8"></script>
 <script src="js/utils.js"></script>
-<script src="js/wc2026.js"></script>
-<script src="js/scoring.js"></script>
-<script>lucide.createIcons();</script>
+<script>initMobileMenu(); lucide.createIcons();</script>
 </body>
 </html>
-                                                                    

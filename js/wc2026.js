@@ -464,4 +464,68 @@ function buildPlayerOptions(selectEl, lang, savedValue) {
   const wrapper = document.createElement('div');
   wrapper.className = 'player-picker';
   wrapper.innerHTML = `
-    <button type="button" class="play
+    <button type="button" class="player-picker-trigger">
+      <span class="player-picker-label">${ph}</span>
+      <span class="player-picker-chevron">▾</span>
+    </button>
+    <div class="player-picker-panel">
+      <div class="player-picker-search-wrap">
+        <input type="text" class="player-picker-search" placeholder="${sph}" autocomplete="off">
+      </div>
+      <div class="player-picker-list"></div>
+    </div>`;
+  selectEl.parentNode.insertBefore(wrapper, selectEl.nextSibling);
+
+  const trigger = wrapper.querySelector('.player-picker-trigger');
+  const label   = wrapper.querySelector('.player-picker-label');
+  const panel   = wrapper.querySelector('.player-picker-panel');
+  const search  = wrapper.querySelector('.player-picker-search');
+  const list    = wrapper.querySelector('.player-picker-list');
+
+  function renderList(filter) {
+    const q = (filter || '').toLowerCase();
+    const hits = players.filter(p =>
+      !q || p.name.toLowerCase().includes(q) || p.teamName.toLowerCase().includes(q)
+    );
+    list.innerHTML = '';
+    if (!hits.length) {
+      list.innerHTML = `<div class="player-picker-empty">${noRes}</div>`;
+      return;
+    }
+    hits.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'player-picker-item' + (selectEl.value === p.value ? ' selected' : '');
+      item.innerHTML = `${flagHtml(p.teamFlag)}<span class="player-picker-name">${p.name}</span><span class="player-picker-team">${p.teamName}</span>`;
+      item.addEventListener('mousedown', e => {
+        e.preventDefault();
+        selectEl.value = p.value;
+        label.innerHTML = `${flagHtml(p.teamFlag)} ${p.name}`;
+        panel.classList.remove('open');
+        trigger.classList.remove('open');
+      });
+      list.appendChild(item);
+    });
+  }
+
+  trigger.addEventListener('click', () => {
+    const open = panel.classList.toggle('open');
+    trigger.classList.toggle('open', open);
+    if (open) { search.value = ''; renderList(''); search.focus(); }
+  });
+  search.addEventListener('input', () => renderList(search.value));
+  document.addEventListener('click', e => {
+    if (!wrapper.contains(e.target)) {
+      panel.classList.remove('open');
+      trigger.classList.remove('open');
+    }
+  });
+
+  // Restore saved value
+  if (savedValue) {
+    selectEl.value = savedValue;
+    const p = players.find(pl => pl.value === savedValue);
+    if (p) label.innerHTML = `${flagHtml(p.teamFlag)} ${p.name}`;
+  }
+
+  renderList('');
+}

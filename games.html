@@ -6,6 +6,7 @@
   <title>Jogos & Resultados — PitaCopa 2026</title>
   <meta name="description" content="Todos os 104 jogos da Copa do Mundo 2026 com datas, horários e resultados em tempo real.">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="js/wc2026.js"></script>
   <style>
@@ -75,39 +76,41 @@
     /* ── Content ────────────────────────────── */
     .games-wrap { max-width: 1120px; margin: 0 auto; padding: 20px 20px 80px; }
 
+    /* ── flag-icons sizing ───────────────────── */
+    .fi { width: 1.4em; line-height: 1em; border-radius: 2px; }
+    .game-flag .fi { width: 20px; height: 15px; vertical-align: middle; }
+
     /* ── Stage section ──────────────────────── */
-    .stage-section { margin-bottom: 36px; }
-    .stage-heading {
-      font-size: 11px; font-weight: 800; color: var(--muted); text-transform: uppercase;
-      letter-spacing: .08em; margin-bottom: 12px; padding-bottom: 8px;
-      border-bottom: 2px solid var(--border);
+    .stage-section { margin-bottom: 32px; }
+    /* Shared with profile.html */
+    .stage-header {
+      font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .06em; padding: 12px 0 8px; margin-top: 24px;
+      border-bottom: 1px solid var(--border); margin-bottom: 12px;
       display: flex; align-items: center; gap: 8px;
     }
-    .stage-heading .sh-name { color: var(--text); font-size: 15px; font-weight: 800; letter-spacing: 0; text-transform: none; }
-    .stage-heading .sh-count { font-size: 11px; font-weight: 400; color: var(--muted-2); }
     .games-grid { display: grid; gap: 8px; }
 
-    /* ── Game card ──────────────────────────── */
-    .game-card {
-      background: var(--bg); border: 1px solid var(--border); border-radius: var(--r-lg);
-      padding: 13px 16px;
-      display: grid;
-      grid-template-columns: 90px 1fr 72px;
-      align-items: center; gap: 12px;
-      transition: border-color .2s, box-shadow .2s;
+    /* ── Game row — shared style with profile/palpites ─── */
+    .game-pred-row {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--r);
+      padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+      transition: border .2s;
     }
-    .game-card:hover { border-color: var(--border-2); box-shadow: var(--sh-sm); }
-    .game-card.status-FINISHED { border-left: 3px solid var(--green); }
-    .game-card.status-IN_PLAY,
-    .game-card.status-PAUSED   { border-left: 3px solid var(--gold); }
+    .game-pred-row:hover { border-color: var(--border-2); }
+    .game-pred-row.status-FINISHED { border-left: 3px solid var(--green); }
+    .game-pred-row.status-IN_PLAY,
+    .game-pred-row.status-PAUSED   { border-left: 3px solid var(--gold); }
 
-    /* meta (left column) */
-    .game-meta { flex-shrink: 0; }
-    .game-meta-date { font-size: 12px; font-weight: 700; color: var(--text); line-height: 1.3; }
+    /* date column */
+    .game-date { font-size: 11px; color: var(--muted); min-width: 74px; flex-shrink: 0; line-height: 1.4; }
+    .game-date small { font-size: 11px; }
+
+    /* status badge */
     .status-badge {
       display: inline-flex; align-items: center; gap: 3px;
-      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
-      padding: 3px 8px; border-radius: var(--r-f); margin-top: 5px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+      padding: 2px 7px; border-radius: var(--r-f); margin-top: 4px;
     }
     .badge-timed,.badge-scheduled { background: var(--bg-3); color: var(--muted); }
     .badge-live { background: var(--gold-l2); color: var(--gold-d); animation: pulse-badge 1.8s ease infinite; }
@@ -115,45 +118,21 @@
     .badge-finished { background: var(--green-l); color: var(--green-d); }
     .badge-postponed { background: #fee2e2; color: #dc2626; }
 
-    /* teams + score (middle column) */
-    .teams-score {
-      display: grid;
-      grid-template-columns: 1fr 72px 1fr;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* Each team column */
-    .team-home {
-      display: flex; align-items: center; gap: 7px;
-      justify-content: flex-start; /* name on left */
-      min-width: 0;
-    }
-    .team-away {
-      display: flex; align-items: center; gap: 7px;
-      justify-content: flex-end; /* name on right, flag at far right */
-      min-width: 0;
-    }
-    .team-crest {
-      width: 26px; height: 26px; object-fit: contain;
-      flex-shrink: 0; border-radius: 3px;
-    }
-    .team-flag { font-size: 20px; flex-shrink: 0; line-height: 1; }
-    .team-name {
-      font-size: 13px; font-weight: 700;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .team-home .team-name { text-align: left; }
-    .team-away .team-name { text-align: right; }
+    /* teams area */
+    .game-teams { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .game-team  { flex: 1; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+    .game-team.away { justify-content: flex-end; }
+    .game-flag  { font-size: 16px; flex-shrink: 0; }
+    .game-team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; }
 
     /* score block */
     .score-block { text-align: center; flex-shrink: 0; }
-    .score-nums { font-size: 20px; font-weight: 800; color: var(--text); line-height: 1; letter-spacing: 1px; }
+    .score-nums { font-size: 18px; font-weight: 800; color: var(--text); line-height: 1; letter-spacing: 1px; }
     .score-nums.pending { font-size: 13px; color: var(--muted); font-weight: 500; }
     .score-sep { color: var(--muted-2); }
 
-    /* prediction (right column) */
-    .pred-col { text-align: center; }
+    /* prediction column (games page only) */
+    .pred-col { text-align: center; flex-shrink: 0; min-width: 54px; }
     .pred-col-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
     .pred-val { font-size: 13px; font-weight: 700; }
     .pred-val.exact   { color: var(--green); }
@@ -167,9 +146,7 @@
     .pts3 { background: var(--gold-l);  color: var(--gold-d); }
     .pts1 { background: var(--green-l); color: var(--green-d); }
     .pts0 { background: #fee2e2; color: #dc2626; }
-
-    /* login nudge */
-    .pred-login { font-size: 10px; color: var(--muted-2); text-align: center; line-height: 1.4; }
+    .pred-login { font-size: 10px; color: var(--muted-2); text-align: center; line-height: 1.4; flex-shrink: 0; min-width: 54px; }
     .pred-login a { color: var(--gold); }
 
     /* states */
@@ -184,16 +161,10 @@
     .no-results { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
 
     /* responsive */
-    @media (max-width: 680px) {
-      .game-card { grid-template-columns: 70px 1fr 0px; }
+    @media (max-width: 600px) {
       .pred-col, .pred-login { display: none; }
-      .team-name { font-size: 12px; }
-      .score-nums { font-size: 17px; }
-      .team-crest, .team-flag { width: 20px; height: 20px; font-size: 16px; }
-      .teams-score { grid-template-columns: 1fr 58px 1fr; gap: 5px; }
-    }
-    @media (max-width: 420px) {
-      .team-name { max-width: 70px; }
+      .game-team-name { max-width: 70px; }
+      .score-nums { font-size: 15px; }
     }
   </style>
 </head>
@@ -370,11 +341,11 @@ if (typeof ALL_TEAMS !== 'undefined') {
     teamIdByName[t.nameEn.toLowerCase()]   = t.id;
   });
 }
-// Build "homeId_awayId" → wc2026 game ID map
+// Build "home_away" → wc2026 game ID map  (wc2026.js uses g.home / g.away, not g.homeId / g.awayId)
 const gameIdByTeams = {};
 if (typeof ALL_GAMES !== 'undefined') {
   ALL_GAMES.forEach(g => {
-    if (g.homeId && g.awayId) gameIdByTeams[`${g.homeId}_${g.awayId}`] = g.id;
+    if (g.home && g.away) gameIdByTeams[`${g.home}_${g.away}`] = g.id;
   });
 }
 function remapMatchId(m) {
@@ -425,33 +396,58 @@ document.getElementById('btnLogout').addEventListener('click', async () => {
 
 /* ── Fetch ────────────────────────────────────────────────────────────── */
 async function loadMatches() {
-  // Render static data immediately so the page feels instant
-  loadFallback();
+  // Render static data immediately so the page feels instant (no banner — this is just a preview)
+  loadFallback(false);
 
   // 5-min session cache
   try {
-    const cached = sessionStorage.getItem('pitacopa_matches_v5');
+    const cached = sessionStorage.getItem('pitacopa_matches_v7');
     if (cached) {
       const { ts, data } = JSON.parse(cached);
-      if (Date.now() - ts < 5 * 60 * 1000) { allMatches = data.map(remapMatchId); render(); return; }
+      if (Date.now() - ts < 5 * 60 * 1000) {
+        // data was saved with wc2026 IDs already merged — just use it
+        allMatches = data;
+        buildFilters();
+        render();
+        return;
+      }
     }
   } catch(e) {}
 
-  // Fetch live scores from API and refresh if successful
+  // Fetch live scores from API and merge into fallback (keeping wc2026 IDs)
   try {
     const res = await fetch('/api/matches?season=2026');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    const live = (data.matches || []).map(remapMatchId);
+    const live = data.matches || [];
     if (!live.length) throw new Error('No matches returned');
-    // Replace fallback data entirely with live API data
-    allMatches = live;
-    sessionStorage.setItem('pitacopa_matches_v5', JSON.stringify({ ts: Date.now(), data: allMatches }));
+
+    // Build a lookup from UTC datetime (first 16 chars = YYYY-MM-DDTHH:MM) → index in allMatches
+    const fallbackByDT = {};
+    allMatches.forEach((m, i) => {
+      const key = (m.utcDate || '').substring(0, 16);
+      if (key) fallbackByDT[key] = i;
+    });
+
+    // Merge each API match into the corresponding fallback entry, preserving the wc2026 ID
+    live.forEach(apiM => {
+      const apiM2 = remapMatchId({ ...apiM }); // normalize stage string etc.
+      const key = (apiM2.utcDate || '').substring(0, 16);
+      if (key && fallbackByDT[key] !== undefined) {
+        const idx = fallbackByDT[key];
+        const savedId = allMatches[idx].id; // wc2026 ID (e.g. "G001", "R32-01")
+        allMatches[idx] = { ...apiM2, id: savedId };
+      }
+    });
+
+    sessionStorage.setItem('pitacopa_matches_v7', JSON.stringify({ ts: Date.now(), data: allMatches }));
     buildFilters();
     render();
   } catch(err) {
     console.warn('API unavailable:', err.message, '— showing static schedule');
+    // Only show the fallback banner when the API actually failed
+    document.getElementById('bannerFallback').style.display = 'block';
   }
 }
 
@@ -478,27 +474,31 @@ function normalizeStage(s) {
   return map[s] || s;
 }
 
-function loadFallback() {
+function loadFallback(showBanner = true) {
   if (typeof ALL_GAMES === 'undefined' || !ALL_GAMES?.length) {
     showError('Inicie o servidor com <code>node server.js</code> e abra <b>http://localhost:3000</b>.');
     return;
   }
   const now = new Date();
   allMatches = ALL_GAMES.map(g => {
-    const home = (typeof getTeamById === 'function' && getTeamById(g.homeId)) || { name: g.homeId, nameEn: g.homeId, flag: '🏳' };
-    const away = (typeof getTeamById === 'function' && getTeamById(g.awayId)) || { name: g.awayId, nameEn: g.awayId, flag: '🏳' };
+    // wc2026.js stores names directly on the game object (g.homeName, g.homeFlag etc.)
+    // Fall back to getTeamById only if the direct fields are missing
+    const homeName = g.homeName || (typeof getTeamById === 'function' && getTeamById(g.home)?.name) || g.home || '?';
+    const awayName = g.awayName || (typeof getTeamById === 'function' && getTeamById(g.away)?.name) || g.away || '?';
+    const homeFlag = g.homeFlag || (typeof getTeamById === 'function' && getTeamById(g.home)?.flag) || '🏳';
+    const awayFlag = g.awayFlag || (typeof getTeamById === 'function' && getTeamById(g.away)?.flag) || '🏳';
     return {
       id: g.id,
       utcDate: g.date,
       status: new Date(g.date) < now ? 'FINISHED' : 'TIMED',
       stage: normalizeStage(g.stage),
       group: g.group ? 'GROUP_' + g.group : null,
-      homeTeam: { name: home.name, shortName: home.name, tla: home.id, crest: null, _flag: home.flag },
-      awayTeam: { name: away.name, shortName: away.name, tla: away.id, crest: null, _flag: away.flag },
+      homeTeam: { name: homeName, shortName: homeName, tla: g.home, crest: null, _flag: homeFlag },
+      awayTeam: { name: awayName, shortName: awayName, tla: g.away, crest: null, _flag: awayFlag },
       score: { fullTime: { home: null, away: null } }
     };
   });
-  document.getElementById('bannerFallback').style.display = 'block';
+  if (showBanner) document.getElementById('bannerFallback').style.display = 'block';
   buildUI();
 }
 
@@ -584,10 +584,10 @@ function render() {
         : ((STAGE_LABEL[sec.stage] || {})[lang] || sec.stage);
 
       el.innerHTML = `
-        <div class="stage-heading">
-          <i data-lucide="${isGroup ? 'users' : 'zap'}" width="13" height="13"></i>
-          <span class="sh-name">${label}</span>
-          <span class="sh-count">${sec.matches.length} ${sec.matches.length !== 1 ? t('label_matches') : t('label_match')}</span>
+        <div class="stage-header">
+          <i data-lucide="flag" width="14" height="14"></i>
+          ${label}
+          <span style="font-size:11px;font-weight:400;color:var(--muted-2);margin-left:4px;">(${sec.matches.length})</span>
         </div>
         <div class="games-grid" id="grid_${sec.key.replace(/\W/g, '_')}"></div>
       `;
@@ -599,53 +599,37 @@ function render() {
   if (window.lucide) lucide.createIcons();
 }
 
-/* ── Build a single game card ─────────────────────────────────────────── */
+/* ── Build a single game row — same structure as profile/palpites ─────── */
 function buildCard(m) {
-  const card = document.createElement('div');
-  card.className = 'game-card status-' + m.status;
+  const row = document.createElement('div');
+  row.className = 'game-pred-row status-' + m.status;
 
-  const gameDate = new Date(m.utcDate);
-  const dateStr  = gameDate.toLocaleDateString('pt-BR', { weekday: 'short', month: 'short', day: 'numeric' });
-  const timeStr  = gameDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const gameDate   = new Date(m.utcDate);
+  const dateStr    = gameDate.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' });
+  const timeStr    = gameDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const isFinished = m.status === 'FINISHED';
+  const isLive     = m.status === 'IN_PLAY' || m.status === 'PAUSED';
 
-  // Status badge
+  // Status badge (shown below time)
   const badgeMap = {
     FINISHED:  `<span class="status-badge badge-finished"><i data-lucide="check" width="10" height="10"></i> FT</span>`,
     IN_PLAY:   `<span class="status-badge badge-live">⚡ AO VIVO</span>`,
     PAUSED:    `<span class="status-badge badge-live">⚡ INTERVALO</span>`,
     POSTPONED: `<span class="status-badge badge-postponed">${t('label_postponed')}</span>`,
   };
-  const badgeHtml = badgeMap[m.status] || `<span class="status-badge badge-timed">${timeStr}</span>`;
+  const badge = badgeMap[m.status] || '';
 
-  // Score
-  const sc         = m.score?.fullTime;
-  const isFinished = m.status === 'FINISHED';
-  const isLive     = m.status === 'IN_PLAY' || m.status === 'PAUSED';
-  const scoreHtml  = (isFinished || isLive) && sc?.home !== null
+  // Score display
+  const sc        = m.score?.fullTime;
+  const scoreHtml = (isFinished || isLive) && sc?.home !== null
     ? `<div class="score-nums">${sc.home}<span class="score-sep"> – </span>${sc.away}</div>`
     : `<div class="score-nums pending">vs</div>`;
 
-  // Team rendering helper
-  function teamHtml(team, side) {
-    const flag = flagByName[(team.name || '').toLowerCase()]
-              || flagByName[(team.tla  || '').toLowerCase()]
-              || team._flag || '🏳';
-    const name = team.shortName || team.name || '?';
-
-    // Crest image with flag fallback
-    const crestHtml = team.crest
-      ? `<img class="team-crest" src="${team.crest}" alt="${name}" loading="lazy"
-             onerror="this.outerHTML='<span class=\\'team-flag\\'>${flag}</span>'">`
-      : `<span class="team-flag">${flag}</span>`;
-
-    if (side === 'home') {
-      // Home: [crest] [Name →]
-      return `<div class="team-home">${crestHtml}<span class="team-name">${name}</span></div>`;
-    } else {
-      // Away: [← Name] [crest]
-      return `<div class="team-away"><span class="team-name">${name}</span>${crestHtml}</div>`;
-    }
-  }
+  // Flags — use flagHtml() (flag-icons CSS spans, same as profile page)
+  const homeFlagHtml = flagHtml(m.homeTeam?._flag || m.homeTeam?.tla || '');
+  const awayFlagHtml = flagHtml(m.awayTeam?._flag || m.awayTeam?.tla || '');
+  const homeName = m.homeTeam?.shortName || m.homeTeam?.name || '?';
+  const awayName = m.awayTeam?.shortName || m.awayTeam?.name || '?';
 
   // Prediction column
   let predHtml = '';
@@ -655,6 +639,60 @@ function buildCard(m) {
     if (has) {
       let cls = '', ptsHtml = '';
       if (isFinished && sc?.home !== null) {
-        const win  = s => s.home > s.away, draw = s => s.home === s.away;
-        const exact   = pred.home === sc.home && pred.away === sc.away;
-        const correct = exact || (win(pred) && win(sc)) || (d
+        const win   = s => s.home > s.away, draw = s => s.home === s.away;
+        const exact = pred.home === sc.home && pred.away === sc.away;
+        const correct = exact || (win(pred) && win(sc)) || (draw(pred) && draw(sc))
+                     || (!win(pred) && !draw(pred) && !win(sc) && !draw(sc));
+        cls = exact ? 'exact' : correct ? 'correct' : 'wrong';
+        const pts = exact ? 3 : correct ? 1 : 0;
+        ptsHtml = `<div><span class="pts-chip pts${pts}">${pts}pt</span></div>`;
+      }
+      predHtml = `<div class="pred-col"><div class="pred-col-label">${t('pred_label')}</div><div class="pred-val ${cls}">${pred.home}–${pred.away}</div>${ptsHtml}</div>`;
+    } else {
+      predHtml = `<div class="pred-col"><div class="pred-col-label">${t('pred_label')}</div><div class="pred-empty">—</div></div>`;
+    }
+  } else {
+    predHtml = `<div class="pred-login"><a href="login">${t('nav_enter')}</a><br>${t('pred_to_predict')}</div>`;
+  }
+
+  row.innerHTML = `
+    <div class="game-date">
+      ${dateStr}<br><small>${timeStr}</small>
+      ${badge ? '<div style="margin-top:4px;">' + badge + '</div>' : ''}
+    </div>
+    <div class="game-teams">
+      <div class="game-team">
+        <span class="game-flag">${homeFlagHtml}</span>
+        <span class="game-team-name">${homeName}</span>
+      </div>
+      <div class="score-block">${scoreHtml}</div>
+      <div class="game-team away">
+        <span class="game-team-name">${awayName}</span>
+        <span class="game-flag">${awayFlagHtml}</span>
+      </div>
+    </div>
+    ${predHtml}
+  `;
+  return row;
+}
+
+function showError(html) {
+  document.getElementById('loadingState').style.display = 'none';
+  document.getElementById('errorState').style.display   = 'block';
+  document.getElementById('errorMsg').innerHTML         = html;
+}
+</script>
+
+<footer style="border-top:1px solid var(--border);padding:20px;text-align:center;font-size:12px;color:var(--muted);margin-top:48px;">
+  <div>© 2026 PitaCopa · <span data-i18n="footer_disclaimer">Apenas entretenimento. Sem apostas reais.</span></div>
+  <div style="margin-top:6px;">
+    <a href="rules" style="color:var(--muted);margin:0 8px;" data-i18n="footer_rules">Regras do Bolão</a>
+    <a href="terms" style="color:var(--muted);margin:0 8px;" data-i18n="footer_terms">Termos de Uso</a>
+    <a href="privacy" style="color:var(--muted);margin:0 8px;" data-i18n="footer_privacy">Privacidade</a>
+  </div>
+</footer>
+<script src="js/i18n.js?v=8"></script>
+<script>if(window.lucide)lucide.createIcons();</script>
+</body>
+</html>
+                        

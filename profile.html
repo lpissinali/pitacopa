@@ -291,18 +291,29 @@
 <!-- ── Tab switcher (plain script — no Firebase dependency) ── -->
 <script>
 (function(){
-  var tabs = document.querySelectorAll('.profile-tab-btn');
+  var tabs   = document.querySelectorAll('.profile-tab-btn');
   var panels = document.querySelectorAll('.tab-panel');
+
+  function activateTab(tabKey) {
+    tabs.forEach(function(b){ b.classList.remove('active'); });
+    panels.forEach(function(p){ p.classList.remove('active'); });
+    var btn = document.querySelector('.profile-tab-btn[data-tab="' + tabKey + '"]');
+    var panel = document.getElementById('tab-' + tabKey);
+    if (btn)   btn.classList.add('active');
+    if (panel) panel.classList.add('active');
+    if (tabKey === 'groups') window._loadGroups && window._loadGroups();
+    if (tabKey === 'preds')  window._loadPreds  && window._loadPreds();
+  }
+
   tabs.forEach(function(btn){
-    btn.addEventListener('click', function(){
-      tabs.forEach(function(b){ b.classList.remove('active'); });
-      panels.forEach(function(p){ p.classList.remove('active'); });
-      btn.classList.add('active');
-      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-      if (btn.dataset.tab === 'groups') window._loadGroups && window._loadGroups();
-      if (btn.dataset.tab === 'preds')  window._loadPreds  && window._loadPreds();
-    });
+    btn.addEventListener('click', function(){ activateTab(btn.dataset.tab); });
   });
+
+  // Hash-based deep-link: profile#palpites → open preds tab
+  var hash = window.location.hash.replace('#', '');
+  var hashMap = { palpites: 'preds', boloes: 'groups', perfil: 'profile' };
+  if (hashMap[hash]) activateTab(hashMap[hash]);
+
   var toggle = document.getElementById('menuToggle');
   var nav = document.getElementById('mainNav');
   if (toggle && nav) toggle.addEventListener('click', function(){ nav.classList.toggle('open'); });
@@ -441,6 +452,10 @@ onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = 'login'; return; }
   currentUser = user;
   await loadUser();
+  // If a tab was activated via URL hash before the module was ready, load its data now
+  const activeTab = document.querySelector('.profile-tab-btn.active')?.dataset.tab;
+  if (activeTab === 'preds')  window._loadPreds  && window._loadPreds();
+  if (activeTab === 'groups') window._loadGroups && window._loadGroups();
 });
 
 async function loadUser() {
@@ -494,10 +509,11 @@ async function loadUser() {
     }
 
     const av = document.getElementById('avatarCircle');
+    const initial = (name || email || '?').charAt(0).toUpperCase();
     if (photo) {
-      av.innerHTML = `<img src="${photo}" alt="avatar">`;
+      av.innerHTML = `<img src="${photo}" alt="avatar" onerror="this.parentElement.textContent='${initial}'">`;
     } else {
-      av.textContent = name.charAt(0).toUpperCase();
+      av.textContent = initial;
     }
 
     // Show password card only for email/password users (not Google, etc.)
@@ -989,4 +1005,4 @@ function showAlert(containerId, msg, type) {
 </script>
 
 <script src="js/i18n.js?v=8"></script>
-<script>lucide.createIcons();</scr                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+<script>lucide.createIcons();</scr
