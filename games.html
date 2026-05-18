@@ -428,7 +428,7 @@ async function loadMatches() {
 
   // 5-min session cache
   try {
-    const cached = sessionStorage.getItem('pitacopa_matches_v7');
+    const cached = sessionStorage.getItem('pitacopa_matches_v8');
     if (cached) {
       const { ts, data } = JSON.parse(cached);
       if (Date.now() - ts < 5 * 60 * 1000) {
@@ -464,11 +464,23 @@ async function loadMatches() {
       if (key && fallbackByDT[key] !== undefined) {
         const idx = fallbackByDT[key];
         const savedId = allMatches[idx].id; // wc2026 ID (e.g. "G001", "R32-01")
-        allMatches[idx] = { ...apiM2, id: savedId };
+        // Preserve _flag from fallback (API team objects don't carry it)
+        const homeFlag = allMatches[idx].homeTeam?._flag
+          || (apiM2.homeTeam?.name && flagByName[apiM2.homeTeam.name.toLowerCase()])
+          || '';
+        const awayFlag = allMatches[idx].awayTeam?._flag
+          || (apiM2.awayTeam?.name && flagByName[apiM2.awayTeam.name.toLowerCase()])
+          || '';
+        allMatches[idx] = {
+          ...apiM2,
+          id: savedId,
+          homeTeam: { ...apiM2.homeTeam, _flag: homeFlag },
+          awayTeam: { ...apiM2.awayTeam, _flag: awayFlag },
+        };
       }
     });
 
-    sessionStorage.setItem('pitacopa_matches_v7', JSON.stringify({ ts: Date.now(), data: allMatches }));
+    sessionStorage.setItem('pitacopa_matches_v8', JSON.stringify({ ts: Date.now(), data: allMatches }));
     buildFilters();
     render();
   } catch(err) {
