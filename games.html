@@ -286,8 +286,19 @@
 (function(){
   /* Mobile menu */
   var toggle = document.getElementById('menuToggle');
-  var nav    = document.getElementById('mainNav');
-  if (toggle && nav) toggle.addEventListener('click', function(){ nav.classList.toggle('open'); });
+  var nav = document.getElementById('mainNav');
+  if (toggle && nav) {
+    toggle.addEventListener('click', function() {
+      var open = nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open);
+    });
+    nav.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        nav.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
 
   /* Lang switch — mark active + reload on change */
   var activeLang = localStorage.getItem('lang') || 'pt';
@@ -708,7 +719,7 @@ function showError(html) {
   </div>
 </footer>
 <script src="js/i18n.js?v=8"></script>
+<script src="js/cookie-consent.js"></script>
 <script>if(window.lucide)lucide.createIcons();</script>
 </body>
 </html>
-                        

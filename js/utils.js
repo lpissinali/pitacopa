@@ -89,12 +89,19 @@ function getParam(name) {
 
 // Mobile menu toggle
 function initMobileMenu() {
-  const toggle = document.querySelector('.navbar-menu-toggle');
+  const toggle = document.querySelector('.navbar-toggle');
   const nav = document.querySelector('.navbar-nav');
   if (toggle && nav) {
     toggle.addEventListener('click', () => {
-      nav.classList.toggle('open');
-      toggle.textContent = nav.classList.contains('open') ? '✕' : '☰';
+      const isOpen = nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen);
+    });
+    // Close menu when a nav link is clicked
+    nav.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        nav.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
     });
   }
 }

@@ -221,7 +221,18 @@
 (function(){
   var toggle = document.getElementById('menuToggle');
   var nav = document.getElementById('mainNav');
-  if(toggle && nav) toggle.addEventListener('click', function(){ nav.classList.toggle('open'); });
+  if (toggle && nav) {
+    toggle.addEventListener('click', function() {
+      var open = nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open);
+    });
+    nav.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        nav.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
   var activeLang = localStorage.getItem('lang') || 'pt';
   document.querySelectorAll('.lang-btn').forEach(function(btn){
     if (btn.dataset.lang === activeLang) btn.classList.add('active');
@@ -498,7 +509,7 @@ if (btnLogout) btnLogout.addEventListener('click', async () => {
 });
 </script>
 <script src="js/i18n.js?v=8"></script>
+<script src="js/cookie-consent.js"></script>
 <script>lucide.createIcons();</script>
 </body>
 </html>
-                   
