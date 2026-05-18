@@ -562,9 +562,9 @@ document.getElementById('btnSaveProfile').addEventListener('click', async () => 
 
     if (nameChanged && userData.nameChanges >= 1) lockNameField();
 
-    showAlert('profileAlert', t('toast_profile_saved'), 'success');
+    showToast(t('toast_profile_saved'), 'success');
   } catch(e) {
-    showAlert('profileAlert', 'Erro: ' + e.message, 'error');
+    showToast('Erro: ' + e.message, 'error');
   }
 });
 
@@ -584,10 +584,10 @@ if (btnChangePass) btnChangePass.addEventListener('click', async () => {
     document.getElementById('inputCurrPwd').value = '';
     document.getElementById('inputNewPwd').value  = '';
     document.getElementById('inputConfPwd').value = '';
-    showAlert('profileAlert', '✅ Senha alterada com sucesso!', 'success');
+    showToast('Senha alterada com sucesso!', 'success');
   } catch(e) {
     const msg = e.code === 'auth/wrong-password' ? 'Senha atual incorreta.' : e.message;
-    showAlert('profileAlert', 'Erro: ' + msg, 'error');
+    showToast('Erro: ' + msg, 'error');
   }
 });
 
@@ -994,9 +994,9 @@ document.getElementById('btnSavePreds').addEventListener('click', async () => {
     userPreds.topScorer = document.getElementById('pickTopScorer').value.trim();
     userPreds.updatedAt = serverTimestamp();
     await setDoc(doc(db, 'user_predictions', currentUser.uid), userPreds, { merge: true });
-    showAlert('predsAlert', t('toast_preds_saved'), 'success');
+    showToast(t('toast_preds_saved'), 'success');
   } catch(e) {
-    showAlert('predsAlert', t('toast_save_error') + ' ' + e.message, 'error');
+    showToast(t('toast_save_error') + ' ' + e.message, 'error');
   }
 });
 
@@ -1006,6 +1006,21 @@ function showAlert(containerId, msg, type) {
   if (!el) return;
   el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
   setTimeout(() => { el.innerHTML = ''; }, 5000);
+}
+
+function showToast(msg, type = 'success') {
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  toast.innerHTML = `<span>${icons[type] || '📢'}</span><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 4000);
 }
 </script>
 

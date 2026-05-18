@@ -227,7 +227,29 @@
             getDoc(doc(db, 'bolao_participants', bid + '_' + currentUser.uid))
           ]);
           if (bSnap.exists()) {
-            bolaoData.push({ id: bid, ...bSnap.data(), myData: pSnap.data() || {} });
+            const myData = pSnap.data() || {};
+            // rank 0 means "just joined, not yet computed" — calculate actual rank on-the-fly
+            if (!myData.rank) {
+              try {
+                const allPartsSnap = await getDocs(
+                  query(collection(db, 'bolao_participants'), where('bolaoId', '==', bid))
+                );
+                const sorted = allPartsSnap.docs
+                  .map(d => d.data())
+                  .sort((a, b) => {
+                    const ptsDiff = (b.points || 0) - (a.points || 0);
+                    if (ptsDiff !== 0) return ptsDiff;
+                    const esDiff = (b.exactScores || 0) - (a.exactScores || 0);
+                    if (esDiff !== 0) return esDiff;
+                    return (a.name || '').localeCompare(b.name || '');
+                  });
+                const idx = sorted.findIndex(p => p.uid === currentUser.uid);
+                if (idx >= 0) myData.rank = idx + 1;
+              } catch (rankErr) {
+                console.warn('Falha ao calcular rank para', bid, rankErr.message);
+              }
+            }
+            bolaoData.push({ id: bid, ...bSnap.data(), myData });
           }
         } catch (e) {
           console.warn('Falha ao carregar bolão', bid, e.message);
@@ -254,7 +276,7 @@
 
   function renderBolaoCard(b) {
     const pts = b.myData.points || 0;
-    const rank = b.myData.rank || '-';
+    const rank = (b.myData.rank > 0) ? b.myData.rank : '-';
     const participants = b.participantCount || 1;
     return '<div class="bolao-card" onclick="window.location.href=\'bolao?id=' + b.id + '\'"><div class="bolao-card-header"><h3>' + b.name + '</h3><p>' + (b.description || '') + '</p></div><div class="bolao-card-body"><div class="bolao-meta"><span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> ' + participants + ' ' + t('label_participant_s') + (participants !== 1 ? 's' : '') + '</span><span><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> ' + pts + ' pts</span></div><div class="bolao-rank"><div class="bolao-rank-pos">' + rank + 'º</div><div class="bolao-rank-label">' + t('dash_rank_label') + '</div></div><a href="bolao?id=' + b.id + '" class="btn btn-primary btn-block btn-sm">' + t('dash_view') + '</a></div></div>';
   }
