@@ -190,15 +190,15 @@ function getTeamById(id) {
   return ALL_TEAMS.find(t => t.id === id);
 }
 
-function getTeamName(id, lang = 'pt') {
+function getTeamName(id) {
   const team = getTeamById(id);
   if (!team) return id;
-  return lang === 'en' ? team.nameEn : team.name;
+  return team.name;
 }
 
-function formatDate(dateStr, lang = 'pt') {
+function formatDate(dateStr) {
   const d = new Date(dateStr + 'T12:00:00');
-  return d.toLocaleDateString(lang === 'pt' ? 'pt-BR' : 'en-US', { month: 'short', day: 'numeric' });
+  return d.toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' });
 }
 
 // Stage labels
@@ -436,17 +436,16 @@ function buildPlayerOptions(selectEl, lang, savedValue) {
     byTeam[team.id].players.push(p);
   });
   const sorted = Object.values(byTeam).sort((a, b) =>
-    (lang === 'en' ? a.team.nameEn : a.team.name)
-      .localeCompare(lang === 'en' ? b.team.nameEn : b.team.name)
+    a.team.name.localeCompare(b.team.name)
   );
   const players = [];
   sorted.forEach(({ team, players: ps }) => {
     ps.slice()
-      .sort((a, b) => (lang === 'en' ? a.nameEn : a.name).localeCompare(lang === 'en' ? b.nameEn : b.name))
+      .sort((a, b) => a.name.localeCompare(b.name))
       .forEach(p => players.push({
-        value:    lang === 'en' ? p.nameEn : p.name,
-        name:     lang === 'en' ? p.nameEn : p.name,
-        teamName: lang === 'en' ? team.nameEn : team.name,
+        value:    p.name,
+        name:     p.name,
+        teamName: team.name,
         teamFlag: team.flag,
       }));
   });
@@ -456,4 +455,13 @@ function buildPlayerOptions(selectEl, lang, savedValue) {
 
   // Remove any existing picker
   const existingPicker = selectEl.parentNode.querySelector('.player-picker');
-  if (existingPicker) existingPicke
+  if (existingPicker) existingPicker.remove();
+
+  const ph    = '— Selecionar jogador —';
+  const sph   = 'Buscar jogador ou seleção…';
+  const noRes = 'Nenhum resultado';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'player-picker';
+  wrapper.innerHTML = `
+    <button type="button" class="play

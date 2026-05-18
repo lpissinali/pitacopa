@@ -430,8 +430,8 @@ function loadFallback() {
       status: new Date(g.date) < now ? 'FINISHED' : 'TIMED',
       stage: g.stage === 'group' ? 'GROUP_STAGE' : g.stage,
       group: g.group ? 'GROUP_' + g.group : null,
-      homeTeam: { name: lang === 'en' ? home.nameEn : home.name, shortName: lang === 'en' ? home.nameEn : home.name, tla: home.id, crest: null, _flag: home.flag },
-      awayTeam: { name: lang === 'en' ? away.nameEn : away.name, shortName: lang === 'en' ? away.nameEn : away.name, tla: away.id, crest: null, _flag: away.flag },
+      homeTeam: { name: home.name, shortName: home.name, tla: home.id, crest: null, _flag: home.flag },
+      awayTeam: { name: away.name, shortName: away.name, tla: away.id, crest: null, _flag: away.flag },
       score: { fullTime: { home: null, away: null } }
     };
   });
@@ -542,9 +542,8 @@ function buildCard(m) {
   card.className = 'game-card status-' + m.status;
 
   const gameDate = new Date(m.utcDate);
-  const locale   = lang === 'en' ? 'en-US' : 'pt-BR';
-  const dateStr  = gameDate.toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' });
-  const timeStr  = gameDate.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+  const dateStr  = gameDate.toLocaleDateString('pt-BR', { weekday: 'short', month: 'short', day: 'numeric' });
+  const timeStr  = gameDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
   // Status badge
   const badgeMap = {
@@ -642,4 +641,4 @@ function showError(html) {
 <script>if(window.lucide)lucide.createIcons();</script>
 </body>
 </html>
-                        
+                                                                                                                                                                                                    

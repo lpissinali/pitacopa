@@ -362,9 +362,7 @@
     const msg   = document.getElementById('deleteModalMsg');
     const title = document.getElementById('deleteModalTitle');
     title.textContent = `⚠️ ${t('delete_confirm_verb')} "${bolaoData.name}"?`;
-    msg.textContent   = lang === 'en'
-      ? 'All participants and predictions will be permanently removed. This cannot be undone.'
-      : 'Todos os participantes e palpites serão removidos permanentemente. Essa ação é irreversível.';
+    msg.textContent   = 'Todos os participantes e palpites serão removidos permanentemente. Essa ação é irreversível.';
     modal.style.display = 'flex';
     if (window.lucide) lucide.createIcons();
   }
@@ -445,7 +443,7 @@
       // Populate team dropdowns for champion/runner-up (no flag in option text — renders as "BR" on Windows)
       const allTeams = typeof ALL_TEAMS !== 'undefined' ? ALL_TEAMS : [];
       const teamOptions = allTeams.map(t =>
-        `<option value="${t.id}">${lang === 'en' ? t.nameEn : t.name}</option>`
+        `<option value="${t.id}">${t.name}</option>`
       ).join('');
       const champSel = document.getElementById('pickChampion');
       const runSel   = document.getElementById('pickRunner');
@@ -480,9 +478,7 @@
           const note = document.createElement('div');
           note.className = 'alert alert-warning tournament-lock-note';
           note.style.marginTop = '12px';
-          note.innerHTML = lang === 'en'
-            ? '🔒 The tournament has started. Champion, Runner-up and Top Scorer picks are now locked.'
-            : t('tournament_locked');
+          note.innerHTML = t('tournament_locked');
           champSection.appendChild(note);
         }
       }
@@ -558,12 +554,12 @@
         const pred     = predictions.games && predictions.games[game.id];
         if (pred && pred.home !== undefined && pred.home !== '') totalPred++;
 
-        const homeName = lang === 'en' ? (game.homeNameEn || game.homeName) : game.homeName;
-        const awayName = lang === 'en' ? (game.awayNameEn || game.awayName) : game.awayName;
+        const homeName = game.homeName;
+        const awayName = game.awayName;
         const homeFlag = game.homeFlag || '🏳';
         const awayFlag = game.awayFlag || '🏳';
-        const dateStr  = gameDate.toLocaleDateString(lang==='en'?'en-US':'pt-BR', { month:'short', day:'numeric' });
-        const timeStr  = gameDate.toLocaleTimeString(lang==='en'?'en-US':'pt-BR', { hour:'2-digit', minute:'2-digit' });
+        const dateStr  = gameDate.toLocaleDateString('pt-BR', { month:'short', day:'numeric' });
+        const timeStr  = gameDate.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
         const homeVal  = pred && pred.home !== undefined ? pred.home : '';
         const awayVal  = pred && pred.away !== undefined ? pred.away : '';
 
@@ -683,4 +679,4 @@
 <script>lucide.createIcons();</script>
 </body>
 </html>
-                                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                

@@ -429,9 +429,7 @@ function lockNameField() {
     const note = document.createElement('span');
     note.className = 'form-note name-lock-note';
     note.style.color = 'var(--muted)';
-    note.innerHTML = '🔒 ' + (lang === 'en'
-      ? 'You\'ve already used your one name change. Display name is now locked.'
-      : 'Você já usou sua alteração de nome. O nome de exibição não pode ser mais alterado.');
+    note.innerHTML = '🔒 Você já usou sua alteração de nome. O nome de exibição não pode ser mais alterado.';
     nameInput.parentElement.appendChild(note);
   }
 }
@@ -490,9 +488,7 @@ async function loadUser() {
       if (!nameInput.parentElement.querySelector('.name-change-note')) {
         const note = document.createElement('span');
         note.className = 'form-note name-change-note';
-        note.textContent = lang === 'en'
-          ? 'ℹ️ You can change your display name one time.'
-          : 'ℹ️ Você pode alterar seu nome de exibição uma vez.';
+        note.textContent = 'ℹ️ Você pode alterar seu nome de exibição uma vez.';
         nameInput.parentElement.appendChild(note);
       }
     }
@@ -505,8 +501,9 @@ async function loadUser() {
     }
 
     // Show password card only for email/password users (not Google, etc.)
-    const provider = currentUser.providerData?.[0]?.providerId;
-    if (provider === 'password') {
+    const providers = (currentUser.providerData || []).map(p => p.providerId);
+    const isEmailUser = providers.includes('password') || (!providers.includes('google.com') && providers.length === 0);
+    if (isEmailUser) {
       document.getElementById('passwordCard').style.display = 'block';
     }
 
@@ -526,9 +523,7 @@ document.getElementById('btnSaveProfile').addEventListener('click', async () => 
 
   if (nameChanged && changeCount >= 1) {
     showAlert('profileAlert',
-      lang === 'en'
-        ? '❌ You\'ve already used your one name change. Display name cannot be changed again.'
-        : '❌ Você já usou sua alteração de nome. Não é possível alterar o nome novamente.',
+      '❌ Você já usou sua alteração de nome. Não é possível alterar o nome novamente.',
       'error');
     return;
   }
@@ -718,9 +713,7 @@ window._loadGroups = async function() {
         const code = btn.dataset.code;
         const link = btn.dataset.link;
         const name = btn.dataset.name;
-        const shareText = lang === 'en'
-          ? `Join my World Cup 2026 pool "${name}"!\nCode: ${code}\nLink: ${link}`
-          : `Entre no meu bolão da Copa 2026 "${name}"!\nCódigo: ${code}\nLink: ${link}`;
+        const shareText = `Entre no meu bolão da Copa 2026 "${name}"!\nCódigo: ${code}\nLink: ${link}`;
         if (navigator.share) {
           navigator.share({ title: 'PitaCopa 2026', text: shareText, url: link }).catch(()=>{});
         } else {
@@ -790,7 +783,7 @@ window._loadPreds = async function() {
     champSel.innerHTML = blankOpt;
     runSel.innerHTML   = blankOpt;
     allTeams.forEach(tm => {
-      const name = lang === 'en' ? tm.nameEn : tm.name;
+      const name = tm.name;
       const opt  = `<option value="${tm.id}">${name}</option>`;  // no flag in option text (renders as "BR" on Windows)
       champSel.innerHTML += opt;
       runSel.innerHTML   += opt;
@@ -825,9 +818,7 @@ window._loadPreds = async function() {
         const note = document.createElement('div');
         note.className = 'alert alert-warning tournament-lock-note';
         note.style.marginTop = '12px';
-        note.innerHTML = lang === 'en'
-          ? '🔒 The tournament has started. Champion, Runner-up and Top Scorer picks are now locked.'
-          : '🔒 O torneio já começou. As escolhas de Campeão, Vice e Artilheiro estão bloqueadas.';
+        note.innerHTML = '🔒 O torneio já começou. As escolhas de Campeão, Vice e Artilheiro estão bloqueadas.';
         champSection.appendChild(note);
       }
     }
@@ -908,12 +899,12 @@ function renderGames() {
       const pred     = userPreds.games && userPreds.games[game.id];
       if (pred && pred.home !== undefined && pred.home !== '') totalPred++;
 
-      const homeName = lang === 'en' ? (game.homeNameEn || game.homeName || game.home) : (game.homeName || game.home);
-      const awayName = lang === 'en' ? (game.awayNameEn || game.awayName || game.away) : (game.awayName || game.away);
+      const homeName = game.homeName || game.home;
+      const awayName = game.awayName || game.away;
       const homeFlag = game.homeFlag || '🏳';
       const awayFlag = game.awayFlag || '🏳';
-      const dateStr  = gameDate.toLocaleDateString(lang==='en'?'en-US':'pt-BR', { month:'short', day:'numeric' });
-      const timeStr  = gameDate.toLocaleTimeString(lang==='en'?'en-US':'pt-BR', { hour:'2-digit', minute:'2-digit' });
+      const dateStr  = gameDate.toLocaleDateString('pt-BR', { month:'short', day:'numeric' });
+      const timeStr  = gameDate.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
 
       const homeVal = pred && pred.home !== undefined ? pred.home : '';
       const awayVal = pred && pred.away !== undefined ? pred.away : '';
@@ -998,4 +989,4 @@ function showAlert(containerId, msg, type) {
 </script>
 
 <script src="js/i18n.js?v=8"></script>
-<script>lucide.createIcons();</scr
+<script>lucide.createIcons();</scr                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
