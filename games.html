@@ -422,27 +422,36 @@ document.getElementById('btnLogout').addEventListener('click', async () => {
 
 /* ── Fetch ────────────────────────────────────────────────────────────── */
 async function loadMatches() {
+  // Render static data immediately so the page feels instant
+  loadFallback();
+
   // 5-min session cache
   try {
-    const cached = sessionStorage.getItem('pitacopa_matches_v3');
+    const cached = sessionStorage.getItem('pitacopa_matches_v4');
     if (cached) {
       const { ts, data } = JSON.parse(cached);
-      if (Date.now() - ts < 5 * 60 * 1000) { allMatches = data; buildUI(); return; }
+      if (Date.now() - ts < 5 * 60 * 1000) { allMatches = data.map(remapMatchId); render(); return; }
     }
   } catch(e) {}
 
+  // Fetch live scores from API and refresh if successful
   try {
     const res = await fetch('/api/matches?season=2026');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    allMatches = (data.matches || []).map(remapMatchId);
-    if (!allMatches.length) throw new Error('No matches returned');
-    sessionStorage.setItem('pitacopa_matches_v3', JSON.stringify({ ts: Date.now(), data: allMatches }));
-    buildUI();
+    const live = (data.matches || []).map(remapMatchId);
+    if (!live.length) throw new Error('No matches returned');
+    // Merge live scores into existing static entries (keep wc2026 IDs)
+    live.forEach(m => {
+      const idx = allMatches.findIndex(x => x.id === m.id);
+      if (idx >= 0) allMatches[idx] = { ...allMatches[idx], ...m };
+      else allMatches.push(m);
+    });
+    sessionStorage.setItem('pitacopa_matches_v4', JSON.stringify({ ts: Date.now(), data: allMatches }));
+    render();
   } catch(err) {
-    console.warn('Proxy failed:', err.message, '— falling back to wc2026.js');
-    loadFallback();
+    console.warn('API unavailable:', err.message, '— showing static schedule');
   }
 }
 
@@ -635,20 +644,4 @@ function buildCard(m) {
       predHtml = `<div class="pred-col"><div class="pred-col-label">${t('pred_label')}</div><div class="pred-empty">—</div></div>`;
     }
   } else {
-    predHtml = `<div class="pred-login"><a href="login">${t('nav_enter')}</a><br>${t('pred_to_predict')}</div>`;
-  }
-
-  card.innerHTML = `
-    <div class="game-meta">
-      <div class="game-meta-date">${dateStr}</div>
-      ${badgeHtml}
-    </div>
-    <div class="teams-score">
-      ${teamHtml(m.homeTeam, 'home')}
-      <div class="score-block">${scoreHtml}</div>
-      ${teamHtml(m.awayTeam, 'away')}
-    </div>
-    ${predHtml}
-  `;
-  return card;
-}
+    predHtml = `<div class="pred-login"><a href="login">${t(
