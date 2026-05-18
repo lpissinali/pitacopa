@@ -720,6 +720,35 @@ function showError(html) {
   document.getElementById('errorState').style.display   = 'block';
   document.getElementById('errorMsg').innerHTML         = html;
 }
+
+/* ── Dev helper — accessible from the browser console ─────────────────── */
+window._pitacopa = {
+  mockLive(idx = 0, homeGoals = 2, awayGoals = 1) {
+    if (!allMatches[idx]) return console.warn('No match at index', idx);
+    allMatches[idx].status = 'IN_PLAY';
+    allMatches[idx].score  = { fullTime: { home: homeGoals, away: awayGoals }, halfTime: { home: 1, away: 0 } };
+    render();
+    console.log('Mocked IN_PLAY:', allMatches[idx].id, homeGoals, '–', awayGoals);
+  },
+  mockFinished(idx = 0, homeGoals = 2, awayGoals = 1) {
+    if (!allMatches[idx]) return console.warn('No match at index', idx);
+    allMatches[idx].status = 'FINISHED';
+    allMatches[idx].score  = { fullTime: { home: homeGoals, away: awayGoals }, halfTime: { home: 1, away: 0 } };
+    render();
+    console.log('Mocked FINISHED:', allMatches[idx].id, homeGoals, '–', awayGoals);
+  },
+  reset(idx = 0) {
+    if (!allMatches[idx]) return console.warn('No match at index', idx);
+    allMatches[idx].status = 'TIMED';
+    allMatches[idx].score  = null;
+    render();
+    console.log('Reset:', allMatches[idx].id);
+  },
+  list() {
+    allMatches.slice(0, 10).forEach((m, i) => console.log(i, m.id, m.status, m.homeTeam?.name, 'vs', m.awayTeam?.name));
+  },
+};
+console.info('Dev helper ready → _pitacopa.mockLive(0) / .mockFinished(0) / .reset(0) / .list()');
 </script>
 
 <footer style="border-top:1px solid var(--border);padding:20px;text-align:center;font-size:12px;color:var(--muted);margin-top:48px;">
