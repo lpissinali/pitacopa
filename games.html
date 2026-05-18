@@ -430,7 +430,7 @@ async function loadMatches() {
 
   // 5-min session cache
   try {
-    const cached = sessionStorage.getItem('pitacopa_matches_v4');
+    const cached = sessionStorage.getItem('pitacopa_matches_v5');
     if (cached) {
       const { ts, data } = JSON.parse(cached);
       if (Date.now() - ts < 5 * 60 * 1000) { allMatches = data.map(remapMatchId); render(); return; }
@@ -445,13 +445,9 @@ async function loadMatches() {
     if (data.error) throw new Error(data.error);
     const live = (data.matches || []).map(remapMatchId);
     if (!live.length) throw new Error('No matches returned');
-    // Merge live scores into existing static entries (keep wc2026 IDs)
-    live.forEach(m => {
-      const idx = allMatches.findIndex(x => x.id === m.id);
-      if (idx >= 0) allMatches[idx] = { ...allMatches[idx], ...m };
-      else allMatches.push(m);
-    });
-    sessionStorage.setItem('pitacopa_matches_v4', JSON.stringify({ ts: Date.now(), data: allMatches }));
+    // Replace fallback data entirely with live API data
+    allMatches = live;
+    sessionStorage.setItem('pitacopa_matches_v5', JSON.stringify({ ts: Date.now(), data: allMatches }));
     buildFilters();
     render();
   } catch(err) {
@@ -659,4 +655,6 @@ function buildCard(m) {
     if (has) {
       let cls = '', ptsHtml = '';
       if (isFinished && sc?.home !== null) {
-        const win  = s =
+        const win  = s => s.home > s.away, draw = s => s.home === s.away;
+        const exact   = pred.home === sc.home && pred.away === sc.away;
+        const correct = exact || (win(pred) && win(sc)) || (d
