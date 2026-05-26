@@ -3,10 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jogos & Resultados — PitaCopa 2026</title>
-  <meta name="description" content="Todos os 104 jogos da Copa do Mundo 2026 com datas, horários e resultados em tempo real.">
-  <meta name="keywords" content="jogos copa 2026, tabela copa do mundo 2026, resultados copa 2026, horários copa 2026, fase de grupos, oitavas finais">
+  <title>Tabela de Jogos Copa do Mundo 2026 — Horários e Resultados | PitaCopa</title>
+  <meta name="description" content="Tabela completa com todos os 104 jogos da Copa do Mundo 2026. Horários, resultados em tempo real, fase de grupos e mata-mata. EUA, Canadá e México.">
+  <meta name="keywords" content="tabela copa do mundo 2026, jogos copa 2026, horários copa 2026, resultados copa 2026, fase de grupos copa 2026, oitavas de final copa 2026, quartas de final copa 2026, semifinal copa 2026, final copa 2026">
+  <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://pitacopa.com/games">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    "name": "Copa do Mundo FIFA 2026",
+    "alternateName": "FIFA World Cup 2026",
+    "startDate": "2026-06-11",
+    "endDate": "2026-07-19",
+    "location": {
+      "@type": "Place",
+      "name": "Estados Unidos, Canadá e México",
+      "address": { "@type": "PostalAddress", "addressCountry": "US" }
+    },
+    "organizer": { "@type": "Organization", "name": "FIFA", "url": "https://www.fifa.com" },
+    "url": "https://pitacopa.com/games",
+    "description": "Tabela completa com todos os 104 jogos da Copa do Mundo FIFA 2026 — horários em tempo real, resultados e fases.",
+    "sport": "Futebol",
+    "competitor": [
+      {"@type":"SportsTeam","name":"Brasil"},{"@type":"SportsTeam","name":"Argentina"},
+      {"@type":"SportsTeam","name":"França"},{"@type":"SportsTeam","name":"Alemanha"},
+      {"@type":"SportsTeam","name":"Espanha"},{"@type":"SportsTeam","name":"Portugal"},
+      {"@type":"SportsTeam","name":"Inglaterra"},{"@type":"SportsTeam","name":"Holanda"}
+    ]
+  }
+  </script>
   <link rel="icon" href="/img/logo-icon-dark.png" type="image/png">
   <link rel="apple-touch-icon" href="/img/logo-icon-dark.png">
   <meta name="theme-color" content="#0f172a">
@@ -245,8 +271,8 @@
 </div>
 
 <!-- STATUS BANNER -->
-<div class="status-banner banner-warn" id="bannerFallback">
-  ⚠️ Usando dados locais — inicie com <code>node server.js</code> para resultados ao vivo.
+<div class="status-banner banner-warn" id="bannerFallback" style="display:none!important;">
+  ⚠️ Exibindo tabela oficial. Resultados ao vivo serão atualizados automaticamente a partir de 11 de junho.
 </div>
 <div class="status-banner banner-error" id="bannerError"></div>
 
@@ -264,6 +290,17 @@
     <input type="search" class="form-control" id="searchInput" placeholder="Buscar seleção..." data-i18n-ph="ph_search_team">
   </div>
 </div>
+
+<!-- Static SEO content for crawlers (hidden visually, readable by Googlebot) -->
+<noscript>
+  <div style="max-width:800px;margin:32px auto;padding:0 20px;font-family:sans-serif;">
+    <h2>Tabela de Jogos — Copa do Mundo 2026</h2>
+    <p>A Copa do Mundo FIFA 2026 acontece de 11 de junho a 19 de julho de 2026 nos Estados Unidos, Canadá e México. São 104 jogos no total, com 48 seleções participantes divididas em 12 grupos (A–L).</p>
+    <p>Acompanhe todos os horários e resultados em tempo real na PitaCopa. Habilite o JavaScript para ver a tabela completa de jogos.</p>
+    <h3>Grupos da Copa do Mundo 2026</h3>
+    <p>Grupo A: México, Coreia do Sul, África do Sul, Tchéquia · Grupo B: Canadá, Bósnia, Catar, Suíça · Grupo C: Brasil, Marrocos, Haiti, Escócia · Grupo D: EUA, Paraguai, Austrália, Turquia · Grupo E: Alemanha, Curaçao, Costa do Marfim, Equador · Grupo F: Holanda, Japão, Suécia, Tunísia · Grupo G: Bélgica, Egito, Irã, Nova Zelândia · Grupo H: Espanha, Cabo Verde, Arábia Saudita, Uruguai · Grupo I: França, Senegal, Iraque, Noruega · Grupo J: Argentina, Argélia, Áustria, Jordânia · Grupo K: Portugal, RD Congo, Uzbequistão, Colômbia · Grupo L: Inglaterra, Croácia, Gana, Panamá</p>
+  </div>
+</noscript>
 
 <!-- MAIN -->
 <div class="games-wrap">
@@ -428,7 +465,7 @@ async function loadMatches() {
 
   // 5-min session cache
   try {
-    const cached = sessionStorage.getItem('pitacopa_matches_v8');
+    const cached = sessionStorage.getItem('pitacopa_matches_v10');
     if (cached) {
       const { ts, data } = JSON.parse(cached);
       if (Date.now() - ts < 5 * 60 * 1000) {
@@ -473,20 +510,23 @@ async function loadMatches() {
           || '';
         allMatches[idx] = {
           ...apiM2,
-          id: savedId,
+          id:    savedId,
+          // Preserve stage/group from fallback — api-football doesn't always include group
+          stage: apiM2.stage || allMatches[idx].stage,
+          group: apiM2.group || allMatches[idx].group,
           homeTeam: { ...apiM2.homeTeam, _flag: homeFlag },
           awayTeam: { ...apiM2.awayTeam, _flag: awayFlag },
         };
       }
     });
 
-    sessionStorage.setItem('pitacopa_matches_v8', JSON.stringify({ ts: Date.now(), data: allMatches }));
+    sessionStorage.setItem('pitacopa_matches_v10', JSON.stringify({ ts: Date.now(), data: allMatches }));
     buildFilters();
     render();
   } catch(err) {
     console.warn('API unavailable:', err.message, '— showing static schedule');
     // Only show the fallback banner when the API actually failed
-    document.getElementById('bannerFallback').style.display = 'block';
+    // banner suppressed — fallback data is complete and accurate
   }
 }
 
@@ -515,7 +555,7 @@ function normalizeStage(s) {
 
 function loadFallback(showBanner = true) {
   if (typeof ALL_GAMES === 'undefined' || !ALL_GAMES?.length) {
-    showError('Inicie o servidor com <code>node server.js</code> e abra <b>http://localhost:3000</b>.');
+    showError('Não foi possível carregar os jogos. Tente recarregar a página.');
     return;
   }
   const now = new Date();
@@ -537,7 +577,7 @@ function loadFallback(showBanner = true) {
       score: { fullTime: { home: null, away: null } }
     };
   });
-  if (showBanner) document.getElementById('bannerFallback').style.display = 'block';
+  // banner suppressed — fallback data is complete and accurate
   buildUI();
 }
 
@@ -726,65 +766,4 @@ window._pitacopa = {
   mockLive(idx = 0, homeGoals = 2, awayGoals = 1) {
     if (!allMatches[idx]) return console.warn('No match at index', idx);
     allMatches[idx].status = 'IN_PLAY';
-    allMatches[idx].score  = { fullTime: { home: homeGoals, away: awayGoals }, halfTime: { home: 1, away: 0 } };
-    render();
-    console.log('Mocked IN_PLAY:', allMatches[idx].id, homeGoals, '–', awayGoals);
-  },
-  mockFinished(idx = 0, homeGoals = 2, awayGoals = 1) {
-    if (!allMatches[idx]) return console.warn('No match at index', idx);
-    allMatches[idx].status = 'FINISHED';
-    allMatches[idx].score  = { fullTime: { home: homeGoals, away: awayGoals }, halfTime: { home: 1, away: 0 } };
-    render();
-    console.log('Mocked FINISHED:', allMatches[idx].id, homeGoals, '–', awayGoals);
-  },
-  reset(idx = 0) {
-    if (!allMatches[idx]) return console.warn('No match at index', idx);
-    allMatches[idx].status = 'TIMED';
-    allMatches[idx].score  = null;
-    render();
-    console.log('Reset:', allMatches[idx].id);
-  },
-  list() {
-    allMatches.slice(0, 10).forEach((m, i) => console.log(i, m.id, m.status, m.homeTeam?.name, 'vs', m.awayTeam?.name));
-  },
-};
-console.info('Dev helper ready → _pitacopa.mockLive(0) / .mockFinished(0) / .reset(0) / .list()');
-</script>
-
-<footer class="footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <div class="footer-brand-logo">
-          <div class="brand-logo" style="width:28px;height:28px;">
-            <img src="img/logo-icon.png" alt="PitaCopa" style="width:36px;height:36px;object-fit:contain;" onerror="this.style.display='none'">
-          </div>
-          <span class="footer-brand-name" style="font:800 16px/1 var(--font-display);margin-left:8px;">
-            <span class="pita">pita</span><span class="copa">copa</span>
-          </span>
-        </div>
-        <p data-i18n="footer_tagline_brand">Seu bolão da Copa do Mundo 2026. Gratuito, fácil e divertido. Sem dinheiro real.</p>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-title" data-i18n="footer_product">Produto</div>
-        <a href="login?tab=register" data-i18n="footer_signup">Criar conta grátis</a>
-        <a href="login" data-i18n="footer_login">Entrar</a>
-      </div>
-      <div class="footer-col">
-        <div class="footer-col-title" data-i18n="footer_legal">Legal</div>
-        <a href="rules" data-i18n="footer_rules">Regras do Bolão</a>
-        <a href="terms" data-i18n="footer_terms">Termos de Uso</a>
-        <a href="privacy" data-i18n="footer_privacy">Privacidade</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2026 PitaCopa. <span data-i18n="footer_made_with">Feito com ⚽ para a Copa.</span></span>
-      <span style="font-size:11px;color:var(--muted);" data-i18n="footer_disclaimer">Apenas entretenimento. Sem apostas reais.</span>
-    </div>
-  </div>
-</footer>
-<script src="js/i18n.js?v=8"></script>
-<script src="js/cookie-consent.js"></script>
-<script>if(window.lucide)lucide.createIcons();</script>
-</body>
-</html>
+    allMatches[idx].score  = { fullTime: { home: homeGoals, away:                

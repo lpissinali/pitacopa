@@ -135,11 +135,7 @@
 
 <!-- TABS -->
 <div class="profile-tabs" id="profileTabs">
-  <button class="profile-tab-btn active" data-tab="profile">
-    <i data-lucide="user" width="15" height="15"></i>
-    <span data-i18n="profile_tab">Meu Perfil</span>
-  </button>
-  <button class="profile-tab-btn" data-tab="groups">
+  <button class="profile-tab-btn active" data-tab="groups">
     <i data-lucide="users" width="15" height="15"></i>
     <span data-i18n="profile_tab_boloes">Meus Bolões</span>
   </button>
@@ -147,10 +143,14 @@
     <i data-lucide="clipboard-list" width="15" height="15"></i>
     <span data-i18n="pred_title">Meus Palpites</span>
   </button>
+  <button class="profile-tab-btn" data-tab="profile">
+    <i data-lucide="user" width="15" height="15"></i>
+    <span data-i18n="profile_tab">Meu Perfil</span>
+  </button>
 </div>
 
 <!-- PROFILE TAB -->
-<div class="tab-panel active" id="tab-profile">
+<div class="tab-panel" id="tab-profile">
   <div class="profile-content">
     <div id="profileAlert"></div>
 
@@ -213,7 +213,7 @@
 </div>
 
 <!-- GROUPS TAB -->
-<div class="tab-panel" id="tab-groups">
+<div class="tab-panel active" id="tab-groups">
   <div class="profile-content">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
       <h2 style="font-size:18px;font-weight:700;">Meus Bolões</h2>

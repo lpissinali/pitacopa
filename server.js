@@ -1,13 +1,17 @@
 /**
- * PitaCopa — Dev Server + football-data.org Proxy
+ * PitaCopa — Dev Server + api-football.com Proxy
  *
  * Run:  node server.js
  * Open: http://localhost:3000
  *
  * What it does:
  *  - Serves all static files (HTML, CSS, JS, img)
- *  - Proxies /api/matches → football-data.org (adds your API key server-side,
- *    bypassing the CORS restriction on the free tier)
+ *  - Proxies /api/matches → api-football.com (normalises response to the
+ *    same shape the frontend expects, keeping CORS key server-side)
+ *
+ * API key:
+ *  Set env var API_FOOTBALL_KEY=<your key>  (Railway → Variables)
+ *  or add  export const API_FOOTBALL_KEY = "xxx"  to js/config.js
  */
 
 const express  = require('express');
@@ -18,83 +22,77 @@ const fs       = require('fs');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// ─── Read API key — env var takes priority, fallback to js/config.js ─────────
+// ─── Read API key ─────────────────────────────────────────────────────────────
 function readApiKey() {
-  if (process.env.FOOTBALL_DATA_API_KEY) return process.env.FOOTBALL_DATA_API_KEY;
+  if (process.env.API_FOOTBALL_KEY) return process.env.API_FOOTBALL_KEY;
   try {
     const cfg = fs.readFileSync(path.join(__dirname, 'js', 'config.js'), 'utf8');
-    const m   = cfg.match(/FOOTBALL_DATA_API_KEY\s*=\s*['"]([^'"]+)['"]/);
+    const m   = cfg.match(/API_FOOTBALL_KEY\s*=\s*['"]([^'"]+)['"]/);
     return m ? m[1] : '';
   } catch { return ''; }
 }
 
-// ─── www → canonical redirect ─────────────────────────────────────────────────
-// Redirects www.pitacopa.com → pitacopa.com (or any www.* → bare domain)
-app.use((req, res, next) => {
-  const host = req.headers.host || '';
-  if (host.startsWith('www.')) {
-    const bare = host.slice(4);
-    return res.redirect(301, `https://${bare}${req.url}`);
-  }
-  next();
-});
+// ─── Normalise api-football.com fixture → football-data.org-compatible shape ──
+function normaliseFixture(f) {
+  // ── Status ──────────────────────────────────────────────────────────────────
+  const STATUS_MAP = {
+    NS:   'TIMED',    // Not Started
+    TBD:  'TIMED',    // Time To Be Defined
+    '1H': 'IN_PLAY',  // First Half
+    HT:   'PAUSED',   // Half Time
+    '2H': 'IN_PLAY',  // Second Half
+    ET:   'IN_PLAY',  // Extra Time
+    BT:   'PAUSED',   // Break Time (extra time)
+    P:    'IN_PLAY',  // Penalty In Progress
+    FT:   'FINISHED', // Full Time
+    AET:  'FINISHED', // After Extra Time
+    PEN:  'FINISHED', // After Penalties
+    PST:  'POSTPONED',
+    CANC: 'CANCELLED',
+    SUSP: 'POSTPONED',
+    INT:  'POSTPONED',
+    AWD:  'FINISHED',
+    WO:   'FINISHED',
+  };
+  const status = STATUS_MAP[f.fixture?.status?.short] || 'TIMED';
 
-// ─── Proxy endpoint ───────────────────────────────────────────────────────────
-// Frontend calls: /api/matches?season=2026
-// Proxy forwards: https://api.football-data.org/v4/competitions/WC/matches?season=2026
-app.get('/api/matches', async (req, res) => {
-  const API_KEY = readApiKey();
-  if (!API_KEY) {
-    return res.status(503).json({ error: 'API key not configured in js/config.js' });
-  }
+  // ── Stage & group from league.round ─────────────────────────────────────────
+  // api-football uses strings like "Group A - 1", "Round of 16", "Final" etc.
+  const round = (f.league?.round || '').trim();
+  let stage = 'GROUP_STAGE';
+  let group = null;
 
-  const season   = req.query.season || '2026';
-  const upstream = `https://api.football-data.org/v4/competitions/WC/matches?season=${season}`;
+  if (/group/i.test(round)) {
+    stage = 'GROUP_STAGE';
+    // "Group A - 1" → "GROUP_A"
+    const gm = round.match(/Group\s+([A-L])/i);
+    if (gm) group = 'GROUP_' + gm[1].toUpperCase();
+  } else if (/round of 32/i.test(round))      { stage = 'LAST_32'; }
+  else if (/round of 16/i.test(round))         { stage = 'LAST_16'; }
+  else if (/quarter/i.test(round))             { stage = 'QUARTER_FINALS'; }
+  else if (/semi/i.test(round))                { stage = 'SEMI_FINALS'; }
+  else if (/3rd|third|third place/i.test(round)) { stage = 'THIRD_PLACE'; }
+  else if (/final/i.test(round))               { stage = 'FINAL'; }
 
-  try {
-    const upstream_res = await fetch(upstream, {
-      headers: { 'X-Auth-Token': API_KEY }
-    });
-    const data = await upstream_res.json();
+  // ── Date: normalise to UTC ISO string ───────────────────────────────────────
+  const utcDate = f.fixture?.date
+    ? new Date(f.fixture.date).toISOString()
+    : null;
 
-    // Pass through status + JSON
-    res.status(upstream_res.status).json(data);
-  } catch (err) {
-    res.status(502).json({ error: 'Upstream request failed', detail: err.message });
-  }
-});
+  // ── Score ────────────────────────────────────────────────────────────────────
+  const score = {
+    fullTime: {
+      home: f.goals?.home  ?? null,
+      away: f.goals?.away  ?? null,
+    },
+    halfTime: {
+      home: f.score?.halftime?.home ?? null,
+      away: f.score?.halftime?.away ?? null,
+    },
+  };
 
-// ─── Strip .html — redirect /foo.html → /foo ─────────────────────────────────
-app.use((req, res, next) => {
-  if (req.path.endsWith('.html')) {
-    const clean = req.path.slice(0, -5) || '/';
-    const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
-    return res.redirect(301, clean + qs);
-  }
-  next();
-});
-
-// ─── Clean URLs (no .html required) ──────────────────────────────────────────
-// /profile → profile.html, /games → games.html, etc.
-const HTML_PAGES = ['login', 'dashboard', 'bolao', 'join', 'profile', 'games', 'ranking', 'admin', 'terms', 'privacy', 'rules', 'seed'];
-HTML_PAGES.forEach(page => {
-  app.get(`/${page}`, (req, res) => {
-    res.sendFile(path.join(__dirname, `${page}.html`));
-  });
-});
-
-// ─── Static files ─────────────────────────────────────────────────────────────
-app.use(express.static(__dirname));
-
-// ─── Start ───────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n🏆 PitaCopa server running at http://localhost:${PORT}`);
-  console.log(`   API proxy: http://localhost:${PORT}/api/matches?season=2026`);
-  const key = readApiKey();
-  if (key) {
-    console.log(`   football-data.org key: ${key.slice(0,6)}…${key.slice(-4)} ✓`);
-  } else {
-    console.log(`   ⚠️  No API key found in js/config.js`);
-  }
-  console.log('');
-});
+  // ── Teams ────────────────────────────────────────────────────────────────────
+  const homeTeam = {
+    id:        f.teams?.home?.id   || null,
+    name:      f.teams?.home?.name || '',
+    shortName: f.
