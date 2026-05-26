@@ -12,6 +12,8 @@ yarn.lock
 .env
 .env.local
 .env.*.local
+serviceAccountKey.json
+backup-*.json
 
 # ── OS files ──────────────────────────────────────────────────────────────────
 .DS_Store
