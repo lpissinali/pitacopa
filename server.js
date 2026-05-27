@@ -10,9 +10,12 @@
  *    same shape the frontend expects, keeping CORS key server-side)
  *
  * API key:
- *  Set env var API_FOOTBALL_KEY=<your key>  (Railway → Variables)
- *  or add  export const API_FOOTBALL_KEY = "xxx"  to js/config.js
+ *  Production: set env var API_FOOTBALL_KEY in Railway → Variables
+ *  Local dev:  create a .env file in this folder with:
+ *              API_FOOTBALL_KEY=your_key_here
  */
+
+require('dotenv').config();   // loads .env for local dev (no-op in production)
 
 const express  = require('express');
 const fetch    = require('node-fetch');
@@ -32,7 +35,7 @@ function readApiKey() {
   } catch { return ''; }
 }
 
-// ─── Normalise api-football.com fixture → football-data.org-compatible shape ──
+// ─── Normalise api-football.com fixture into the shape the frontend expects ──
 function normaliseFixture(f) {
   // ── Status ──────────────────────────────────────────────────────────────────
   const STATUS_MAP = {
@@ -95,4 +98,96 @@ function normaliseFixture(f) {
   const homeTeam = {
     id:        f.teams?.home?.id   || null,
     name:      f.teams?.home?.name || '',
-    shortName: f.
+    shortName: f.teams?.home?.name || '',
+    tla:       (f.teams?.home?.name || '').slice(0, 3).toUpperCase(),
+    crest:     f.teams?.home?.logo || null,
+  };
+  const awayTeam = {
+    id:        f.teams?.away?.id   || null,
+    name:      f.teams?.away?.name || '',
+    shortName: f.teams?.away?.name || '',
+    tla:       (f.teams?.away?.name || '').slice(0, 3).toUpperCase(),
+    crest:     f.teams?.away?.logo || null,
+  };
+
+  return { utcDate, status, stage, group, homeTeam, awayTeam, score };
+}
+
+// ─── www → canonical redirect ─────────────────────────────────────────────────
+app.use((req, res, next) => {
+  const host = req.headers.host || '';
+  if (host.startsWith('www.')) {
+    const bare = host.slice(4);
+    return res.redirect(301, `https://${bare}${req.url}`);
+  }
+  next();
+});
+
+// ─── Proxy endpoint ───────────────────────────────────────────────────────────
+// Frontend calls: /api/matches?season=2026
+// Proxy fetches:  https://v3.football.api-sports.io/fixtures?league=1&season=2026
+// and normalises the response into the shape the frontend expects.
+app.get('/api/matches', async (req, res) => {
+  const API_KEY = readApiKey();
+  if (!API_KEY) {
+    return res.status(503).json({ error: 'API_FOOTBALL_KEY not configured' });
+  }
+
+  const season   = req.query.season || '2026';
+  const upstream = `https://v3.football.api-sports.io/fixtures?league=1&season=${season}`;
+
+  try {
+    const upstream_res = await fetch(upstream, {
+      headers: {
+        'x-apisports-key': API_KEY,
+      }
+    });
+    const data = await upstream_res.json();
+
+    if (!upstream_res.ok) {
+      return res.status(upstream_res.status).json({ error: 'Upstream error', detail: data });
+    }
+
+    const fixtures = data.response || [];
+    const matches  = fixtures.map(normaliseFixture);
+
+    res.json({ matches });
+  } catch (err) {
+    res.status(502).json({ error: 'Upstream request failed', detail: err.message });
+  }
+});
+
+// ─── Strip .html — redirect /foo.html → /foo ─────────────────────────────────
+app.use((req, res, next) => {
+  if (req.path.endsWith('.html')) {
+    const clean = req.path.slice(0, -5) || '/';
+    const qs = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    return res.redirect(301, clean + qs);
+  }
+  next();
+});
+
+// ─── Clean URLs (no .html required) ──────────────────────────────────────────
+// /profile → profile.html, /games → games.html, etc.
+const HTML_PAGES = ['login', 'dashboard', 'bolao', 'join', 'profile', 'games', 'ranking', 'admin', 'terms', 'privacy', 'rules', 'seed'];
+HTML_PAGES.forEach(page => {
+  app.get(`/${page}`, (req, res) => {
+    res.sendFile(path.join(__dirname, `${page}.html`));
+  });
+});
+
+// ─── Static files ─────────────────────────────────────────────────────────────
+app.use(express.static(__dirname));
+
+// ─── Start ───────────────────────────────────────────────────────────────────
+app.listen(PORT, () => {
+  console.log(`\n🏆 PitaCopa server running at http://localhost:${PORT}`);
+  console.log(`   API proxy: http://localhost:${PORT}/api/matches?season=2026`);
+  const key = readApiKey();
+  if (key) {
+    console.log(`   api-football.com key: ${key.slice(0,6)}…${key.slice(-4)} ✓`);
+  } else {
+    console.log(`   ⚠️  No API_FOOTBALL_KEY found — set env var or add to js/config.js`);
+  }
+  console.log('');
+});

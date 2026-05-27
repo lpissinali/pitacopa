@@ -10,6 +10,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "firebase": "^12.13.0",
     "firebase-admin": "^13.10.0",
