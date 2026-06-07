@@ -13,8 +13,8 @@ const TRANSLATIONS = {
     nav_enter: "Entrar",
     nav_login: "Entrar",
     nav_register: "Criar Conta",
-    nav_dashboard: "Meus Bolões",
-    nav_palpites: "Meus Palpites",
+    nav_dashboard: "Bolões",
+    nav_palpites: "Palpites",
     nav_logout: "Sair",
 
     // Hero
@@ -200,7 +200,7 @@ const TRANSLATIONS = {
     btn_share: "Compartilhar",
 
     // Predictions
-    pred_title: "Meus Palpites",
+    pred_title: "Palpites",
     pred_champion: "🏆 Campeão",
     pred_runner: "🥈 Vice-campeão",
     pred_topscorer: "⚽ Artilheiro",
@@ -220,8 +220,8 @@ const TRANSLATIONS = {
     ranking_heading: "Ranking Global",
 
     // Profile page
-    profile_tab: "Meu Perfil",
-    profile_tab_boloes: "Meus Bolões",
+    profile_tab: "Perfil",
+    profile_tab_boloes: "Bolões",
     btn_save_profile: "Salvar Perfil",
 
     // Games page

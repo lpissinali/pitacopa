@@ -147,7 +147,7 @@
     .game-team:first-child { grid-area: home; justify-content: flex-start; flex-direction: row-reverse; }
     .game-team:last-child  { grid-area: away; justify-content: flex-start; }
     .game-flag  { font-size: 16px; flex-shrink: 0; }
-    .game-team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; max-width: 100px; text-align: left; }
+    .game-team-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; max-width: 150px; text-align: left; }
 
     /* score block — fixed min-width so the row doesn't shift when "vs" becomes a live score */
     .score-block { text-align: center; flex-shrink: 0; grid-area: score; min-width: 40px; }
@@ -187,7 +187,7 @@
     /* responsive */
     @media (max-width: 600px) {
       .pred-col, .pred-login { display: none; }
-      .game-team-name { max-width: 70px; }
+      .game-team-name { max-width: 110px; }
       .score-nums { font-size: 15px; }
     }
 
@@ -226,10 +226,10 @@
       <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> <span data-i18n="nav_ranking">Ranking</span></a></li>
       <li id="navAuthLink"><a href="login" data-i18n="nav_enter">Entrar</a></li>
       <li id="navDashLink" style="display:none;">
-        <a href="dashboard"><i data-lucide="layout-grid" width="14" height="14"></i> Meus Bolões</a>
+        <a href="dashboard"><i data-lucide="layout-grid" width="14" height="14"></i> Bolões</a>
       </li>
       <li id="navPalpitesLink" style="display:none;">
-        <a href="profile#palpites"><i data-lucide="clipboard-list" width="14" height="14"></i> Meus Palpites</a>
+        <a href="profile#palpites"><i data-lucide="clipboard-list" width="14" height="14"></i> Palpites</a>
       </li>
       <li id="navLogoutLi" style="display:none;">
         <button class="btn btn-ghost btn-sm" id="btnLogout">
