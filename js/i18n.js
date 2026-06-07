@@ -14,6 +14,7 @@ const TRANSLATIONS = {
     nav_login: "Entrar",
     nav_register: "Criar Conta",
     nav_dashboard: "Meus Bolões",
+    nav_palpites: "Meus Palpites",
     nav_logout: "Sair",
 
     // Hero
