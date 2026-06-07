@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="google-adsense-account" content="ca-pub-4831931651277615">
   <title>Meus Bolões — PitaCopa 2026</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/img/logo-icon-dark.png" type="image/png">
@@ -79,6 +78,15 @@
         <span data-i18n="dash_join">Entrar em Bolão</span>
       </button>
     </div>
+  </div>
+
+  <div class="affiliate-banner mt-4">
+    <div>
+      <h3 data-i18n="aff_title">Análises e Odds da Copa 2026</h3>
+      <p data-i18n="aff_desc">Veja as melhores análises antes de registrar seus palpites.</p>
+      <p class="disclaimer" data-i18n="aff_disclaimer">Conteúdo patrocinado. Maiores de 18 anos.</p>
+    </div>
+    <a href="https://SEU-LINK-AFILIADO.com" target="_blank" rel="noopener sponsored" class="btn btn-primary btn-sm" data-i18n="aff_btn">Ver Análises</a>
   </div>
 </div>
 
@@ -405,7 +413,6 @@
         <a href="rules" data-i18n="footer_rules">Regras do Bolão</a>
         <a href="terms" data-i18n="footer_terms">Termos de Uso</a>
         <a href="privacy" data-i18n="footer_privacy">Privacidade</a>
-        <a href="cookies" data-i18n="footer_cookies">Cookies</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -418,4 +425,3 @@
 <script src="js/utils.js"></script>
 <script>initMobileMenu(); lucide.createIcons();</script>
 </body>
-</html>

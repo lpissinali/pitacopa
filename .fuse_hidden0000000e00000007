@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="google-adsense-account" content="ca-pub-4831931651277615">
   <title>Entrar — PitaCopa 2026</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/img/logo-icon-dark.png" type="image/png">
@@ -53,6 +52,14 @@
         <div class="auth-perk-icon"><i data-lucide="zap" width="14" height="14"></i></div>
         <span data-i18n="perk4">Ranking automático em tempo real</span>
       </div>
+    </div>
+    <div class="auth-affiliate">
+      <p style="font-weight:700;color:var(--gold);margin-bottom:10px;" data-i18n="aff_left_title">Quer análises antes de palpitar?</p>
+      <a href="https://SEU-LINK-AFILIADO.com" target="_blank" rel="noopener sponsored" class="btn btn-outline btn-sm">
+        <i data-lucide="arrow-right" width="14" height="14"></i>
+        <span data-i18n="aff_btn_short">Ver Odds da Copa</span>
+      </a>
+      <p style="font-size:11px;color:rgba(255,255,255,.3);margin-top:10px;" data-i18n="aff_disclaimer_short">Conteúdo patrocinado. +18. Jogue com responsabilidade.</p>
     </div>
   </div>
 

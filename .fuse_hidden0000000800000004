@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="google-adsense-account" content="ca-pub-4831931651277615">
   <title>Jogos & Resultados — PitaCopa 2026</title>
   <meta name="description" content="Todos os 104 jogos da Copa do Mundo 2026 com datas, horários e resultados em tempo real.">
   <meta name="keywords" content="jogos copa 2026, tabela copa do mundo 2026, resultados copa 2026, horários copa 2026, fase de grupos, oitavas finais">
@@ -800,7 +799,6 @@ console.info('Dev helper ready → _pitacopa.mockLive(0) / .mockFinished(0) / .r
         <a href="rules" data-i18n="footer_rules">Regras do Bolão</a>
         <a href="terms" data-i18n="footer_terms">Termos de Uso</a>
         <a href="privacy" data-i18n="footer_privacy">Privacidade</a>
-        <a href="cookies" data-i18n="footer_cookies">Cookies</a>
       </div>
     </div>
     <div class="footer-bottom">

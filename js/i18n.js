@@ -83,13 +83,6 @@ const TRANSLATIONS = {
     score_pts: "pts",
     tiebreak: "Desempate: placares exatos → resultados → campeão → vice → ordem alfabética",
 
-    // Affiliate
-    aff_eyebrow: "Análises da Copa",
-    aff_title: "Quer dar pitacos mais certeiros?",
-    aff_desc: "Veja análises e odds da Copa 2026 antes de registrar seus palpites.",
-    aff_disclaimer: "Conteúdo patrocinado. Maiores de 18 anos. Jogue com responsabilidade.",
-    aff_btn: "Ver Análises",
-
     // Final CTA
     final_title: "Pronto pra provar que você é o maior pitaqueiro?",
     final_sub: "Grátis, sem cartão, em 30 segundos.",
@@ -107,6 +100,7 @@ const TRANSLATIONS = {
     footer_legal: "Legal",
     footer_rules: "Regras do Bolão",
     footer_privacy: "Privacidade",
+    footer_cookies: "Cookies",
     footer_terms: "Termos de Uso",
     footer_responsible: "Jogo Responsável",
     footer_social: "Redes Sociais",
@@ -210,11 +204,6 @@ const TRANSLATIONS = {
     pred_saved: "Palpites salvos com sucesso!",
     pred_locked: "⏰ Prazo encerrado — palpites bloqueados.",
 
-    // Auth left panel affiliate
-    aff_left_title: "Quer análises antes de palpitar?",
-    aff_btn_short: "Ver Odds da Copa",
-    aff_disclaimer_short: "Conteúdo patrocinado. +18. Jogue com responsabilidade.",
-
     // Page headings
     games_heading: "Jogos & Resultados",
     ranking_heading: "Ranking Global",
@@ -245,8 +234,6 @@ const TRANSLATIONS = {
     pred_lock_note: "Palpites bloqueiam automaticamente no horário do jogo",
     tournament_locked: "🔒 O torneio já começou. As escolhas de Campeão, Vice e Artilheiro estão bloqueadas.",
     delete_bolao_title: "⚠️ Deletar Bolão",
-    aff_bolao_title: "Quer analisar os jogos antes de convidar seus amigos?",
-    aff_bolao_btn: "Ver Análises da Copa",
     pool_pitaqueiros: "pitaqueiros",
     pool_ranking_label: "Ranking do Bolão",
     label_position: "posição",

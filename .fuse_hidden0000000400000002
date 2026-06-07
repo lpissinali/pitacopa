@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="google-adsense-account" content="ca-pub-4831931651277615">
   <title>Bolão — PitaCopa 2026</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/img/logo-icon-dark.png" type="image/png">
@@ -77,6 +76,18 @@
     .delete-modal h3 { font-size:18px;font-weight:700;margin-bottom:8px;color:#dc2626; }
     .delete-modal p  { font-size:14px;color:var(--muted);margin-bottom:20px; }
     .delete-modal-actions { display:flex;gap:10px;justify-content:flex-end; }
+
+    /* ── Affiliate ───────────────────────────────── */
+    .aff-mini {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--gold-l);
+      border: 1px solid rgba(245,166,35,.2);
+      border-radius: var(--r-lg);
+      text-align: center;
+    }
+    .aff-mini p { font-size: 12px; color: var(--muted-2); margin-bottom: 10px; }
+    .aff-mini .disclaimer { font-size: 11px; color: var(--muted); margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -191,6 +202,13 @@
         <i data-lucide="share-2" width="15" height="15"></i>
         <span data-i18n="btn_share">Compartilhar</span>
       </button>
+    </div>
+
+    <!-- Affiliate mini -->
+    <div class="aff-mini">
+      <p data-i18n="aff_bolao_title">Quer analisar os jogos antes de convidar seus amigos?</p>
+      <a href="https://SEU-LINK-AFILIADO.com" target="_blank" rel="noopener sponsored" class="btn btn-primary btn-sm" data-i18n="aff_bolao_btn">Ver Análises da Copa</a>
+      <p class="disclaimer">Conteúdo patrocinado. Maiores de 18 anos.</p>
     </div>
   </div>
 
@@ -433,7 +451,6 @@
         <a href="rules" data-i18n="footer_rules">Regras do Bolão</a>
         <a href="terms" data-i18n="footer_terms">Termos de Uso</a>
         <a href="privacy" data-i18n="footer_privacy">Privacidade</a>
-        <a href="cookies" data-i18n="footer_cookies">Cookies</a>
       </div>
     </div>
     <div class="footer-bottom">

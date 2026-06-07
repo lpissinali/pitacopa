@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="google-adsense-account" content="ca-pub-4831931651277615">
   <title>Política de Privacidade — PitaCopa 2026</title>
   <meta name="description" content="Política de Privacidade do PitaCopa — como coletamos e usamos seus dados.">
   <meta name="robots" content="index, follow">
@@ -63,7 +62,7 @@
 
   <div class="legal-hero">
     <h1>Política de Privacidade</h1>
-    <p>Última atualização: junho de 2026</p>
+    <p>Última atualização: maio de 2026</p>
   </div>
 
   <div class="legal-body">
@@ -86,10 +85,9 @@
     </ul>
 
     <h2>3. Compartilhamento</h2>
-    <p>Não vendemos seus dados pessoais. Podemos compartilhar informações apenas com:</p>
+    <p>Não vendemos seus dados. Podemos compartilhá-los apenas com:</p>
     <ul>
       <li><strong>Firebase (Google):</strong> infraestrutura de banco de dados e autenticação.</li>
-      <li><strong>Google AdSense:</strong> exibimos anúncios fornecidos pelo Google para manter o PitaCopa gratuito. O Google e seus parceiros podem coletar e usar dados (como identificadores de dispositivo e atividade de navegação) para veicular e medir anúncios — veja a seção 9 para mais detalhes e como gerenciar suas preferências.</li>
       <li><strong>Autoridades:</strong> quando exigido por lei.</li>
     </ul>
 
@@ -116,16 +114,14 @@
       <li><strong>Oposição:</strong> entre em contato caso discorde de algum tratamento de dados.</li>
     </ul>
 
-    <h2>9. Cookies, Publicidade e Armazenamento Local</h2>
-    <p>Usamos os seguintes tipos de armazenamento e cookies no seu navegador:</p>
+    <h2>9. Cookies e Armazenamento Local</h2>
+    <p>Usamos os seguintes tipos de armazenamento no seu navegador:</p>
     <ul>
       <li><strong>Essenciais:</strong> token de autenticação Firebase (localStorage/IndexedDB) — necessário para manter sua sessão ativa.</li>
       <li><strong>Preferências:</strong> configurações de idioma e preferências de interface (localStorage).</li>
       <li><strong>Google / Firebase:</strong> o SDK do Firebase pode definir cookies de sessão como parte do processo de autenticação com Google.</li>
-      <li><strong>Publicidade (Google AdSense):</strong> exibimos anúncios fornecidos pelo Google AdSense para manter o serviço gratuito. O Google e seus parceiros publicitários podem usar cookies e identificadores semelhantes para veicular anúncios com base nas suas visitas a este e a outros sites, medir desempenho e evitar exibições repetitivas.</li>
     </ul>
-    <p>Você pode personalizar ou desativar os anúncios personalizados do Google em <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer">adssettings.google.com</a>, e consultar como o Google usa dados de sites parceiros em <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer">policies.google.com/technologies/partner-sites</a>. Detalhes adicionais sobre cada categoria de cookie estão na nossa <a href="cookies">Política de Cookies</a>.</p>
-    <p>Na sua primeira visita, exibimos um aviso de consentimento — você pode escolher "Aceitar tudo" (essenciais + publicidade) ou "Apenas essenciais". Você pode alterar essa escolha a qualquer momento limpando os dados do site no seu navegador.</p>
+    <p>Não utilizamos cookies de rastreamento, publicidade ou análise comportamental. Na sua primeira visita, exibimos um aviso de consentimento — você pode escolher "Aceitar tudo" ou "Apenas essenciais".</p>
 
     <h2>10. Base Legal (LGPD / GDPR)</h2>
     <p>O tratamento dos seus dados se baseia nas seguintes hipóteses legais:</p>
@@ -169,7 +165,6 @@
         <a href="rules" data-i18n="footer_rules">Regras do Bolão</a>
         <a href="terms" data-i18n="footer_terms">Termos de Uso</a>
         <a href="privacy" data-i18n="footer_privacy">Privacidade</a>
-        <a href="cookies" data-i18n="footer_cookies">Cookies</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -202,3 +197,4 @@
 <script>lucide.createIcons();</script>
 </body>
 </html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 

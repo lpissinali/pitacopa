@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="google-adsense-account" content="ca-pub-4831931651277615">
   <title>Ranking Global — PitaCopa 2026</title>
   <meta name="description" content="Ranking global de todos os pitaqueiros da Copa do Mundo 2026. Veja quem lidera o placar geral.">
   <meta name="keywords" content="ranking bolão copa 2026, classificação bolão copa do mundo, pitaqueiros, pontuação copa 2026">
@@ -234,7 +233,6 @@
         <a href="rules" data-i18n="footer_rules">Regras do Bolão</a>
         <a href="terms" data-i18n="footer_terms">Termos de Uso</a>
         <a href="privacy" data-i18n="footer_privacy">Privacidade</a>
-        <a href="cookies" data-i18n="footer_cookies">Cookies</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -541,3 +539,4 @@ if (btnLogout) btnLogout.addEventListener('click', async () => {
 <script>lucide.createIcons();</script>
 </body>
 </html>
+                                                                                                                                                                                                                                                                                            

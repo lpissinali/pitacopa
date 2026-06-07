@@ -547,29 +547,6 @@ a:hover { text-decoration: underline; }
 }
 .scoring-row-pts.green { color: var(--green-d); background: var(--green-l); }
 
-/* ── Affiliate Band ──────────────────────── */
-.aff-band {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-3) 100%);
-  border-radius: var(--r-2xl);
-  padding: 40px 48px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 32px;
-  flex-wrap: wrap;
-  border: 1px solid rgba(245,166,35,.2);
-  box-shadow: var(--sh-md);
-}
-.aff-band-eyebrow {
-  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--gold); margin-bottom: 8px;
-}
-.aff-band-title {
-  font-size: 22px; font-weight: 800; color: white; margin-bottom: 8px;
-}
-.aff-band-desc { font-size: 14px; color: rgba(255,255,255,.65); margin-bottom: 6px; }
-.aff-band-disclaimer { font-size: 11px; color: rgba(255,255,255,.35); }
-
 /* ── Dashboard content ───────────────────── */
 .dashboard-content {
   max-width: 1120px;
@@ -635,22 +612,6 @@ a:hover { text-decoration: underline; }
 }
 .empty-state h3 { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
 .empty-state p  { font-size: 14px; color: var(--muted); }
-
-/* ── Affiliate banner (dashboard) ────────── */
-.affiliate-banner {
-  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-3) 100%);
-  border-radius: var(--r-xl);
-  padding: 28px 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-  border: 1px solid rgba(245,166,35,.15);
-}
-.affiliate-banner h3 { font-size: 16px; font-weight: 800; color: white; margin-bottom: 4px; }
-.affiliate-banner p  { font-size: 13px; color: rgba(255,255,255,.6); }
-.affiliate-banner .disclaimer { font-size: 11px; color: rgba(255,255,255,.35); margin-top: 4px; }
 
 /* ── Loader / Spinner ────────────────────── */
 .loader { display: flex; justify-content: center; padding: 64px 0; }
@@ -824,18 +785,6 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   justify-content: center;
   overflow-y: auto;
 }
-.auth-affiliate {
-  position: relative; z-index: 1;
-  margin-top: 32px;
-  background: rgba(245,166,35,.08);
-  border: 1px solid rgba(245,166,35,.2);
-  border-radius: var(--r-lg);
-  padding: 16px;
-  font-size: 12px;
-  color: rgba(255,255,255,.65);
-}
-.auth-affiliate a { color: var(--gold); font-weight: 700; }
-
 /* Tabs */
 .tabs { display: flex; background: var(--bg-2); border-radius: var(--r-lg); padding: 4px; margin-bottom: 28px; }
 .tab-btn {
@@ -1148,8 +1097,6 @@ textarea.form-control { resize: vertical; min-height: 80px; }
   .steps { grid-template-columns: 1fr; }
   .section { padding: 56px 0; }
   .section-title { font-size: 26px; }
-  .aff-band { flex-direction: column; padding: 28px 24px; }
-  .aff-band a { width: 100%; justify-content: center; }
   .auth-right { padding: 32px 20px; }
   .join-card { padding: 36px 24px; }
   .footer-grid { grid-template-columns: 1fr; gap: 24px; }
