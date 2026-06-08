@@ -129,6 +129,18 @@ for (const [id, g] of Object.entries(SCHEDULE)) {
   const key = (g.date || '').substring(0, 16);
   if (key) (SCHEDULE_BY_DT[key] = SCHEDULE_BY_DT[key] || []).push(id);
 }
+// A match is "scoring-relevant" from kickoff until 4h later (covers 90' + halftime
+// + stoppage + knockout extra-time/penalties + a buffer to catch the FINISHED state).
+const SYNC_WINDOW_AFTER_MS = 4 * 60 * 60 * 1000;
+function isWithinMatchWindow(now = Date.now()) {
+  for (const g of Object.values(SCHEDULE)) {
+    if (g.kickoffMs && now >= g.kickoffMs && now <= g.kickoffMs + SYNC_WINDOW_AFTER_MS) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function codeFromName(name) { return CODE_BY_NAME[normName(name)] || null; }
 function teamTokens(code) {
   const t = TEAM_BY_ID[code];
@@ -572,10 +584,14 @@ app.listen(PORT, () => {
   console.log(`   firebase-admin: ${adminReady ? 'ready ✓' : 'NOT configured ✗ (set FIREBASE_SERVICE_ACCOUNT)'}`);
   console.log('');
 
-  // Kick off results-sync + scoring loop (every 5 min). getMatches is cached, so
-  // idle periods cost no extra api-football calls beyond the existing TTL.
+  // Results-sync + scoring loop. The 5-min tick is cheap (date math); it only does
+  // the real work (api fetch + Firestore reads/scoring) when a match is in its
+  // scoring window — from kickoff until ~4h later — so nothing runs overnight,
+  // between match days, or before the tournament starts. Out-of-window result
+  // entry (e.g. champion after the final) is handled by the admin "rescore" button.
   if (adminReady) {
-    syncResultsAndScore();
-    setInterval(syncResultsAndScore, 5 * 60 * 1000);
+    const tick = () => { if (isWithinMatchWindow()) syncResultsAndScore(); };
+    tick();                                   // catch a restart mid-match
+    setInterval(tick, 5 * 60 * 1000);
   }
 });
