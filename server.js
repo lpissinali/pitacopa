@@ -123,6 +123,99 @@ app.use((req, res, next) => {
   next();
 });
 
+// ─── api-football proxy cache ─────────────────────────────────────────────────
+// Every /games page load calls /api/matches, which otherwise hits api-football
+// live each time. The World Cup fixture list changes slowly, so we cache the
+// upstream response and let concurrent/repeat visitors share one call. This
+// protects the shared daily api-football quota (the same key powers
+// fanaticscores) from traffic spikes during the tournament.
+//
+// The cache TTL is adaptive, driven by the fixtures themselves:
+//   • a match is live now            → refresh every 2 minutes (fresh scores)
+//   • nothing live, next kickoff soon → refresh around that kickoff
+//   • nothing live, nothing imminent  → refresh at most once per hour (save quota)
+//
+// Scope note: this touches ONLY the api-football proxy. No Firestore / user data
+// is involved here — all user data lives in Firebase and is accessed client-side.
+const LIVE_TTL_MS = 120_000;       // 2 min — while a match is in progress
+const IDLE_TTL_MS = 3_600_000;     // 1 hour — when nothing is live or imminent
+const matchesCache = new Map();    // season -> { matches, fetchedAt }
+const inFlight     = new Map();    // season -> Promise<matches> (stampede guard)
+
+const LIVE_STATUSES = new Set(['IN_PLAY', 'PAUSED']);
+
+// How long a cached snapshot stays valid, based on what it contains.
+function ttlForMatches(matches) {
+  if (matches.some(m => LIVE_STATUSES.has(m.status))) return LIVE_TTL_MS;
+
+  // Nothing live: normally hold for an hour, but if a match kicks off within
+  // that hour, expire around kickoff so we don't miss the start of live play.
+  const now = Date.now();
+  let nextKickoff = Infinity;
+  for (const m of matches) {
+    if (!m.utcDate) continue;
+    const t = new Date(m.utcDate).getTime();
+    if (t > now && t < nextKickoff) nextKickoff = t;
+  }
+  const untilKickoff = nextKickoff - now;
+  if (untilKickoff < IDLE_TTL_MS) return Math.max(untilKickoff, LIVE_TTL_MS);
+  return IDLE_TTL_MS;
+}
+
+function afBodyHasErrors(errors) {
+  if (!errors) return false;
+  if (Array.isArray(errors)) return errors.length > 0;
+  if (typeof errors === 'object') return Object.keys(errors).length > 0;
+  return false;
+}
+
+// Fetches (or returns cached) normalised matches for a season. Coalesces
+// concurrent misses into a single upstream request. Throws on upstream failure
+// so the caller can decide whether to serve a stale copy.
+async function getMatches(season, API_KEY) {
+  const cached = matchesCache.get(season);
+  if (cached && Date.now() - cached.fetchedAt < ttlForMatches(cached.matches)) {
+    return { matches: cached.matches, cache: 'hit' };
+  }
+
+  if (inFlight.has(season)) {
+    return { matches: await inFlight.get(season), cache: 'coalesced' };
+  }
+
+  const promise = (async () => {
+    const upstream = `https://v3.football.api-sports.io/fixtures?league=1&season=${season}`;
+    const upstream_res = await fetch(upstream, { headers: { 'x-apisports-key': API_KEY } });
+    const data = await upstream_res.json();
+
+    if (!upstream_res.ok) {
+      const err = new Error('Upstream error');
+      err.status = upstream_res.status;
+      err.detail = data;
+      throw err;
+    }
+    // api-football also returns errors inside a 200 body (bad key, quota
+    // exhausted, plan limits). Don't cache those — they'd freeze a transient
+    // failure for the whole TTL.
+    if (afBodyHasErrors(data.errors)) {
+      const err = new Error('Upstream returned errors');
+      err.status = 502;
+      err.detail = data.errors;
+      throw err;
+    }
+
+    const matches = (data.response || []).map(normaliseFixture);
+    matchesCache.set(season, { matches, fetchedAt: Date.now() });
+    return matches;
+  })();
+
+  inFlight.set(season, promise);
+  try {
+    return { matches: await promise, cache: 'miss' };
+  } finally {
+    inFlight.delete(season);
+  }
+}
+
 // ─── Proxy endpoint ───────────────────────────────────────────────────────────
 // Frontend calls: /api/matches?season=2026
 // Proxy fetches:  https://v3.football.api-sports.io/fixtures?league=1&season=2026
@@ -133,27 +226,22 @@ app.get('/api/matches', async (req, res) => {
     return res.status(503).json({ error: 'API_FOOTBALL_KEY not configured' });
   }
 
-  const season   = req.query.season || '2026';
-  const upstream = `https://v3.football.api-sports.io/fixtures?league=1&season=${season}`;
+  const season = req.query.season || '2026';
 
   try {
-    const upstream_res = await fetch(upstream, {
-      headers: {
-        'x-apisports-key': API_KEY,
-      }
-    });
-    const data = await upstream_res.json();
-
-    if (!upstream_res.ok) {
-      return res.status(upstream_res.status).json({ error: 'Upstream error', detail: data });
-    }
-
-    const fixtures = data.response || [];
-    const matches  = fixtures.map(normaliseFixture);
-
+    const { matches, cache } = await getMatches(season, API_KEY);
+    res.set('x-proxy-cache', cache);
     res.json({ matches });
   } catch (err) {
-    res.status(502).json({ error: 'Upstream request failed', detail: err.message });
+    // Resilience: if api-football errors (including a quota wipe-out caused by
+    // the *other* site), serve the last known fixtures rather than failing the
+    // page. Better a couple of minutes stale than blank.
+    const stale = matchesCache.get(season);
+    if (stale) {
+      res.set('x-proxy-cache', 'stale');
+      return res.json({ matches: stale.matches });
+    }
+    res.status(err.status || 502).json({ error: 'Upstream request failed', detail: err.detail || err.message });
   }
 });
 
