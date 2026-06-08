@@ -1636,6 +1636,20 @@ function buildPlayerOptions(selectEl, lang, savedValue, extraPlayers = []) {
   });
   players.sort((a, b) => a._sort.localeCompare(b._sort));
 
+  // Populate the native select with real <option> elements so that
+  // `selectEl.value = ...` actually sticks (a value with no matching option
+  // is silently rejected by the browser → artilheiro saved as empty string).
+  selectEl.innerHTML = '';
+  const blankOpt = document.createElement('option');
+  blankOpt.value = '';
+  selectEl.appendChild(blankOpt);
+  players.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.value;
+    opt.textContent = p.name;
+    selectEl.appendChild(opt);
+  });
+
   // Hide original select (keep its ID so .value reads still work)
   selectEl.style.display = 'none';
 

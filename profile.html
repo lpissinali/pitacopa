@@ -273,6 +273,10 @@
         <span data-i18n="pred_global_info">Seus palpites globais — válidos para todos os bolões em que você participa. Jogos bloqueiam automaticamente no horário de início.</span>
       </p>
 
+      <div id="tournamentLockBanner" class="alert alert-warning" style="margin-bottom:20px;">
+        ⏳ As escolhas de <strong>Campeão</strong>, <strong>Vice-campeão</strong> e <strong>Artilheiro</strong> podem ser alteradas até o início do torneio. Depois disso, ficarão <strong>bloqueadas</strong> e não poderão mais ser modificadas.
+      </div>
+
       <div class="settings-card" style="margin-bottom:24px;">
         <h3><i data-lucide="trophy" width="16" height="16"></i> Campeão, Vice e Artilheiro</h3>
         <div class="champ-picks">
@@ -380,6 +384,7 @@ let userData = {};
 let userPreds = {};
 let groupsLoaded = false;
 let predsLoaded = false;
+let predsLocked = false;
 const lang = 'pt';
 
 // ── All countries, sorted alphabetically in Portuguese ────────────────────
@@ -822,7 +827,9 @@ const STAGE_LABELS_PRED = {
   'final':        { pt:'Final',            en:'Final'          },
 };
 
-const TOURNAMENT_START = new Date('2026-06-11T00:00:00');
+// Global picks (champion/runner-up/top-scorer) lock one day after the opener,
+// giving people extra time. Opener: 2026-06-11 → picks lock 2026-06-12.
+const PICKS_LOCK_TIME = new Date('2026-06-12T00:00:00');
 
 let activeStage = 'all';
 
@@ -870,20 +877,28 @@ window._loadPreds = async function() {
       buildPlayerOptions(document.getElementById('pickTopScorer'), lang, userPreds.topScorer || '', extraPlayers);
     }
 
-    // Tournament start lock
-    const tournamentStarted = new Date() >= TOURNAMENT_START;
-    if (tournamentStarted) {
+    // Picks lock — champion / runner-up / top-scorer become read-only
+    const picksLocked = new Date() >= PICKS_LOCK_TIME;
+    predsLocked = picksLocked;
+    if (picksLocked) {
       ['pickChampion','pickRunner','pickTopScorer'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.disabled = true; }
       });
-      const champSection = document.querySelector('.champ-picks').closest('.settings-card');
-      if (champSection && !champSection.querySelector('.tournament-lock-note')) {
-        const note = document.createElement('div');
-        note.className = 'alert alert-warning tournament-lock-note';
-        note.style.marginTop = '12px';
-        note.innerHTML = '🔒 O torneio já começou. As escolhas de Campeão, Vice e Artilheiro estão bloqueadas.';
-        champSection.appendChild(note);
+      // The artilheiro field uses a custom picker that hides the native <select>;
+      // disable its trigger so it can't be opened/changed.
+      const picker = document.querySelector('.player-picker');
+      if (picker) {
+        picker.classList.add('locked');
+        picker.style.pointerEvents = 'none';
+        picker.style.opacity = '0.6';
+        const trigger = picker.querySelector('.player-picker-trigger');
+        if (trigger) trigger.disabled = true;
+      }
+      // Swap the pre-lock notice for the "blocked" wording.
+      const banner = document.getElementById('tournamentLockBanner');
+      if (banner) {
+        banner.innerHTML = '🔒 O prazo encerrou. As escolhas de <strong>Campeão</strong>, <strong>Vice-campeão</strong> e <strong>Artilheiro</strong> estão bloqueadas e não podem mais ser alteradas.';
       }
     }
 
@@ -1034,9 +1049,13 @@ function renderGames() {
 // ── Save predictions ───────────────────────────────────────────────────────
 document.getElementById('btnSavePreds').addEventListener('click', async () => {
   try {
-    userPreds.champion  = document.getElementById('pickChampion').value;
-    userPreds.runnerUp  = document.getElementById('pickRunner').value;
-    userPreds.topScorer = document.getElementById('pickTopScorer').value.trim();
+    // Once the tournament has started, the global picks are locked — don't
+    // overwrite champion / runner-up / top-scorer (game predictions still save).
+    if (!predsLocked) {
+      userPreds.champion  = document.getElementById('pickChampion').value;
+      userPreds.runnerUp  = document.getElementById('pickRunner').value;
+      userPreds.topScorer = document.getElementById('pickTopScorer').value.trim();
+    }
     userPreds.updatedAt = serverTimestamp();
     await setDoc(doc(db, 'user_predictions', currentUser.uid), userPreds, { merge: true });
     showToast(t('toast_preds_saved'), 'success');

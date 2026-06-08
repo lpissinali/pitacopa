@@ -1,0 +1,37 @@
+// ──────────────────────────────────────────────────────────────────────────
+// PitaCopa — server-side lock for global picks (champion / runnerUp / topScorer)
+//
+// PASTE THIS *match* BLOCK into your existing ruleset in the Firebase console:
+//   Firebase console → project pitacopa-a2cea → Firestore Database → Rules
+// Add it INSIDE your existing `match /databases/{database}/documents { ... }`.
+// Do NOT replace the whole file — keep your other collections' rules intact.
+//
+// Deadline below is 2026-06-12T03:00:00Z, which equals midnight (00:00) in
+// Brazil (UTC-3) on 12/06 — matching PICKS_LOCK_TIME in profile.html.
+// ──────────────────────────────────────────────────────────────────────────
+
+match /user_predictions/{uid} {
+
+  // Adjust read scope to match your app (ranking reads other users' picks).
+  allow read: if request.auth != null;
+
+  // First-time creation: only the owner, and only before the deadline.
+  allow create: if request.auth != null
+                && request.auth.uid == uid
+                && request.time < timestamp.value(1781233200000);
+
+  // Updates: owner only. After the deadline, the three global picks must stay
+  // identical to what's already stored (game predictions can still change).
+  allow update: if request.auth != null
+                && request.auth.uid == uid
+                && (
+                     request.time < timestamp.value(1781233200000)
+                     || (
+                          request.resource.data.get('champion',  '') == resource.data.get('champion',  '')
+                       && request.resource.data.get('runnerUp',  '') == resource.data.get('runnerUp',  '')
+                       && request.resource.data.get('topScorer', '') == resource.data.get('topScorer', '')
+                     )
+                   );
+
+  allow delete: if false;
+}
