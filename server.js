@@ -25,6 +25,144 @@ const fs       = require('fs');
 const app  = express();
 const PORT = process.env.PORT || 3000;
 
+// ─── Firebase Admin (trusted server-side writes) ───────────────────────────────
+// Predictions and scoring are written ONLY here, via the Admin SDK, which bypasses
+// Firestore security rules. Clients can no longer write user_predictions directly,
+// so the per-match / global-pick locks below can't be bypassed from devtools.
+//
+// Setup (one-time): Firebase console → Project settings → Service accounts →
+// "Generate new private key". Paste the WHOLE JSON into a Railway variable named
+// FIREBASE_SERVICE_ACCOUNT. Locally, put it in .env on one line (gitignored).
+const admin = require('firebase-admin');
+const { calculateScore } = require('./js/scoring');
+
+let adminReady = false;
+(function initAdmin() {
+  try {
+    let credential;
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      credential = admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT));
+    } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+      credential = admin.credential.applicationDefault();
+    } else {
+      console.warn('⚠️  FIREBASE_SERVICE_ACCOUNT not set — prediction saving & scoring are DISABLED.');
+      return;
+    }
+    admin.initializeApp({ credential, projectId: 'pitacopa-a2cea' });
+    adminReady = true;
+  } catch (e) {
+    console.error('Firebase Admin init failed:', e.message);
+  }
+})();
+const adminDb = () => admin.firestore();
+
+// Optional allow-list for the manual rescore endpoint (comma-separated emails).
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '')
+  .split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+
+// Global picks (champion/runner-up/top-scorer) lock one day after the opener.
+// 2026-06-12T03:00:00Z == midnight 12/06 in Brazil (UTC-3); matches the client.
+const PICKS_LOCK_MS = Date.parse('2026-06-12T03:00:00Z');
+
+// ─── Match schedule (parsed from js/wc2026.js — single source of truth) ────────
+// We only need each game's id, kickoff, and team codes; a regex over the ALL_GAMES
+// object literals avoids duplicating the fixture list (and any drift with it).
+const SCHEDULE = (function loadSchedule() {
+  const out = {}; // gameId -> { date, home, away, kickoffMs }
+  try {
+    const src = fs.readFileSync(path.join(__dirname, 'js', 'wc2026.js'), 'utf8');
+    // Match a single game object only. Game objects are flat (no nested braces),
+    // so [^{}] keeps each match inside one object and never spans across objects.
+    // Team objects have no `date:` field, so they can't match here.
+    const objRe = /\{[^{}]*?\bid:\s*"([^"]+)"[^{}]*?\bdate:\s*"([^"]+)"[^{}]*?\}/g;
+    let m;
+    while ((m = objRe.exec(src)) !== null) {
+      const chunk = m[0];
+      const homeM = chunk.match(/\bhome:\s*"([^"]+)"/);
+      const awayM = chunk.match(/\baway:\s*"([^"]+)"/);
+      out[m[1]] = {
+        date: m[2],
+        home: homeM ? homeM[1] : '',
+        away: awayM ? awayM[1] : '',
+        kickoffMs: new Date(m[2]).getTime(),
+      };
+    }
+  } catch (e) {
+    console.error('Schedule parse failed:', e.message);
+  }
+  return out;
+})();
+// Teams (id + names), parsed from WC2026_TEAMS in js/wc2026.js — used to map
+// api-football fixtures (which carry team names) back to our game IDs.
+const TEAM_BY_ID = {};       // code -> { name, nameEn }
+const CODE_BY_NAME = {};     // normalized name/nameEn -> code
+function normName(s) {
+  return (s || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // strip diacritics
+    .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+(function loadTeams() {
+  try {
+    const src = fs.readFileSync(path.join(__dirname, 'js', 'wc2026.js'), 'utf8');
+    const re = /id:\s*"([a-z][a-z0-9]{1,4})",\s*name:\s*"([^"]+)",\s*nameEn:\s*"([^"]+)"/g;
+    let m;
+    while ((m = re.exec(src)) !== null) {
+      const [, id, name, nameEn] = m;
+      TEAM_BY_ID[id] = { name, nameEn };
+      CODE_BY_NAME[normName(name)]   = id;
+      CODE_BY_NAME[normName(nameEn)] = id;
+      CODE_BY_NAME[id] = id;
+    }
+  } catch (e) {
+    console.error('Teams parse failed:', e.message);
+  }
+})();
+
+// "home_away" (team codes) → gameId, for group-stage fixtures (codes are known).
+const GAME_ID_BY_TEAMS = {};
+// "YYYY-MM-DDTHH:MM" → [gameId, …] (a list — simultaneous matches share a slot).
+const SCHEDULE_BY_DT = {};
+for (const [id, g] of Object.entries(SCHEDULE)) {
+  if (g.home && g.away && g.home !== 'TBD' && g.away !== 'TBD') {
+    GAME_ID_BY_TEAMS[`${g.home}_${g.away}`] = id;
+  }
+  const key = (g.date || '').substring(0, 16);
+  if (key) (SCHEDULE_BY_DT[key] = SCHEDULE_BY_DT[key] || []).push(id);
+}
+function codeFromName(name) { return CODE_BY_NAME[normName(name)] || null; }
+function teamTokens(code) {
+  const t = TEAM_BY_ID[code];
+  return new Set(normName(t ? `${t.name} ${t.nameEn}` : code).split(' ').filter(Boolean));
+}
+function tokenOverlap(text, codeTokens) {
+  const ts = new Set(normName(text).split(' ').filter(Boolean));
+  let n = 0; for (const w of ts) if (codeTokens.has(w)) n++;
+  return n;
+}
+
+// Map a normalised api-football fixture to one of our game IDs.
+//   1) exact team-code match (group stage) — most reliable, time-drift proof
+//   2) unique kickoff slot — covers knockout (distinct times) & non-colliding group
+//   3) fuzzy team match among games sharing a kickoff slot (simultaneous matches)
+function fixtureToGameId(m) {
+  const h = codeFromName(m.homeTeam?.name);
+  const a = codeFromName(m.awayTeam?.name);
+  if (h && a && GAME_ID_BY_TEAMS[`${h}_${a}`]) return GAME_ID_BY_TEAMS[`${h}_${a}`];
+
+  const cands = SCHEDULE_BY_DT[(m.utcDate || '').substring(0, 16)] || [];
+  if (cands.length === 1) return cands[0];
+  if (cands.length === 0) return null;
+
+  let best = null, bestScore = 0;
+  for (const gid of cands) {
+    const g = SCHEDULE[gid];
+    const sc = tokenOverlap(m.homeTeam?.name, teamTokens(g.home))
+             + tokenOverlap(m.awayTeam?.name, teamTokens(g.away));
+    if (sc > bestScore) { bestScore = sc; best = gid; }
+  }
+  return bestScore > 0 ? best : null;
+}
+
 // ─── Read API key ─────────────────────────────────────────────────────────────
 function readApiKey() {
   if (process.env.API_FOOTBALL_KEY) return process.env.API_FOOTBALL_KEY;
@@ -216,6 +354,159 @@ async function getMatches(season, API_KEY) {
   }
 }
 
+// ─── JSON body parsing (for the prediction-save endpoint) ─────────────────────
+app.use(express.json({ limit: '256kb' }));
+
+// Verify the caller's Firebase ID token from the Authorization header.
+async function verifyUser(req) {
+  const h = req.headers.authorization || '';
+  const token = h.startsWith('Bearer ') ? h.slice(7) : '';
+  if (!token) { const e = new Error('Missing token'); e.status = 401; throw e; }
+  return admin.auth().verifyIdToken(token);
+}
+
+// ─── Save predictions (authenticated, lock-enforced) ──────────────────────────
+// Replaces the old client-side setDoc. Enforces the locks server-side:
+//   • a game prediction is accepted only before that match's kickoff
+//   • champion / runner-up / top-scorer accepted only before PICKS_LOCK_MS
+// Anything locked is silently kept at its stored value (and counted in `rejected`).
+app.post('/api/predictions', async (req, res) => {
+  if (!adminReady) return res.status(503).json({ error: 'Server not configured for writes' });
+
+  let decoded;
+  try { decoded = await verifyUser(req); }
+  catch (e) { return res.status(e.status || 401).json({ error: 'Unauthorized' }); }
+
+  const uid  = decoded.uid;
+  const now  = Date.now();
+  const body = req.body || {};
+  const ref  = adminDb().collection('user_predictions').doc(uid);
+
+  try {
+    const snap = await ref.get();
+    const existing = snap.exists ? snap.data() : {};
+    const out = { ...existing };
+    if (!out.games) out.games = {};
+
+    // Global picks — only writable before the lock.
+    if (now < PICKS_LOCK_MS) {
+      if ('champion'  in body) out.champion  = String(body.champion  || '');
+      if ('runnerUp'  in body) out.runnerUp  = String(body.runnerUp  || '');
+      if ('topScorer' in body) out.topScorer = String(body.topScorer || '').trim();
+    }
+
+    // Per-game predictions — accept only for matches that haven't kicked off.
+    let rejected = 0;
+    const incoming = (body.games && typeof body.games === 'object') ? body.games : {};
+    for (const [gid, pred] of Object.entries(incoming)) {
+      const g = SCHEDULE[gid];
+      if (!g || now >= g.kickoffMs) { rejected++; continue; }  // unknown or locked
+      const ph = pred && pred.home !== '' && pred.home != null ? parseInt(pred.home, 10) : '';
+      const pa = pred && pred.away !== '' && pred.away != null ? parseInt(pred.away, 10) : '';
+      out.games[gid] = {
+        home: (ph === '' || isNaN(ph)) ? '' : ph,
+        away: (pa === '' || isNaN(pa)) ? '' : pa,
+      };
+    }
+
+    out.updatedAt = admin.firestore.FieldValue.serverTimestamp();
+    await ref.set(out, { merge: true });
+    res.json({ ok: true, rejected });
+  } catch (e) {
+    console.error('save predictions error:', e.message);
+    res.status(500).json({ error: 'Save failed' });
+  }
+});
+
+// ─── Results sync + scoring ───────────────────────────────────────────────────
+// Pulls FINISHED fixtures from api-football (reusing the cached getMatches), maps
+// each to our game IDs by kickoff datetime, stores confirmed scores into
+// settings/results.games, then recomputes every user's GLOBAL score from their
+// user_predictions and mirrors it onto their bolao_participants docs (which the
+// per-bolão standings read). The global ranking page computes scores itself.
+let scoringBusy = false;
+async function syncResultsAndScore() {
+  if (!adminReady || scoringBusy) return;
+  const API_KEY = readApiKey();
+  if (!API_KEY) return;
+  scoringBusy = true;
+  try {
+    const { matches } = await getMatches('2026', API_KEY);
+    const db = adminDb();
+
+    const resultsRef = db.collection('settings').doc('results');
+    const resSnap = await resultsRef.get();
+    const results = resSnap.exists ? resSnap.data() : {};
+    if (!results.games) results.games = {};
+
+    let changed = false;
+    for (const m of matches) {
+      if (m.status !== 'FINISHED') continue;
+      const h = m.score?.fullTime?.home;
+      const a = m.score?.fullTime?.away;
+      if (h == null || a == null) continue;
+      const gid = fixtureToGameId(m);
+      if (!gid) {
+        console.warn(`scoring: could not map finished fixture ${m.homeTeam?.name} v ${m.awayTeam?.name} @ ${m.utcDate}`);
+        continue;
+      }
+      const prev = results.games[gid];
+      if (!prev || prev.home !== h || prev.away !== a || !prev.confirmed) {
+        results.games[gid] = { home: h, away: a, confirmed: true };
+        changed = true;
+      }
+    }
+    if (changed) await resultsRef.set({ games: results.games }, { merge: true });
+
+    // Recompute global scores.
+    const fullResults = {
+      games:     results.games,
+      champion:  results.champion  || '',
+      runnerUp:  results.runnerUp  || '',
+      topScorer: results.topScorer || '',
+    };
+    const predsSnap = await db.collection('user_predictions').get();
+    const scoreByUid = {};
+    predsSnap.forEach(d => { scoreByUid[d.id] = calculateScore(d.data() || {}, fullResults); });
+
+    // Mirror onto participations (chunked into ≤400-write batches).
+    const partSnap = await db.collection('bolao_participants').get();
+    const updates = [];
+    partSnap.forEach(d => {
+      const p = d.data();
+      const s = scoreByUid[p.uid];
+      if (!s) return;
+      if (p.points === s.points && p.exactScores === s.exactScores && p.correctResults === s.correctResults) return;
+      updates.push([d.ref, { points: s.points, exactScores: s.exactScores, correctResults: s.correctResults }]);
+    });
+    for (let i = 0; i < updates.length; i += 400) {
+      const batch = db.batch();
+      updates.slice(i, i + 400).forEach(([ref, data]) => batch.set(ref, data, { merge: true }));
+      await batch.commit();
+    }
+    if (changed || updates.length) {
+      console.log(`scoring: results ${changed ? 'updated' : 'unchanged'}, ${updates.length} participant doc(s) rescored`);
+    }
+  } catch (e) {
+    console.error('syncResultsAndScore error:', e.message);
+  } finally {
+    scoringBusy = false;
+  }
+}
+
+// Manual rescore trigger (admin only) — handy right after entering champion/etc.
+app.post('/api/admin/sync', async (req, res) => {
+  if (!adminReady) return res.status(503).json({ error: 'Server not configured' });
+  let decoded;
+  try { decoded = await verifyUser(req); }
+  catch (e) { return res.status(e.status || 401).json({ error: 'Unauthorized' }); }
+  if (!ADMIN_EMAILS.length || !ADMIN_EMAILS.includes((decoded.email || '').toLowerCase())) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+  syncResultsAndScore();
+  res.json({ ok: true, started: true });
+});
+
 // ─── Proxy endpoint ───────────────────────────────────────────────────────────
 // Frontend calls: /api/matches?season=2026
 // Proxy fetches:  https://v3.football.api-sports.io/fixtures?league=1&season=2026
@@ -277,5 +568,14 @@ app.listen(PORT, () => {
   } else {
     console.log(`   ⚠️  No API_FOOTBALL_KEY found — set env var or add to js/config.js`);
   }
+  console.log(`   schedule: ${Object.keys(SCHEDULE).length} games parsed`);
+  console.log(`   firebase-admin: ${adminReady ? 'ready ✓' : 'NOT configured ✗ (set FIREBASE_SERVICE_ACCOUNT)'}`);
   console.log('');
+
+  // Kick off results-sync + scoring loop (every 5 min). getMatches is cached, so
+  // idle periods cost no extra api-football calls beyond the existing TTL.
+  if (adminReady) {
+    syncResultsAndScore();
+    setInterval(syncResultsAndScore, 5 * 60 * 1000);
+  }
 });

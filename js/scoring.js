@@ -129,3 +129,16 @@ function rankParticipants(participants) {
 function getMaxPossiblePoints(remainingGames) {
   return remainingGames * SCORING_RULES.EXACT_SCORE;
 }
+
+// Dual-mode export: in the browser these stay as globals (module is undefined);
+// under Node (server.js) they become a CommonJS module.
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    SCORING_RULES,
+    getResult,
+    scoreGame,
+    calculateScore,
+    rankParticipants,
+    getMaxPossiblePoints,
+  };
+}

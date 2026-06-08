@@ -1,37 +1,76 @@
 // ──────────────────────────────────────────────────────────────────────────
-// PitaCopa — server-side lock for global picks (champion / runnerUp / topScorer)
+// PitaCopa — Firestore rules for the server-enforced prediction/scoring model
 //
-// PASTE THIS *match* BLOCK into your existing ruleset in the Firebase console:
-//   Firebase console → project pitacopa-a2cea → Firestore Database → Rules
-// Add it INSIDE your existing `match /databases/{database}/documents { ... }`.
-// Do NOT replace the whole file — keep your other collections' rules intact.
+// ⚠️ FIRST, CHECK FOR "TEST MODE". Your js/config.js notes Firestore was started
+//    in test mode. If your current rules still look like:
+//        allow read, write: if true;   // (or: request.time < <some date>)
+//    then NONE of the locks below are active yet — anyone can write anything.
+//    You must deploy real rules for the server-side lock to mean anything.
 //
-// Deadline below is 2026-06-12T03:00:00Z, which equals midnight (00:00) in
-// Brazil (UTC-3) on 12/06 — matching PICKS_LOCK_TIME in profile.html.
+// HOW TO DEPLOY: Firebase console → project pitacopa-a2cea → Firestore Database
+//    → Rules. Add/merge the match blocks below INSIDE your existing
+//    `match /databases/{database}/documents { ... }`. Keep the rules for your
+//    other collections (users, boloes, bolao_predictions) — see the note at the
+//    bottom about hardening those too.
 // ──────────────────────────────────────────────────────────────────────────
 
-match /user_predictions/{uid} {
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
 
-  // Adjust read scope to match your app (ranking reads other users' picks).
-  allow read: if request.auth != null;
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email in ['pissinali@gmail.com'];
+    }
 
-  // First-time creation: only the owner, and only before the deadline.
-  allow create: if request.auth != null
-                && request.auth.uid == uid
-                && request.time < timestamp.value(1781233200000);
+    // ── Global predictions ──────────────────────────────────────────────────
+    // Signed-in users may READ (ranking/bolão pages need this). NO client writes:
+    // saves go through the server's POST /api/predictions, which uses the Admin
+    // SDK (bypasses these rules) and enforces the per-match + global-pick locks.
+    match /user_predictions/{uid} {
+      allow read:  if isSignedIn();
+      allow write: if false;
+    }
 
-  // Updates: owner only. After the deadline, the three global picks must stay
-  // identical to what's already stored (game predictions can still change).
-  allow update: if request.auth != null
-                && request.auth.uid == uid
-                && (
-                     request.time < timestamp.value(1781233200000)
-                     || (
-                          request.resource.data.get('champion',  '') == resource.data.get('champion',  '')
-                       && request.resource.data.get('runnerUp',  '') == resource.data.get('runnerUp',  '')
-                       && request.resource.data.get('topScorer', '') == resource.data.get('topScorer', '')
-                     )
-                   );
+    // ── Tournament results & settings ───────────────────────────────────────
+    // Public read. Admin may set champion/runnerUp/topScorer (and extra players)
+    // from the admin page. The server writes results.games (confirmed match
+    // scores) via the Admin SDK, bypassing these rules. Blocking everyone else
+    // stops a user from forging match scores to inflate the ranking.
+    match /settings/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
 
-  allow delete: if false;
+    // ── Bolão participations ────────────────────────────────────────────────
+    // Users join (create their own row) and may tidy their own row, but can NEVER
+    // set or change the scoring fields — those are written only by the server.
+    match /bolao_participants/{partId} {
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.points == 0
+                    && request.resource.data.exactScores == 0
+                    && request.resource.data.correctResults == 0;
+
+      allow update: if isSignedIn()
+                    && resource.data.uid == request.auth.uid
+                    && request.resource.data.points         == resource.data.points
+                    && request.resource.data.exactScores    == resource.data.exactScores
+                    && request.resource.data.correctResults == resource.data.correctResults;
+
+      allow delete: if isSignedIn()
+                    && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+  }
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// NOT INCLUDED (left to you): rules for `users`, `boloes`, and
+// `bolao_predictions`. They have their own intended access patterns that need a
+// careful per-write audit before locking down. If you want, ask and I'll trace
+// every client write across the app and produce a complete hardened ruleset.
+// Until then, keep your existing rules for those collections so nothing breaks.
+// ──────────────────────────────────────────────────────────────────────────

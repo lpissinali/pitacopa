@@ -268,6 +268,9 @@
 })();
 </script>
 
+<!-- Scoring math (defines window.calculateScore for the module below) -->
+<script src="js/scoring.js"></script>
+
 <script type="module">
 import { auth, db } from './js/config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -327,7 +330,7 @@ async function loadRanking() {
       ]);
     }
 
-    // Tournament actual results (filled after tournament ends)
+    // Tournament actual results (champion/runnerUp/topScorer + confirmed game scores)
     const results      = resultsSnap.exists() ? resultsSnap.data() : {};
     const actualChamp  = results.champion  || '';
     const actualRunner = results.runnerUp  || '';
@@ -340,29 +343,23 @@ async function loadRanking() {
     const users = {};
     usersSnap.forEach(d => { users[d.id] = d.data(); });
 
-    // Aggregate points, exactScores, correctResults from all bolão participations
-    const pointsByUser   = {};
-    const exactsByUser   = {};
-    const resultsByUser  = {};
-    partSnap.forEach(d => {
-      const p = d.data();
-      if (!p.uid) return;
-      pointsByUser[p.uid]  = (pointsByUser[p.uid]  || 0) + (p.points        || 0);
-      exactsByUser[p.uid]  = (exactsByUser[p.uid]  || 0) + (p.exactScores   || 0);
-      resultsByUser[p.uid] = (resultsByUser[p.uid] || 0) + (p.correctResults || 0);
-    });
-
-    // Build player list with tiebreaker fields — exclude disabled accounts
+    // Build player list — each user's GLOBAL score is computed once from their
+    // predictions vs the official results (predictions are global, so a user has
+    // the same score in every bolão). Computing here avoids the old bug of summing
+    // a user's points across all their bolão participations (double-counting).
     allPlayers = Object.entries(users).filter(([, u]) => !u.disabled).map(([uid, u]) => {
       const preds = predsByUid[uid] || {};
+      const score = (typeof calculateScore === 'function')
+        ? calculateScore(preds, results)
+        : { points: 0, exactScores: 0, correctResults: 0 };
       return {
         uid,
         name:           u.name    || 'Anônimo',
         country:        u.country || '',
         photoURL:       u.photoURL || '',
-        totalPoints:    pointsByUser[uid]  || 0,
-        exactScores:    exactsByUser[uid]  || 0,
-        correctResults: resultsByUser[uid] || 0,
+        totalPoints:    score.points         || 0,
+        exactScores:    score.exactScores     || 0,
+        correctResults: score.correctResults  || 0,
         championCorrect: actualChamp  && preds.champion === actualChamp  ? 1 : 0,
         runnerUpCorrect: actualRunner && preds.runnerUp === actualRunner ? 1 : 0,
       };

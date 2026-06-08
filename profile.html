@@ -1048,19 +1048,41 @@ function renderGames() {
 
 // ── Save predictions ───────────────────────────────────────────────────────
 document.getElementById('btnSavePreds').addEventListener('click', async () => {
+  const btn = document.getElementById('btnSavePreds');
   try {
-    // Once the tournament has started, the global picks are locked — don't
-    // overwrite champion / runner-up / top-scorer (game predictions still save).
+    btn.disabled = true;
+    // Writes go through the server, which enforces the locks (per-match kickoff +
+    // global picks) using its own clock — so they can't be bypassed client-side.
+    const payload = { games: userPreds.games || {} };
+    // Client-side lock is just UX; the server is the real gate. Don't even send
+    // the global picks once locked.
     if (!predsLocked) {
-      userPreds.champion  = document.getElementById('pickChampion').value;
-      userPreds.runnerUp  = document.getElementById('pickRunner').value;
-      userPreds.topScorer = document.getElementById('pickTopScorer').value.trim();
+      payload.champion  = document.getElementById('pickChampion').value;
+      payload.runnerUp  = document.getElementById('pickRunner').value;
+      payload.topScorer = document.getElementById('pickTopScorer').value.trim();
     }
-    userPreds.updatedAt = serverTimestamp();
-    await setDoc(doc(db, 'user_predictions', currentUser.uid), userPreds, { merge: true });
-    showToast(t('toast_preds_saved'), 'success');
+    const token = await currentUser.getIdToken();
+    const res = await fetch('/api/predictions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!predsLocked) {
+      userPreds.champion  = payload.champion;
+      userPreds.runnerUp  = payload.runnerUp;
+      userPreds.topScorer = payload.topScorer;
+    }
+    if (data.rejected) {
+      showToast(t('toast_preds_saved') + ` (${data.rejected} jogo(s) já bloqueado(s) não foram alterados)`, 'info');
+    } else {
+      showToast(t('toast_preds_saved'), 'success');
+    }
   } catch(e) {
     showToast(t('toast_save_error') + ' ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
   }
 });
 

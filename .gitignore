@@ -13,6 +13,8 @@ yarn.lock
 .env.local
 .env.*.local
 serviceAccountKey.json
+serviceAccountKey*.json
+serviceAccountKey.railway.txt
 backup-*.json
 
 # ── OS files ──────────────────────────────────────────────────────────────────
