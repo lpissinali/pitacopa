@@ -204,6 +204,79 @@
       .score-nums:not(.pending) { flex-direction: column; gap: 2px; }
       .score-sep { display: none; }
     }
+
+    /* ── Two-column layout: games + group standings ─────────────────────────── */
+    .games-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 28px;
+      align-items: start;
+    }
+    .groups-panel {
+      position: sticky;
+      top: 16px;
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+    }
+    /* Match .stage-header metrics so this title lines up with the first games
+       section header on the left column (same top offset, padding, border). */
+    .groups-title {
+      font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .06em; padding: 12px 0 8px; margin-top: 24px;
+      border-bottom: 1px solid var(--border); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .grp-card {
+      background: var(--card, #fff);
+      border: 1px solid var(--border, #e6e8ec);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    .grp-card h4 {
+      font-size: 12px; font-weight: 800; color: var(--navy, #0f172a);
+      padding: 8px 10px; background: var(--bg-2, #f6f7f9);
+      border-bottom: 1px solid var(--border, #e6e8ec);
+    }
+    .grp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .grp-table th {
+      font-size: 9.5px; font-weight: 700; color: var(--muted, #6b7280);
+      text-transform: uppercase; padding: 5px 3px; text-align: center;
+    }
+    .grp-table th:first-child, .grp-table td:first-child { padding-left: 8px; }
+    .grp-table th.t-team, .grp-table td.t-team { text-align: left; }
+    .grp-table td {
+      padding: 5px 3px; text-align: center; color: var(--navy, #0f172a);
+      border-top: 1px solid var(--border, #eef0f3);
+    }
+    .grp-table td.t-pts { font-weight: 800; }
+    .grp-table td.t-team {
+      display: flex; align-items: center; gap: 6px; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis; max-width: 150px;
+    }
+    .grp-table td.t-team .fi { border-radius: 2px; flex: none; }
+    .grp-table td.t-team span.nm { overflow: hidden; text-overflow: ellipsis; }
+    .grp-table tr.qualify td:first-child { box-shadow: inset 3px 0 0 var(--gold, #f5a623); }
+    .grp-pos { color: var(--muted, #9aa1ad); font-weight: 700; }
+
+    /* Mobile view toggle (hidden on desktop) */
+    .games-view-toggle { display: none; }
+
+    @media (max-width: 900px) {
+      .games-layout { grid-template-columns: 1fr; gap: 0; }
+      .groups-panel { position: static; max-height: none; overflow: visible; margin-top: 8px; }
+      .games-view-toggle {
+        display: flex; gap: 6px; margin-bottom: 16px;
+        background: var(--bg-2, #f0f1f4); padding: 4px; border-radius: 10px;
+      }
+      .gv-btn {
+        flex: 1; padding: 9px 12px; border: none; background: transparent; cursor: pointer;
+        font-size: 13px; font-weight: 700; color: var(--muted, #6b7280); border-radius: 7px;
+      }
+      .gv-btn.active { background: var(--card, #fff); color: var(--navy, #0f172a); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+      .games-layout[data-view="jogos"]  .groups-panel { display: none; }
+      .games-layout[data-view="grupos"] .games-col    { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -302,8 +375,18 @@
     <p id="errorMsg"></p>
     <button class="btn btn-primary" onclick="location.reload()">Tentar novamente</button>
   </div>
-  <div id="gamesWrap" style="display:none;"></div>
-  <div class="no-results" id="noResults" style="display:none;">Nenhuma seleção encontrada.</div>
+  <div class="games-view-toggle" id="gamesViewToggle">
+    <button class="gv-btn active" data-view="jogos">Jogos</button>
+    <button class="gv-btn" data-view="grupos">Grupos</button>
+  </div>
+
+  <div class="games-layout" id="gamesLayout" data-view="jogos">
+    <div class="games-col">
+      <div id="gamesWrap" style="display:none;"></div>
+      <div class="no-results" id="noResults" style="display:none;">Nenhuma seleção encontrada.</div>
+    </div>
+    <aside class="groups-panel" id="groupsPanel"></aside>
+  </div>
 </div>
 
 <!-- ── Plain script: nav, lang switch active state, Lucide init ─────────── -->
@@ -454,7 +537,7 @@ async function loadMatches() {
 
   // 5-min session cache
   try {
-    const cached = sessionStorage.getItem('pitacopa_matches_v10');
+    const cached = sessionStorage.getItem('pitacopa_matches_v11');
     if (cached) {
       const { ts, data } = JSON.parse(cached);
       if (Date.now() - ts < 5 * 60 * 1000) {
@@ -475,37 +558,37 @@ async function loadMatches() {
     const live = data.matches || [];
     if (!live.length) throw new Error('No matches returned');
 
-    // Build a lookup from UTC datetime (first 16 chars = YYYY-MM-DDTHH:MM) → index in allMatches
+    // Index the static schedule by wc2026 id and by kickoff datetime.
+    const fallbackById = {};
     const fallbackByDT = {};
     allMatches.forEach((m, i) => {
+      fallbackById[m.id] = i;
       const key = (m.utcDate || '').substring(0, 16);
-      if (key) fallbackByDT[key] = i;
+      if (key && fallbackByDT[key] === undefined) fallbackByDT[key] = i;
     });
 
-    // Merge each API match into the corresponding fallback entry, preserving the wc2026 ID
+    // The static schedule (wc2026.js) is the source of truth for identity —
+    // id, stage, group, teams, kickoff. We only overlay live STATUS + SCORE from
+    // the API, so api round/group quirks can never scramble the grouping or order.
+    // remapMatchId() resolves the API fixture to our game id by teams (reliable
+    // even when matches kick off simultaneously); we fall back to datetime only
+    // when the id can't be resolved (e.g. knockout slots with TBD teams).
     live.forEach(apiM => {
-      const apiM2 = remapMatchId({ ...apiM }); // normalize stage string etc.
-      const key = (apiM2.utcDate || '').substring(0, 16);
-      if (key && fallbackByDT[key] !== undefined) {
-        const idx = fallbackByDT[key];
-        const savedId = allMatches[idx].id; // wc2026 ID (e.g. "G001", "R32-01")
-        // Preserve _flag from fallback (API team objects don't carry it)
-        const homeFlag = allMatches[idx].homeTeam?._flag
-          || (apiM2.homeTeam?.name && flagByName[apiM2.homeTeam.name.toLowerCase()])
-          || '';
-        const awayFlag = allMatches[idx].awayTeam?._flag
-          || (apiM2.awayTeam?.name && flagByName[apiM2.awayTeam.name.toLowerCase()])
-          || '';
-        allMatches[idx] = {
-          ...apiM2,
-          id: savedId,
-          homeTeam: { ...apiM2.homeTeam, _flag: homeFlag },
-          awayTeam: { ...apiM2.awayTeam, _flag: awayFlag },
-        };
+      const apiM2 = remapMatchId({ ...apiM });
+      let idx = fallbackById[apiM2.id];
+      if (idx === undefined) {
+        const key = (apiM2.utcDate || '').substring(0, 16);
+        idx = fallbackByDT[key];
       }
+      if (idx === undefined) return;
+      allMatches[idx] = {
+        ...allMatches[idx],     // keep static identity (id, stage, group, teams, date, _flag)
+        status: apiM2.status,   // live status from API
+        score:  apiM2.score,    // live / final score from API
+      };
     });
 
-    sessionStorage.setItem('pitacopa_matches_v10', JSON.stringify({ ts: Date.now(), data: allMatches }));
+    sessionStorage.setItem('pitacopa_matches_v11', JSON.stringify({ ts: Date.now(), data: allMatches }));
     buildUI();
   } catch(err) {
     console.warn('API unavailable:', err.message, '— showing static schedule');
@@ -570,10 +653,25 @@ function buildUI() {
   document.getElementById('gamesWrap').style.display    = 'block';
   buildFilters();
   render();
-  document.getElementById('searchInput').addEventListener('input', e => {
-    searchQuery = e.target.value.toLowerCase().trim();
-    render();
-  });
+  renderGroups();
+  if (!buildUI._wired) {
+    buildUI._wired = true;
+    document.getElementById('searchInput').addEventListener('input', e => {
+      searchQuery = e.target.value.toLowerCase().trim();
+      render();
+    });
+    // Mobile Jogos / Grupos toggle
+    const tg = document.getElementById('gamesViewToggle');
+    const layout = document.getElementById('gamesLayout');
+    if (tg && layout) {
+      tg.addEventListener('click', e => {
+        const btn = e.target.closest('.gv-btn');
+        if (!btn) return;
+        layout.dataset.view = btn.dataset.view;
+        tg.querySelectorAll('.gv-btn').forEach(b => b.classList.toggle('active', b === btn));
+      });
+    }
+  }
   if (window.lucide) lucide.createIcons();
 }
 
@@ -658,6 +756,89 @@ function render() {
       sec.matches.forEach(m => grid.appendChild(buildCard(m)));
     });
 
+  if (window.lucide) lucide.createIcons();
+}
+
+/* ── Group standings (computed from finished group-stage results) ─────── */
+function computeStandings() {
+  // Final scores keyed by wc2026 game id (e.g. "G001").
+  const scoreById = {};
+  allMatches.forEach(m => {
+    if (m.status === 'FINISHED' && m.score && m.score.fullTime && m.score.fullTime.home != null) {
+      scoreById[m.id] = { h: m.score.fullTime.home, a: m.score.fullTime.away };
+    }
+  });
+
+  // Seed every group from the static team list (reliable codes + names + flags).
+  const TEAMS = (typeof WC2026_TEAMS !== 'undefined') ? WC2026_TEAMS : {};
+  const groups = {};
+  Object.entries(TEAMS).forEach(([grp, teams]) => {
+    groups[grp] = {};
+    teams.forEach(tm => {
+      groups[grp][tm.id] = { id: tm.id, name: tm.name, flag: tm.flag, P:0, J:0, V:0, E:0, D:0, GP:0, GC:0 };
+    });
+  });
+
+  // Accumulate from finished group games (static ALL_GAMES gives codes + group).
+  (typeof ALL_GAMES !== 'undefined' ? ALL_GAMES : []).forEach(g => {
+    if (g.stage !== 'group') return;
+    const sc = scoreById[g.id];
+    if (!sc) return;
+    const H = groups[g.group] && groups[g.group][g.home];
+    const A = groups[g.group] && groups[g.group][g.away];
+    if (!H || !A) return;
+    H.J++; A.J++;
+    H.GP += sc.h; H.GC += sc.a; A.GP += sc.a; A.GC += sc.h;
+    if (sc.h > sc.a)      { H.V++; H.P += 3; A.D++; }
+    else if (sc.h < sc.a) { A.V++; A.P += 3; H.D++; }
+    else                  { H.E++; A.E++; H.P++; A.P++; }
+  });
+
+  // Sort each group: points → goal difference → goals for → name.
+  Object.keys(groups).forEach(grp => {
+    groups[grp] = Object.values(groups[grp]).sort((x, y) => {
+      if (y.P !== x.P) return y.P - x.P;
+      const sgx = x.GP - x.GC, sgy = y.GP - y.GC;
+      if (sgy !== sgx) return sgy - sgx;
+      if (y.GP !== x.GP) return y.GP - x.GP;
+      return (x.name || '').localeCompare(y.name || '');
+    });
+  });
+  return groups;
+}
+
+function renderGroups() {
+  const panel = document.getElementById('groupsPanel');
+  if (!panel) return;
+  const groups = computeStandings();
+  const grpKeys = Object.keys(groups).sort();
+  if (!grpKeys.length) { panel.innerHTML = ''; return; }
+
+  let html = `<div class="groups-title"><i data-lucide="trophy" width="13" height="13"></i> Classificação dos Grupos</div>`;
+  grpKeys.forEach(grp => {
+    const rows = groups[grp].map((tm, i) => {
+      const sg = tm.GP - tm.GC;
+      const sgStr = sg > 0 ? '+' + sg : String(sg);
+      return `<tr class="${i < 2 ? 'qualify' : ''}">
+        <td><span class="grp-pos">${i + 1}</span></td>
+        <td class="t-team">${flagHtml(tm.flag)}<span class="nm">${tm.name}</span></td>
+        <td class="t-pts">${tm.P}</td>
+        <td>${tm.J}</td><td>${tm.V}</td><td>${tm.E}</td><td>${tm.D}</td>
+        <td>${tm.GP}</td><td>${tm.GC}</td><td>${sgStr}</td>
+      </tr>`;
+    }).join('');
+    html += `<div class="grp-card">
+      <h4>${t('label_group')} ${grp}</h4>
+      <table class="grp-table">
+        <thead><tr>
+          <th>#</th><th class="t-team">Seleção</th>
+          <th>P</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  });
+  panel.innerHTML = html;
   if (window.lucide) lucide.createIcons();
 }
 
