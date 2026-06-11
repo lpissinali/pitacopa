@@ -132,6 +132,7 @@
     .badge-timed,.badge-scheduled { background: var(--bg-3); color: var(--muted); }
     .badge-live { background: var(--gold-l2); color: var(--gold-d); animation: pulse-badge 1.8s ease infinite; }
     @keyframes pulse-badge { 0%,100%{opacity:1} 50%{opacity:.5} }
+    @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.85)} }
     .badge-finished { background: var(--green-l); color: var(--green-d); }
     .badge-postponed { background: #fee2e2; color: #dc2626; }
 
@@ -347,6 +348,10 @@
   ⚠️ Usando dados locais — inicie com <code>node server.js</code> para resultados ao vivo.
 </div>
 <div class="status-banner banner-error" id="bannerError"></div>
+<div id="liveIndicator" style="display:none;align-items:center;justify-content:center;gap:8px;padding:8px 16px;background:rgba(220,38,38,.08);border-bottom:1px solid rgba(220,38,38,.2);font-size:13px;font-weight:600;color:#dc2626;">
+  <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#dc2626;animation:livePulse 1.2s ease-in-out infinite;"></span>
+  AO VIVO · Atualizando a cada 30s
+</div>
 
 <!-- FILTER BAR -->
 <div class="filter-bar">
@@ -530,18 +535,85 @@ document.getElementById('btnLogout').addEventListener('click', async () => {
   await signOut(auth); location.reload();
 });
 
+/* ── Live polling ────────────────────────────────────────────────────── */
+let pollTimer = null;
+const POLL_INTERVAL = 30_000; // 30 s
+
+function hasLiveMatches() {
+  return allMatches.some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
+}
+
+function stopPolling() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+function schedulePoll() {
+  stopPolling();
+  if (!hasLiveMatches()) return;
+
+  pollTimer = setInterval(async () => {
+    try {
+      await fetchAndMerge();
+      render();
+      renderGroups();
+      if (!hasLiveMatches()) { stopPolling(); updateLiveBanner(false); }
+    } catch(err) {
+      console.warn('Live poll failed:', err.message);
+    }
+  }, POLL_INTERVAL);
+}
+
+function updateLiveBanner(visible) {
+  let el = document.getElementById('liveIndicator');
+  if (!el) return;
+  el.style.display = visible ? 'flex' : 'none';
+}
+
+/* Core fetch+merge (shared by initial load and polls) */
+async function fetchAndMerge() {
+  const res = await fetch('/api/matches?season=2026');
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  const live = data.matches || [];
+  if (!live.length) throw new Error('No matches returned');
+
+  const fallbackById = {};
+  const fallbackByDT = {};
+  allMatches.forEach((m, i) => {
+    fallbackById[m.id] = i;
+    const key = (m.utcDate || '').substring(0, 16);
+    if (key && fallbackByDT[key] === undefined) fallbackByDT[key] = i;
+  });
+
+  live.forEach(apiM => {
+    const apiM2 = remapMatchId({ ...apiM });
+    let idx = fallbackById[apiM2.id];
+    if (idx === undefined) {
+      const key = (apiM2.utcDate || '').substring(0, 16);
+      idx = fallbackByDT[key];
+    }
+    if (idx === undefined) return;
+    allMatches[idx] = {
+      ...allMatches[idx],
+      status: apiM2.status,
+      score:  apiM2.score,
+    };
+  });
+}
+
 /* ── Fetch ────────────────────────────────────────────────────────────── */
 async function loadMatches() {
   // Render static data immediately so the page feels instant (no banner — this is just a preview)
   loadFallback(false);
 
-  // 5-min session cache
+  // 5-min session cache — skipped if it contains live matches (scores could be stale)
   try {
     const cached = sessionStorage.getItem('pitacopa_matches_v11');
     if (cached) {
       const { ts, data } = JSON.parse(cached);
-      if (Date.now() - ts < 5 * 60 * 1000) {
-        // data was saved with wc2026 IDs already merged — just use it
+      const hasLiveInCache = data.some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
+      if (!hasLiveInCache && Date.now() - ts < 5 * 60 * 1000) {
         allMatches = data;
         buildUI();
         return;
@@ -551,45 +623,16 @@ async function loadMatches() {
 
   // Fetch live scores from API and merge into fallback (keeping wc2026 IDs)
   try {
-    const res = await fetch('/api/matches?season=2026');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    const live = data.matches || [];
-    if (!live.length) throw new Error('No matches returned');
+    await fetchAndMerge();
 
-    // Index the static schedule by wc2026 id and by kickoff datetime.
-    const fallbackById = {};
-    const fallbackByDT = {};
-    allMatches.forEach((m, i) => {
-      fallbackById[m.id] = i;
-      const key = (m.utcDate || '').substring(0, 16);
-      if (key && fallbackByDT[key] === undefined) fallbackByDT[key] = i;
-    });
+    // Only cache when no live matches are running (avoid serving stale scores)
+    if (!hasLiveMatches()) {
+      sessionStorage.setItem('pitacopa_matches_v11', JSON.stringify({ ts: Date.now(), data: allMatches }));
+    }
 
-    // The static schedule (wc2026.js) is the source of truth for identity —
-    // id, stage, group, teams, kickoff. We only overlay live STATUS + SCORE from
-    // the API, so api round/group quirks can never scramble the grouping or order.
-    // remapMatchId() resolves the API fixture to our game id by teams (reliable
-    // even when matches kick off simultaneously); we fall back to datetime only
-    // when the id can't be resolved (e.g. knockout slots with TBD teams).
-    live.forEach(apiM => {
-      const apiM2 = remapMatchId({ ...apiM });
-      let idx = fallbackById[apiM2.id];
-      if (idx === undefined) {
-        const key = (apiM2.utcDate || '').substring(0, 16);
-        idx = fallbackByDT[key];
-      }
-      if (idx === undefined) return;
-      allMatches[idx] = {
-        ...allMatches[idx],     // keep static identity (id, stage, group, teams, date, _flag)
-        status: apiM2.status,   // live status from API
-        score:  apiM2.score,    // live / final score from API
-      };
-    });
-
-    sessionStorage.setItem('pitacopa_matches_v11', JSON.stringify({ ts: Date.now(), data: allMatches }));
     buildUI();
+    updateLiveBanner(hasLiveMatches());
+    schedulePoll();
   } catch(err) {
     console.warn('API unavailable:', err.message, '— showing static schedule');
     // banner suppressed — fallback data already rendered by loadFallback() above
