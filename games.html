@@ -133,6 +133,12 @@
     .badge-live { background: var(--gold-l2); color: var(--gold-d); animation: pulse-badge 1.8s ease infinite; }
     @keyframes pulse-badge { 0%,100%{opacity:1} 50%{opacity:.5} }
     @keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.85)} }
+    .match-elapsed { display:block; font-weight:800; line-height:1.1; text-align:center; }
+    .match-elapsed.live { font-size:20px; color:#dc2626; }
+    .match-elapsed.live sup { font-size:12px; }
+    .match-elapsed.live small { display:block; font-size:10px; font-weight:700; color:var(--muted); margin-top:2px; }
+    .match-elapsed.paused { font-size:15px; color:var(--gold-d); letter-spacing:.03em; }
+    .match-elapsed.finished { font-size:17px; color:var(--muted); letter-spacing:.05em; }
     .badge-finished { background: var(--green-l); color: var(--green-d); }
     .badge-postponed { background: #fee2e2; color: #dc2626; }
 
@@ -596,8 +602,10 @@ async function fetchAndMerge() {
     if (idx === undefined) return;
     allMatches[idx] = {
       ...allMatches[idx],
-      status: apiM2.status,
-      score:  apiM2.score,
+      status:      apiM2.status,
+      score:       apiM2.score,
+      elapsed:     apiM2.elapsed     ?? null,
+      statusShort: apiM2.statusShort ?? null,
     };
   });
 }
@@ -896,14 +904,33 @@ function buildCard(m) {
   const isFinished = m.status === 'FINISHED';
   const isLive     = m.status === 'IN_PLAY' || m.status === 'PAUSED';
 
-  // Status badge (shown below time)
-  const badgeMap = {
-    FINISHED:  `<span class="status-badge badge-finished"><i data-lucide="check" width="10" height="10"></i> FT</span>`,
-    IN_PLAY:   `<span class="status-badge badge-live">⚡ AO VIVO</span>`,
-    PAUSED:    `<span class="status-badge badge-live">⚡ INTERVALO</span>`,
-    POSTPONED: `<span class="status-badge badge-postponed">${t('label_postponed')}</span>`,
-  };
-  const badge = badgeMap[m.status] || '';
+  // Date column content — elapsed time while live, FT when done, date+time otherwise
+  let dateColHtml;
+  if (isLive) {
+    const ss = m.statusShort;
+    let inner;
+    if (ss === 'HT') {
+      inner = `<span class="match-elapsed paused">HT</span>`;
+    } else if (ss === 'BT') {
+      inner = `<span class="match-elapsed paused">ET HT</span>`;
+    } else if (ss === 'P') {
+      inner = `<span class="match-elapsed live">${m.elapsed ?? '—'}<sup>′</sup><br><small>PEN</small></span>`;
+    } else if (ss === 'ET') {
+      inner = `<span class="match-elapsed live">${m.elapsed ?? '—'}<sup>′</sup><br><small>ET</small></span>`;
+    } else {
+      inner = `<span class="match-elapsed live">${m.elapsed ?? '—'}<sup>′</sup></span>`;
+    }
+    dateColHtml = inner + `<div style="margin-top:4px;"><span class="status-badge badge-live">⚡ AO VIVO</span></div>`;
+  } else if (isFinished) {
+    dateColHtml = `<span class="match-elapsed finished">FT</span>`;
+  } else {
+    dateColHtml = `${dateStr}<br><small>${timeStr}</small>`;
+  }
+
+  // Non-live/finished badges (postponed etc.)
+  const badge = (!isLive && !isFinished)
+    ? (m.status === 'POSTPONED' ? `<span class="status-badge badge-postponed">${t('label_postponed')}</span>` : '')
+    : '';
 
   // Score display
   const sc        = m.score?.fullTime;
@@ -943,7 +970,7 @@ function buildCard(m) {
 
   row.innerHTML = `
     <div class="game-date">
-      ${dateStr}<br><small>${timeStr}</small>
+      ${dateColHtml}
       ${badge ? '<div style="margin-top:4px;">' + badge + '</div>' : ''}
     </div>
     <div class="game-teams">

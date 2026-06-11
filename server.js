@@ -260,7 +260,11 @@ function normaliseFixture(f) {
     crest:     f.teams?.away?.logo || null,
   };
 
-  return { utcDate, status, stage, group, homeTeam, awayTeam, score };
+  return {
+    utcDate, status, stage, group, homeTeam, awayTeam, score,
+    elapsed:     f.fixture?.status?.elapsed ?? null,  // minutes played (null when not live)
+    statusShort: f.fixture?.status?.short  ?? null,   // raw code: '1H','HT','2H','ET','BT','P'…
+  };
 }
 
 // ─── www → canonical redirect ─────────────────────────────────────────────────
