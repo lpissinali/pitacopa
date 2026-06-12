@@ -922,7 +922,9 @@ function buildCard(m) {
     }
     dateColHtml = inner + `<div style="margin-top:4px;"><span class="status-badge badge-live">⚡ AO VIVO</span></div>`;
   } else if (isFinished) {
-    dateColHtml = `<span class="match-elapsed finished">FT</span>`;
+    const ss = m.statusShort;
+    const ftLabel = ss === 'PEN' ? 'PEN' : ss === 'AET' ? 'AET' : 'FT';
+    dateColHtml = `<span class="match-elapsed finished">${ftLabel}</span>`;
   } else {
     dateColHtml = `${dateStr}<br><small>${timeStr}</small>`;
   }
@@ -933,9 +935,16 @@ function buildCard(m) {
     : '';
 
   // Score display
-  const sc        = m.score?.fullTime;
-  const scoreHtml = (isFinished || isLive) && sc?.home !== null
-    ? `<div class="score-nums"><span class="score-num">${sc.home}</span><span class="score-sep"> – </span><span class="score-num">${sc.away}</span></div>`
+  // scDisplay = what we show on screen (includes ET goals during live/finished AET)
+  // scFull    = 90-min score only, used EXCLUSIVELY for point calculation
+  const scDisplay  = m.score?.liveScore ?? m.score?.fullTime;
+  const scFull     = m.score?.fullTime;
+  const hasPen     = m.score?.penalty?.home != null;
+  const penLabel   = hasPen
+    ? `<span style="font-size:10px;color:var(--muted);display:block;text-align:center;margin-top:2px;">(p. ${m.score.penalty.home}–${m.score.penalty.away})</span>`
+    : '';
+  const scoreHtml  = (isFinished || isLive) && scDisplay?.home !== null
+    ? `<div class="score-nums"><span class="score-num">${scDisplay.home}</span><span class="score-sep"> – </span><span class="score-num">${scDisplay.away}</span></div>${hasPen && isFinished ? penLabel : ''}`
     : `<div class="score-nums pending">vs</div>`;
 
   // Flags — use flagHtml() (flag-icons CSS spans, same as profile page)
@@ -944,18 +953,18 @@ function buildCard(m) {
   const homeName = m.homeTeam?.shortName || m.homeTeam?.name || '?';
   const awayName = m.awayTeam?.shortName || m.awayTeam?.name || '?';
 
-  // Prediction column
+  // Prediction column — points based on 90-min score (scFull), not including ET/pens
   let predHtml = '';
   if (currentUser) {
     const pred = (userPreds.games || {})[m.id];
     const has  = pred && pred.home !== undefined && pred.home !== '' && pred.away !== undefined && pred.away !== '';
     if (has) {
       let cls = '', ptsHtml = '';
-      if (isFinished && sc?.home !== null) {
+      if (isFinished && scFull?.home !== null) {
         const win   = s => s.home > s.away, draw = s => s.home === s.away;
-        const exact = pred.home === sc.home && pred.away === sc.away;
-        const correct = exact || (win(pred) && win(sc)) || (draw(pred) && draw(sc))
-                     || (!win(pred) && !draw(pred) && !win(sc) && !draw(sc));
+        const exact = pred.home === scFull.home && pred.away === scFull.away;
+        const correct = exact || (win(pred) && win(scFull)) || (draw(pred) && draw(scFull))
+                     || (!win(pred) && !draw(pred) && !win(scFull) && !draw(scFull));
         cls = exact ? 'exact' : correct ? 'correct' : 'wrong';
         const pts = exact ? 3 : correct ? 1 : 0;
         ptsHtml = `<div><span class="pts-chip pts${pts}">${pts}pt</span></div>`;

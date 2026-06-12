@@ -233,14 +233,31 @@ function normaliseFixture(f) {
     : null;
 
   // ── Score ────────────────────────────────────────────────────────────────────
+  // IMPORTANT: f.score.fulltime = 90-minute score only (used for point calculation)
+  //            f.goals          = total goals including extra time (used for display)
+  //            f.score.penalty  = penalty shootout score (separate, not added to goals)
   const score = {
     fullTime: {
-      home: f.goals?.home  ?? null,
-      away: f.goals?.away  ?? null,
+      // 90-min score — this is what predictions are scored against
+      home: f.score?.fulltime?.home ?? null,
+      away: f.score?.fulltime?.away ?? null,
     },
     halfTime: {
       home: f.score?.halftime?.home ?? null,
       away: f.score?.halftime?.away ?? null,
+    },
+    extraTime: {
+      home: f.score?.extratime?.home ?? null,
+      away: f.score?.extratime?.away ?? null,
+    },
+    penalty: {
+      home: f.score?.penalty?.home ?? null,
+      away: f.score?.penalty?.away ?? null,
+    },
+    // Total goals including ET (not penalties) — used only for visual display
+    liveScore: {
+      home: f.goals?.home ?? null,
+      away: f.goals?.away ?? null,
     },
   };
 
