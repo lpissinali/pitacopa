@@ -326,6 +326,15 @@ function ttlForMatches(matches) {
   for (const m of matches) {
     if (!m.utcDate) continue;
     const t = new Date(m.utcDate).getTime();
+    // KICKED OFF but this snapshot still says TIMED: api-football flips the
+    // status a minute or two after the real kickoff, so a snapshot cached in
+    // that gap looks "idle" and (without this guard) would be held for the
+    // full hour — exactly what froze Canada–Bosnia at TIMED minutes into the
+    // match. Keep refreshing at the live TTL until the status flips or the
+    // match window passes.
+    if (m.status === 'TIMED' && t <= now && now - t < SYNC_WINDOW_AFTER_MS) {
+      return LIVE_TTL_MS;
+    }
     if (t > now && t < nextKickoff) nextKickoff = t;
   }
   const untilKickoff = nextKickoff - now;

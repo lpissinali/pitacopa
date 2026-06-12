@@ -549,20 +549,40 @@ function hasLiveMatches() {
   return allMatches.some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
 }
 
+// A match inside its kickoff window (kicked off less than ~4h ago) that the
+// data still lists as TIMED is almost certainly live — api-football flips the
+// status a few minutes after the real kickoff, and the proxy may briefly
+// serve a pre-kickoff snapshot. Poll through that gap so the page picks the
+// match up the moment the status flips, instead of staying frozen pre-game.
+const KICKOFF_WINDOW_MS = 4 * 60 * 60 * 1000;
+function hasMatchInKickoffWindow() {
+  const now = Date.now();
+  return allMatches.some(m => {
+    if (m.status !== 'TIMED' || !m.utcDate) return false;
+    const t = new Date(m.utcDate).getTime();
+    return t <= now && now - t < KICKOFF_WINDOW_MS;
+  });
+}
+
+function shouldPoll() {
+  return hasLiveMatches() || hasMatchInKickoffWindow();
+}
+
 function stopPolling() {
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
 }
 
 function schedulePoll() {
   stopPolling();
-  if (!hasLiveMatches()) return;
+  if (!shouldPoll()) return;
 
   pollTimer = setInterval(async () => {
     try {
       await fetchAndMerge();
       render();
       renderGroups();
-      if (!hasLiveMatches()) { stopPolling(); updateLiveBanner(false); }
+      if (!shouldPoll()) { stopPolling(); updateLiveBanner(false); }
+      else updateLiveBanner(hasLiveMatches());
     } catch(err) {
       console.warn('Live poll failed:', err.message);
     }
@@ -624,6 +644,10 @@ async function loadMatches() {
       if (!hasLiveInCache && Date.now() - ts < 5 * 60 * 1000) {
         allMatches = data;
         buildUI();
+        // Still arm the poller: if a cached TIMED match is inside its kickoff
+        // window, shouldPoll() picks it up and the page self-corrects within
+        // 30s instead of staying frozen pre-game until a manual reload.
+        schedulePoll();
         return;
       }
     }
