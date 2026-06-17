@@ -26,6 +26,40 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
   <script src="js/wc2026.js"></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://pitacopa.com/games",
+        "url": "https://pitacopa.com/games",
+        "name": "Jogos & Resultados — Copa do Mundo 2026 | PitaCopa",
+        "description": "Tabela completa dos 104 jogos da Copa do Mundo 2026 com datas, horários, resultados ao vivo e fase de cada partida.",
+        "inLanguage": "pt-BR",
+        "isPartOf": { "@id": "https://pitacopa.com/#website" }
+      },
+      {
+        "@type": "SportsEvent",
+        "name": "Copa do Mundo FIFA 2026",
+        "startDate": "2026-06-11",
+        "endDate": "2026-07-19",
+        "location": {
+          "@type": "Place",
+          "name": "Estados Unidos, Canadá e México"
+        },
+        "sport": "Futebol",
+        "organizer": {
+          "@type": "Organization",
+          "name": "FIFA",
+          "url": "https://www.fifa.com"
+        },
+        "description": "A Copa do Mundo FIFA 2026 é realizada nos Estados Unidos, Canadá e México, com 48 seleções disputando 104 jogos entre 11 de junho e 19 de julho de 2026.",
+        "url": "https://pitacopa.com/games"
+      }
+    ]
+  }
+  </script>
   <style>
     /* ── Hero ───────────────────────────────── */
     .games-hero {
@@ -91,7 +125,7 @@
     .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
 
     /* ── Content ────────────────────────────── */
-    .games-wrap { max-width: 1120px; margin: 0 auto; padding: 20px 20px 80px; }
+    .games-wrap { max-width: 1120px; margin: 0 auto; padding: 20px 20px 32px; }
 
     /* ── flag-icons sizing ───────────────────── */
     .fi { width: 1.4em; line-height: 1em; border-radius: 2px; }
@@ -305,6 +339,7 @@
         <i data-lucide="calendar-days" width="14" height="14"></i> <span data-i18n="nav_games">Jogos</span>
       </a></li>
       <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> <span data-i18n="nav_ranking">Ranking</span></a></li>
+      <li><a href="blog"><i data-lucide="newspaper" width="14" height="14"></i> <span>Blog</span></a></li>
       <li id="navAuthLink"><a href="login" data-i18n="nav_enter">Entrar</a></li>
       <li id="navDashLink" style="display:none;">
         <a href="dashboard"><i data-lucide="layout-grid" width="14" height="14"></i> Bolões</a>
@@ -1059,6 +1094,15 @@ window._pitacopa = {
 };
 console.info('Dev helper ready → _pitacopa.mockLive(0) / .mockFinished(0) / .reset(0) / .list()');
 </script>
+
+<!-- ABOUT SECTION -->
+<div style="background:var(--bg-2);border-top:1px solid var(--border);padding:24px 20px;margin-bottom:-64px;">
+  <div style="max-width:900px;margin:0 auto;">
+    <p style="font-size:14px;color:var(--text-2);line-height:1.75;margin:0;">
+      A <strong>Copa do Mundo FIFA 2026</strong> acontece de <strong>11 de junho a 19 de julho de 2026</strong> nos Estados Unidos, Canadá e México — a primeira edição com 48 seleções e 104 partidas. Acompanhe aqui a tabela completa de jogos com resultados em tempo real, organizados por fase e grupo. Os resultados são atualizados automaticamente durante as partidas. Para participar do bolão e fazer seus palpites, <a href="login?tab=register" style="color:var(--gold);font-weight:600;">crie uma conta gratuita</a>.
+    </p>
+  </div>
+</div>
 
 <footer class="footer">
   <div class="container">

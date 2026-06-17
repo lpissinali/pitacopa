@@ -26,6 +26,34 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.2.3/css/flag-icons.min.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://pitacopa.com/ranking",
+        "url": "https://pitacopa.com/ranking",
+        "name": "Ranking Global — PitaCopa 2026",
+        "description": "Ranking global de todos os participantes do bolão da Copa do Mundo 2026. Veja a classificação em tempo real.",
+        "inLanguage": "pt-BR",
+        "isPartOf": { "@id": "https://pitacopa.com/#website" }
+      },
+      {
+        "@type": "SportsEvent",
+        "name": "Copa do Mundo FIFA 2026",
+        "startDate": "2026-06-11",
+        "endDate": "2026-07-19",
+        "location": {
+          "@type": "Place",
+          "name": "Estados Unidos, Canadá e México"
+        },
+        "sport": "Futebol",
+        "url": "https://pitacopa.com/ranking"
+      }
+    ]
+  }
+  </script>
   <style>
     /* flag-icons sizing */
     .fi { width:1.4em; line-height:1em; border-radius:2px; }
@@ -41,7 +69,7 @@
       margin-bottom: 16px;
       box-shadow: 0 6px 28px rgba(245,166,35,.55);
     }
-    .ranking-content { max-width:800px; margin:0 auto; padding:32px 20px 80px; }
+    .ranking-content { max-width:800px; margin:0 auto; padding:32px 20px 32px; }
     .search-bar { display:flex; gap:10px; margin-bottom:24px; align-items:center; }
     .search-bar input { flex:1; }
     .ranking-card { background:var(--bg); border:1px solid var(--border); border-radius:var(--r-xl); overflow:hidden; box-shadow:var(--sh-sm); }
@@ -118,6 +146,7 @@
     <ul class="navbar-nav" id="mainNav">
       <li><a href="games"><i data-lucide="calendar-days" width="14" height="14"></i> <span data-i18n="nav_games">Jogos</span></a></li>
       <li><a href="ranking" style="color:var(--gold);font-weight:700;"><i data-lucide="trophy" width="14" height="14"></i> <span data-i18n="nav_ranking">Ranking</span></a></li>
+      <li><a href="blog"><i data-lucide="newspaper" width="14" height="14"></i> <span>Blog</span></a></li>
       <li id="navAuthLinks"><a href="login" data-i18n="nav_enter">Entrar</a></li>
       <li id="navUserLinks" style="display:none;">
         <a href="dashboard"><i data-lucide="layout-grid" width="14" height="14"></i> Bolões</a>
@@ -207,6 +236,15 @@
       <p>Seja o primeiro a se cadastrar e fazer seus palpites!</p>
       <a href="login?tab=register" class="btn btn-primary" style="margin-top:20px;">Criar Conta Grátis</a>
     </div>
+  </div>
+</div>
+
+<!-- ABOUT SECTION -->
+<div style="background:var(--bg-2);border-top:1px solid var(--border);padding:28px 20px;margin-bottom:-64px;">
+  <div style="max-width:800px;margin:0 auto;">
+    <p style="font-size:14px;color:var(--text-2);line-height:1.75;margin:0;">
+      O <strong>Ranking Global do PitaCopa</strong> reúne todos os participantes do bolão da Copa do Mundo 2026, classificados pela pontuação acumulada ao longo dos 104 jogos do torneio. A pontuação é calculada automaticamente após cada partida: <strong>3 pontos</strong> para quem acerta o placar exato, <strong>1 ponto</strong> para quem acerta apenas o resultado (vitória, empate ou derrota), e pontuações especiais para quem acertar o campeão (10 pts), vice-campeão (5 pts) e artilheiro (5 pts). Em caso de empate, o desempate considera o número de placares exatos, resultados corretos e, por último, ordem alfabética. O ranking atualiza em tempo real conforme os jogos são finalizados — acompanhe a disputa a cada rodada.
+    </p>
   </div>
 </div>
 
