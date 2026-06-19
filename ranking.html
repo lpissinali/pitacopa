@@ -120,7 +120,14 @@
     @media(max-width:600px){
       .top3-podium { gap:8px; }
       .podium-slot { width:112px; padding:16px 8px; }
+      /* Hide País and Exatos on mobile — keep #, Jogador, Pts */
+      .ranking-table th:nth-child(3), .ranking-table td:nth-child(3),
       .ranking-table th:nth-child(4), .ranking-table td:nth-child(4) { display:none; }
+      .ranking-table th, .ranking-table td { padding:10px 10px; }
+      .pos-cell { width:36px; }
+      .player-avatar { width:28px; height:28px; font-size:11px; flex-shrink:0; }
+      .player-name { font-size:13px; }
+      .pts-cell { font-size:16px; }
     }
 .pagination { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:20px; }
     .pagination button { padding:7px 14px; font-size:13px; font-weight:600; border:1.5px solid var(--border-2); border-radius:var(--r-f); background:transparent; cursor:pointer; color:var(--text-2); transition:all .15s; }
