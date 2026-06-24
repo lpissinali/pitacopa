@@ -46,7 +46,7 @@
     .mini-rank-table .me-row { background:var(--gold-l); font-weight:700; }
     /* Predictions */
     .stage-header { font-size:14px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; padding:12px 0 8px; margin-top:24px; border-bottom:1px solid var(--border); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
-    .game-pred-row { background:var(--bg); border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; gap:12px; transition:border .2s; }
+    .game-pred-row { background:var(--bg); border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; gap:12px; transition:border .2s; position:relative; }
     .game-pred-row:hover { border-color:var(--border-2); }
     .game-pred-row.locked { opacity:.65; background:var(--bg-2); }
     .game-date { font-size:11px; color:var(--muted); min-width:80px; flex-shrink:0; }
@@ -64,8 +64,7 @@
     .game-team:last-child  { grid-area: away; justify-content:flex-start; }
     .game-flag { font-size:16px; flex-shrink:0; }
     .game-team-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; max-width:140px; text-align:left; }
-    .score-inputs { grid-area: score; display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; }
-    .score-inputs-row { display:flex; align-items:center; gap:6px; }
+    .score-inputs { grid-area: score; display:flex; align-items:center; gap:6px; flex-shrink:0; }
     /* Mobile: stack home above away (left column), score spans both rows on the right */
     @media (max-width: 640px) {
       .game-teams {
@@ -82,7 +81,7 @@
     .score-input { width:42px; height:36px; text-align:center; font-size:15px; font-weight:700; border:1.5px solid var(--border-2); border-radius:var(--r-sm); background:var(--bg); color:var(--text); }
     .score-input:focus { outline:none; border-color:var(--gold); box-shadow:0 0 0 3px var(--gold-l); }
     .score-sep { font-size:14px; font-weight:700; color:var(--muted); }
-    .lock-badge { font-size:11px; background:var(--bg-3); color:var(--muted); padding:3px 8px; border-radius:var(--r-f); white-space:nowrap; flex-shrink:0; }
+    .lock-badge { position:absolute; top:8px; right:10px; font-size:11px; background:var(--bg-3); color:var(--muted); padding:2px 7px; border-radius:var(--r-f); white-space:nowrap; display:flex; align-items:center; gap:4px; }
     .champ-picks { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:24px; }
     .champ-card { background:var(--bg-2); border:1px solid var(--border); border-radius:var(--r-lg); padding:16px; }
     .champ-card label { font-size:13px; font-weight:700; display:block; margin-bottom:8px; }
@@ -1006,20 +1005,18 @@ function renderGames() {
             </div>
           </div>
           <div class="score-inputs">
-            <div class="score-inputs-row">
-              <input type="number" class="score-input" min="0" max="99"
-                value="${homeVal}" data-game="${game.id}" data-side="home"
-                ${isLocked ? 'disabled' : ''} placeholder="—"
-                oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
-              <span class="score-sep">×</span>
-              <input type="number" class="score-input" min="0" max="99"
-                value="${awayVal}" data-game="${game.id}" data-side="away"
-                ${isLocked ? 'disabled' : ''} placeholder="—"
-                oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
-            </div>
-            ${isLocked ? '<span class="lock-badge"><i data-lucide="lock" width="11" height="11"></i> Bloqueado</span>' : ''}
+            <input type="number" class="score-input" min="0" max="99"
+              value="${homeVal}" data-game="${game.id}" data-side="home"
+              ${isLocked ? 'disabled' : ''} placeholder="—"
+              oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
+            <span class="score-sep">×</span>
+            <input type="number" class="score-input" min="0" max="99"
+              value="${awayVal}" data-game="${game.id}" data-side="away"
+              ${isLocked ? 'disabled' : ''} placeholder="—"
+              oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
           </div>
         </div>
+        ${isLocked ? '<span class="lock-badge"><i data-lucide="lock" width="11" height="11"></i> Bloqueado</span>' : ''}
       `;
       container.appendChild(row);
     });
