@@ -593,12 +593,12 @@ function renderUsers(filter = '') {
     return;
   }
 
-  // Aggregate points per user
+  // Aggregate points per user — use max across boloes to avoid double-counting
   const ptsByUid = {};
   const boloesByUid = {};
   allParticipants.forEach(p => {
     if (!p.uid) return;
-    ptsByUid[p.uid] = (ptsByUid[p.uid] || 0) + (p.points || 0);
+    ptsByUid[p.uid] = Math.max(ptsByUid[p.uid] || 0, p.points || 0);
     boloesByUid[p.uid] = (boloesByUid[p.uid] || 0) + 1;
   });
 
