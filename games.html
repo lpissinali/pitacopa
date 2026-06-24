@@ -520,7 +520,15 @@ if (typeof ALL_TEAMS !== 'undefined') {
     teamIdByName[t.id.toLowerCase()]       = t.id;
     teamIdByName[t.name.toLowerCase()]     = t.id;
     teamIdByName[t.nameEn.toLowerCase()]   = t.id;
+    // Also index API name variants (& vs and, alternate suffixes)
+    const enAmp = t.nameEn.toLowerCase().replace(' and ', ' & ');
+    teamIdByName[enAmp] = t.id;
   });
+  // Explicit API name aliases that don't follow a simple pattern
+  const API_ALIASES = {
+    'cape verde islands': 'cpv',
+  };
+  Object.entries(API_ALIASES).forEach(([alias, id]) => { teamIdByName[alias] = id; });
 }
 // Build "home_away" → wc2026 game ID map  (wc2026.js uses g.home / g.away, not g.homeId / g.awayId)
 const gameIdByTeams = {};
