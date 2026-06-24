@@ -64,7 +64,8 @@
     .game-team:last-child  { grid-area: away; justify-content:flex-start; }
     .game-flag { font-size:16px; flex-shrink:0; }
     .game-team-name { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; max-width:140px; text-align:left; }
-    .score-inputs { grid-area: score; display:flex; align-items:center; gap:6px; flex-shrink:0; }
+    .score-inputs { grid-area: score; display:flex; flex-direction:column; align-items:center; gap:4px; flex-shrink:0; }
+    .score-inputs-row { display:flex; align-items:center; gap:6px; }
     /* Mobile: stack home above away (left column), score spans both rows on the right */
     @media (max-width: 640px) {
       .game-teams {
@@ -1005,18 +1006,20 @@ function renderGames() {
             </div>
           </div>
           <div class="score-inputs">
-            <input type="number" class="score-input" min="0" max="99"
-              value="${homeVal}" data-game="${game.id}" data-side="home"
-              ${isLocked ? 'disabled' : ''} placeholder="—"
-              oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
-            <span class="score-sep">×</span>
-            <input type="number" class="score-input" min="0" max="99"
-              value="${awayVal}" data-game="${game.id}" data-side="away"
-              ${isLocked ? 'disabled' : ''} placeholder="—"
-              oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
+            <div class="score-inputs-row">
+              <input type="number" class="score-input" min="0" max="99"
+                value="${homeVal}" data-game="${game.id}" data-side="home"
+                ${isLocked ? 'disabled' : ''} placeholder="—"
+                oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
+              <span class="score-sep">×</span>
+              <input type="number" class="score-input" min="0" max="99"
+                value="${awayVal}" data-game="${game.id}" data-side="away"
+                ${isLocked ? 'disabled' : ''} placeholder="—"
+                oninput="if(this.value.length>2)this.value=this.value.slice(0,2)">
+            </div>
+            ${isLocked ? '<span class="lock-badge"><i data-lucide="lock" width="11" height="11"></i> Bloqueado</span>' : ''}
           </div>
         </div>
-        ${isLocked ? '<span class="lock-badge"><i data-lucide="lock" width="11" height="11"></i> Bloqueado</span>' : ''}
       `;
       container.appendChild(row);
     });
