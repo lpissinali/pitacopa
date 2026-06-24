@@ -3,7 +3,11 @@
  *
  * Swaps home/away prediction values in Firestore's user_predictions collection
  * for match IDs whose home/away teams were inverted in wc2026.js across the
- * last 5 commits (e6fe595, 57553a0, 48a1acf, 48b8b50).
+ * last 5 commits (e6fe595, 57553a0, 48a1acf, 48b8b50, 6aab6c1).
+ *
+ * Only affects users whose updatedAt is BEFORE the last fixing commit was
+ * deployed (2026-06-23T19:21:58Z). Users who re-saved predictions after the
+ * fix was live already saw the correct team labels and should not be swapped.
  *
  * Run from the project root:
  *   node scripts/swap-predictions.js [--dry-run]
@@ -17,35 +21,19 @@ const admin  = require('firebase-admin');
 const path   = require('path');
 const fs     = require('fs');
 
-// ── Affected match IDs (from git diff across last 5 commits) ─────────────────
+// Affected match IDs (from git diff across last 5 commits)
 const SWAPPED_IDS = new Set([
-  'G004',  // RSA ↔ CZE          (48a1acf)
-  'G005',  // MEX ↔ CZE round 3  (48b8b50)
-  'G010',  // BIH ↔ SUI          (e6fe595)
-  'G011',  // CAN ↔ SUI round 3  (48b8b50)
-  'G016',  // MAR ↔ SCO          (57553a0)
-  'G017',  // BRA ↔ SCO round 3  (48b8b50)
-  'G022',  // PAR ↔ TUR          (48a1acf)
-  'G023',  // USA ↔ TUR round 3  (48b8b50)
-  'G028',  // CUW ↔ ECU round 2  (48b8b50)
-  'G029',  // GER ↔ ECU round 3  (48b8b50)
-  'G034',  // JAP ↔ TUN round 2  (48b8b50)
-  'G035',  // NLD ↔ TUN round 3  (48b8b50)
-  'G040',  // EGY ↔ NZL round 2  (48b8b50)
-  'G041',  // BEL ↔ NZL round 3  (48b8b50)
-  'G046',  // CPV ↔ URU round 2  (48b8b50)
-  'G047',  // ESP ↔ URU round 3  (48b8b50)
-  'G052',  // SEN ↔ NOR round 2  (48b8b50)
-  'G053',  // FRA ↔ NOR round 3  (48b8b50)
-  'G058',  // ALG ↔ JOR round 2  (48b8b50)
-  'G059',  // ARG ↔ JOR round 3  (48b8b50)
-  'G064',  // COD ↔ COL round 2  (48b8b50)
-  'G065',  // POR ↔ COL round 3  (48b8b50)
-  'G070',  // CRO ↔ PAN round 2  (48b8b50)
-  'G071',  // ENG ↔ PAN round 3  (48b8b50)
+  'G004', 'G005', 'G010', 'G011', 'G016', 'G017',
+  'G022', 'G023', 'G028', 'G029', 'G034', 'G035',
+  'G040', 'G041', 'G046', 'G047', 'G052', 'G053',
+  'G058', 'G059', 'G064', 'G065', 'G070', 'G071',
 ]);
 
-// ── Init Firebase Admin ───────────────────────────────────────────────────────
+// Cutoff: last fixing commit (6aab6c1) at 2026-06-23T19:21:58Z
+// Users who saved predictions AFTER this saw correct team labels already.
+const CUTOFF_MS = new Date('2026-06-23T19:21:58Z').getTime();
+
+// Init Firebase Admin
 const keyPath = path.join(__dirname, '..', 'serviceAccountKey.json');
 if (!fs.existsSync(keyPath)) {
   console.error('serviceAccountKey.json not found at', keyPath);
@@ -60,18 +48,19 @@ admin.initializeApp({
 const db      = admin.firestore();
 const DRY_RUN = process.argv.includes('--dry-run');
 
-if (DRY_RUN) console.log('🔍 DRY RUN — no writes will be made\n');
+if (DRY_RUN) console.log('DRY RUN -- no writes will be made\n');
+console.log('Cutoff: ' + new Date(CUTOFF_MS).toISOString() + ' -- skipping users who updated after this\n');
 
-// ── Main ─────────────────────────────────────────────────────────────────────
 async function main() {
   const col  = db.collection('user_predictions');
   const snap = await col.get();
 
-  console.log(`Found ${snap.size} user_predictions documents\n`);
+  console.log('Found ' + snap.size + ' user_predictions documents\n');
 
-  let totalUsers  = 0;
-  let totalSwaps  = 0;
-  const BATCH_MAX = 400; // Firestore batch limit is 500 ops, keep headroom
+  let totalUsers   = 0;
+  let totalSwaps   = 0;
+  let totalSkipped = 0;
+  const BATCH_MAX  = 400;
 
   let batch      = db.batch();
   let batchOps   = 0;
@@ -81,15 +70,26 @@ async function main() {
     if (batchOps === 0) return;
     if (!DRY_RUN) await batch.commit();
     batchCount++;
-    console.log(`  ✅ Batch #${batchCount} committed (${batchOps} writes)`);
-    batch   = db.batch();
+    console.log('  Batch #' + batchCount + ' committed (' + batchOps + ' writes)');
+    batch    = db.batch();
     batchOps = 0;
   }
 
   for (const doc of snap.docs) {
-    const uid  = doc.id;
-    const data = doc.data();
+    const uid   = doc.id;
+    const data  = doc.data();
     const games = data.games || {};
+
+    // Skip users who updated predictions after the fix was deployed
+    const updatedAt = data.updatedAt;
+    if (updatedAt) {
+      const updatedMs = updatedAt.toMillis ? updatedAt.toMillis() : new Date(updatedAt).getTime();
+      if (updatedMs >= CUTOFF_MS) {
+        console.log('  SKIP uid=' + uid + '  updatedAt=' + new Date(updatedMs).toISOString() + ' >= cutoff');
+        totalSkipped++;
+        continue;
+      }
+    }
 
     const swapsForUser = [];
 
@@ -97,12 +97,13 @@ async function main() {
       const pred = games[gid];
       if (pred === undefined || pred === null) continue;
 
-      const { home, away } = pred;
+      const home = pred.home;
+      const away = pred.away;
 
-      // Skip if both values are empty strings (no prediction entered)
+      // Skip if both values are empty (no prediction entered)
       if ((home === '' || home == null) && (away === '' || away == null)) continue;
 
-      swapsForUser.push({ gid, before: { home, away }, after: { home: away, away: home } });
+      swapsForUser.push({ gid, beforeHome: home, beforeAway: away });
     }
 
     if (swapsForUser.length === 0) continue;
@@ -110,12 +111,12 @@ async function main() {
     totalUsers++;
     totalSwaps += swapsForUser.length;
 
-    // Build the update payload — only touch the affected fields
+    // Build update payload -- only touch affected fields
     const update = {};
-    for (const { gid, before, after } of swapsForUser) {
-      update[`games.${gid}.home`] = after.home;
-      update[`games.${gid}.away`] = after.away;
-      console.log(`  uid=${uid}  ${gid}: ${before.home}-${before.away} → ${after.home}-${after.away}`);
+    for (const { gid, beforeHome, beforeAway } of swapsForUser) {
+      update['games.' + gid + '.home'] = beforeAway;
+      update['games.' + gid + '.away'] = beforeHome;
+      console.log('  uid=' + uid + '  ' + gid + ': ' + beforeHome + '-' + beforeAway + ' -> ' + beforeAway + '-' + beforeHome);
     }
 
     if (!DRY_RUN) {
@@ -127,19 +128,20 @@ async function main() {
 
   await commitBatch();
 
-  console.log(`\n── Summary ─────────────────────────────────────`);
-  console.log(`Users affected : ${totalUsers}`);
-  console.log(`Total swaps    : ${totalSwaps}`);
+  console.log('\n-- Summary --');
+  console.log('Users skipped  : ' + totalSkipped + ' (updated after cutoff)');
+  console.log('Users affected : ' + totalUsers);
+  console.log('Total swaps    : ' + totalSwaps);
   if (DRY_RUN) {
-    console.log(`\n⚠️  DRY RUN — run without --dry-run to apply changes`);
+    console.log('\nDRY RUN -- run without --dry-run to apply changes');
   } else {
-    console.log(`\n✅ Done. Restart the server to trigger re-scoring.`);
+    console.log('\nDone. Restart the server to trigger re-scoring.');
   }
 
   process.exit(0);
 }
 
-main().catch(err => {
+main().catch(function(err) {
   console.error('Fatal error:', err);
   process.exit(1);
 });
