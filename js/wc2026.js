@@ -403,8 +403,8 @@ const GROUP_GAMES = [
 const KNOCKOUT_GAMES = [
   // ── Round of 32 (June 28 – July 3) ──────
   { id: "R32-01", stage: "round32", label: "Jogo R32-1", labelEn: "R32 Match 1",
-    home: "TBD", homeName: "A definir", homeNameEn: "TBD", homeFlag: "🏳️",
-    away: "TBD", awayName: "A definir", awayNameEn: "TBD", awayFlag: "🏳️",
+    home: "rsa", homeName: "África do Sul", homeNameEn: "South Africa", homeFlag: "🇿🇦",
+    away: "can", awayName: "Canadá", awayNameEn: "Canada", awayFlag: "🇨🇦",
     date: "2026-06-28T19:00:00Z", result: null },
   { id: "R32-02", stage: "round32", label: "Jogo R32-2", labelEn: "R32 Match 2",
     home: "TBD", homeName: "A definir", homeNameEn: "TBD", homeFlag: "🏳️",
