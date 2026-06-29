@@ -545,8 +545,10 @@ function remapMatchId(m) {
   const awayTla  = (m.awayTeam?.tla  || '').toLowerCase();
   const homeName = (m.homeTeam?.name || '').toLowerCase();
   const awayName = (m.awayTeam?.name || '').toLowerCase();
-  const homeId = teamIdByName[homeTla] || teamIdByName[homeName];
-  const awayId = teamIdByName[awayTla] || teamIdByName[awayName];
+  // Name takes priority over TLA — TLA is auto-derived (name.slice(0,3)) so
+  // "Austria" → "AUS" collides with Australia's code "aus". Name is unambiguous.
+  const homeId = teamIdByName[homeName] || teamIdByName[homeTla];
+  const awayId = teamIdByName[awayName] || teamIdByName[awayTla];
   if (homeId && awayId) {
     const wc2026Id = gameIdByTeams[`${homeId}_${awayId}`];
     if (wc2026Id) m.id = wc2026Id;

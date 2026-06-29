@@ -345,7 +345,7 @@ const GROUP_GAMES = [
     date: "2026-06-28T02:00:00Z", result: null },
   { id: "G060", group: "J", stage: "group", round: 3,
     home: "alg", homeName: "Argélia", homeNameEn: "Algeria", homeFlag: "🇩🇿",
-    away: "aut", awayName: "Áustria", awayNameEn: "Austria", awayFlag: "🇦🇹", 
+    away: "aut", awayName: "Áustria", awayNameEn: "Austria", awayFlag: "🇦🇹",
     date: "2026-06-28T02:00:00Z", result: null },
   // ── Group K ─────────────────────────
   { id: "G061", group: "K", stage: "group", round: 1,
