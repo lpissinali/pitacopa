@@ -682,7 +682,7 @@ async function loadMatches() {
 
   // 5-min session cache — skipped if it contains live matches (scores could be stale)
   try {
-    const cached = sessionStorage.getItem('pitacopa_matches_v12');
+    const cached = sessionStorage.getItem('pitacopa_matches_v13');
     if (cached) {
       const { ts, data } = JSON.parse(cached);
       const hasLiveInCache = data.some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
@@ -704,7 +704,7 @@ async function loadMatches() {
 
     // Only cache when no live matches are running (avoid serving stale scores)
     if (!hasLiveMatches()) {
-      sessionStorage.setItem('pitacopa_matches_v12', JSON.stringify({ ts: Date.now(), data: allMatches }));
+      sessionStorage.setItem('pitacopa_matches_v13', JSON.stringify({ ts: Date.now(), data: allMatches }));
     }
 
     buildUI();
