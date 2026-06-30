@@ -43,6 +43,56 @@
         "logo": {
           "@type": "ImageObject",
           "url": "https://pitacopa.com/img/logo.png"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "email": "suporte@pitacopa.com",
+          "contactType": "customer support"
+        }
+      },
+      {
+        "@type": "SportsEvent",
+        "@id": "https://pitacopa.com/#wc2026",
+        "name": "Copa do Mundo FIFA 2026",
+        "description": "A Copa do Mundo FIFA 2026 é realizada nos Estados Unidos, Canadá e México com 48 seleções disputando 104 jogos entre 11 de junho e 19 de julho de 2026.",
+        "startDate": "2026-06-11",
+        "endDate": "2026-07-19",
+        "eventStatus": "https://schema.org/EventScheduled",
+        "image": "https://pitacopa.com/img/logo-dark.png",
+        "url": "https://pitacopa.com",
+        "sport": "Futebol",
+        "location": {
+          "@type": "Place",
+          "name": "Estados Unidos, Canadá e México",
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "US",
+            "addressLocality": "New York, Los Angeles, Miami, Dallas, Houston, Seattle, Kansas City, Atlanta, Boston, San Francisco, Toronto, Vancouver, Mexico City, Guadalajara, Monterrey"
+          }
+        },
+        "organizer": {
+          "@type": "Organization",
+          "name": "FIFA",
+          "url": "https://www.fifa.com"
+        },
+        "performer": [
+          { "@type": "SportsTeam", "name": "Brazil" },
+          { "@type": "SportsTeam", "name": "Argentina" },
+          { "@type": "SportsTeam", "name": "France" },
+          { "@type": "SportsTeam", "name": "Germany" },
+          { "@type": "SportsTeam", "name": "Spain" },
+          { "@type": "SportsTeam", "name": "Portugal" },
+          { "@type": "SportsTeam", "name": "England" },
+          { "@type": "SportsTeam", "name": "Netherlands" }
+        ],
+        "offers": {
+          "@type": "Offer",
+          "name": "Bolão Gratuito PitaCopa",
+          "description": "Participe do bolão gratuito da Copa do Mundo 2026. Faça palpites nos 104 jogos e compete com amigos.",
+          "price": "0",
+          "priceCurrency": "BRL",
+          "url": "https://pitacopa.com/login?tab=register",
+          "availability": "https://schema.org/InStock"
         }
       }
     ]
@@ -69,6 +119,7 @@
       <li><a href="games"><i data-lucide="calendar" width="14" height="14"></i> <span data-i18n="nav_games">Jogos</span></a></li>
       <li><a href="ranking"><i data-lucide="trophy" width="14" height="14"></i> <span data-i18n="nav_ranking">Ranking</span></a></li>
       <li><a href="blog"><i data-lucide="newspaper" width="14" height="14"></i> <span>Blog</span></a></li>
+      <li><a href="about"><i data-lucide="info" width="14" height="14"></i> <span>Sobre</span></a></li>
       <li><a href="login" data-i18n="nav_login">Entrar</a></li>
       <li>
         <a href="login?tab=register" class="btn btn-primary btn-sm" data-i18n="nav_register">
@@ -369,6 +420,7 @@
         <a href="login?tab=register" data-i18n="footer_signup">Criar conta grátis</a>
         <a href="login" data-i18n="footer_login">Entrar</a>
         <a href="blog">Blog</a>
+        <a href="about">Sobre</a>
         <a href="games" data-i18n="nav_games">Jogos</a>
         <a href="ranking" data-i18n="nav_ranking">Ranking</a>
       </div>
