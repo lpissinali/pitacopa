@@ -468,8 +468,8 @@ const KNOCKOUT_GAMES = [
     date: "2026-07-04T01:30:00Z", result: null },
   // ── Round of 16 (July 4–7) ───────────────
   { id: "R16-01", stage: "round16", label: "Oitavas 1", labelEn: "R16 Match 1",
-    home: "TBD", homeName: "A definir", homeNameEn: "TBD", homeFlag: "🏳️",
-    away: "TBD", awayName: "A definir", awayNameEn: "TBD", awayFlag: "🏳️",
+    home: "can", homeName: "Canadá", homeNameEn: "Canada", homeFlag: "🇨🇦",
+    away: "mar", awayName: "Marrocos", awayNameEn: "Morocco", awayFlag: "🇲🇦",
     date: "2026-07-04T17:00:00Z", result: null },
   { id: "R16-02", stage: "round16", label: "Oitavas 2", labelEn: "R16 Match 2",
     home: "TBD", homeName: "A definir", homeNameEn: "TBD", homeFlag: "🏳️",
