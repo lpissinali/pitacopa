@@ -590,7 +590,7 @@ app.use((req, res, next) => {
 
 // ─── Clean URLs (no .html required) ──────────────────────────────────────────
 // /profile → profile.html, /games → games.html, etc.
-const HTML_PAGES = ['login', 'dashboard', 'bolao', 'join', 'profile', 'games', 'ranking', 'admin', 'terms', 'privacy', 'cookies', 'rules', 'seed', 'blog'];
+const HTML_PAGES = ['login', 'dashboard', 'bolao', 'join', 'profile', 'games', 'ranking', 'admin', 'terms', 'privacy', 'cookies', 'rules', 'seed', 'blog', 'about'];
 HTML_PAGES.forEach(page => {
   app.get(`/${page}`, (req, res) => {
     res.sendFile(path.join(__dirname, `${page}.html`));
