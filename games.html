@@ -710,7 +710,7 @@ async function loadMatches() {
 
   // 5-min session cache — skipped if it contains live matches (scores could be stale)
   try {
-    const cached = sessionStorage.getItem('pitacopa_matches_v17');
+    const cached = sessionStorage.getItem('pitacopa_matches_v18');
     if (cached) {
       const { ts, data } = JSON.parse(cached);
       const hasLiveInCache = data.some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
@@ -732,7 +732,7 @@ async function loadMatches() {
 
     // Only cache when no live matches are running (avoid serving stale scores)
     if (!hasLiveMatches()) {
-      sessionStorage.setItem('pitacopa_matches_v17', JSON.stringify({ ts: Date.now(), data: allMatches }));
+      sessionStorage.setItem('pitacopa_matches_v18', JSON.stringify({ ts: Date.now(), data: allMatches }));
     }
 
     buildUI();
@@ -1034,7 +1034,8 @@ function buildCard(m) {
   // Score display
   // scDisplay = what we show on screen (includes ET goals during live/finished AET)
   // scFull    = 90-min score only, used EXCLUSIVELY for point calculation
-  const scDisplay  = m.score?.liveScore ?? m.score?.fullTime;
+  const _ls        = m.score?.liveScore;
+  const scDisplay  = (_ls?.home != null) ? _ls : m.score?.fullTime;
   const scFull     = m.score?.fullTime;
   const hasPen     = m.score?.penalty?.home != null;
   const penLabel   = hasPen
