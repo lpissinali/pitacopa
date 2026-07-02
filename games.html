@@ -710,7 +710,7 @@ async function loadMatches() {
 
   // 5-min session cache — skipped if it contains live matches (scores could be stale)
   try {
-    const cached = sessionStorage.getItem('pitacopa_matches_v18');
+    const cached = sessionStorage.getItem('pitacopa_matches_v19');
     if (cached) {
       const { ts, data } = JSON.parse(cached);
       const hasLiveInCache = data.some(m => m.status === 'IN_PLAY' || m.status === 'PAUSED');
@@ -732,16 +732,50 @@ async function loadMatches() {
 
     // Only cache when no live matches are running (avoid serving stale scores)
     if (!hasLiveMatches()) {
-      sessionStorage.setItem('pitacopa_matches_v18', JSON.stringify({ ts: Date.now(), data: allMatches }));
+      sessionStorage.setItem('pitacopa_matches_v19', JSON.stringify({ ts: Date.now(), data: allMatches }));
     }
 
     buildUI();
     updateLiveBanner(hasLiveMatches());
     schedulePoll();
   } catch(err) {
-    console.warn('API unavailable:', err.message, '— showing static schedule');
-    // banner suppressed — fallback data already rendered by loadFallback() above
+    console.warn('API unavailable:', err.message, '— trying Firestore scores');
+    // API quota exhausted or server error — read confirmed scores from Firestore
+    // (settings/results.games is written by the server scoring logic after each match)
+    try {
+      await applyFirestoreScores();
+      buildUI();
+    } catch(fsErr) {
+      console.warn('Firestore scores unavailable:', fsErr.message);
+      // fallback data already rendered by loadFallback() above — nothing more to do
+    }
   }
+}
+
+/* ── Apply confirmed scores from Firestore settings/results ─────────────── */
+async function applyFirestoreScores() {
+  const snap = await getDoc(doc(db, 'settings', 'results'));
+  if (!snap.exists()) return;
+  const games = snap.data().games || {};
+  // Build index of allMatches by game ID for fast lookup
+  const idxById = {};
+  allMatches.forEach((m, i) => { idxById[m.id] = i; });
+  let applied = 0;
+  for (const [gid, sc] of Object.entries(games)) {
+    if (sc.home == null || sc.away == null) continue;
+    const idx = idxById[gid];
+    if (idx === undefined) continue;
+    allMatches[idx] = {
+      ...allMatches[idx],
+      status: 'FINISHED',
+      score: {
+        fullTime:  { home: sc.home, away: sc.away },
+        liveScore: { home: sc.home, away: sc.away },
+      }
+    };
+    applied++;
+  }
+  console.log(`Firestore scores: applied ${applied} results`);
 }
 
 /* ── Stage string normalizer (wc2026.js → API-style keys used in FILTER_CHIPS) */
