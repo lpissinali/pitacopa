@@ -513,8 +513,8 @@ const KNOCKOUT_GAMES = [
     away: "eng", awayName: "Inglaterra", awayNameEn: "England", awayFlag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
     date: "2026-07-11T21:00:00Z", result: null },
   { id: "QF-4", stage: "quarterfinal", label: "Quartas 4", labelEn: "Quarterfinal 4",
-    home: "TBD", homeName: "A definir", homeNameEn: "TBD", homeFlag: "🏳️",
-    away: "TBD", awayName: "A definir", awayNameEn: "TBD", awayFlag: "🏳️",
+    home: "arg", homeName: "Argentina", homeNameEn: "Argentina", homeFlag: "🇦🇷",
+    away: "sui", awayName: "Suíça", awayNameEn: "Switzerland", awayFlag: "🇨🇭",
     date: "2026-07-12T01:00:00Z", result: null },
   // ── Semifinals (July 14–15) ──────────────
   { id: "SF-1", stage: "semifinal", label: "Semi 1", labelEn: "Semifinal 1",
