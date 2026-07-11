@@ -8,9 +8,11 @@
  *
  * Usage:
  *   node scripts/add-result.js <gameId> <homeGoals> <awayGoals> [--dry-run]
+ *   node scripts/add-result.js --rescore-only [--dry-run]
  *
- * Example:
+ * Examples:
  *   node scripts/add-result.js R32-11 3 0
+ *   node scripts/add-result.js --rescore-only        # use after saving champion/runnerUp/topScorer in admin
  *
  * With --dry-run it prints what would change without writing to Firestore.
  */
@@ -23,25 +25,31 @@ const fs    = require('fs');
 const { calculateScore } = require('../js/scoring');
 
 // ── Args ──────────────────────────────────────────────────────────────────────
-const args    = process.argv.slice(2).filter(a => a !== '--dry-run');
-const DRY_RUN = process.argv.includes('--dry-run');
+const args        = process.argv.slice(2).filter(a => !['--dry-run', '--rescore-only'].includes(a));
+const DRY_RUN     = process.argv.includes('--dry-run');
+const RESCORE_ONLY = process.argv.includes('--rescore-only');
 
-if (args.length < 3) {
-  console.error('Usage: node scripts/add-result.js <gameId> <homeGoals> <awayGoals> [--dry-run]');
-  console.error('Example: node scripts/add-result.js R32-11 3 0');
+if (!RESCORE_ONLY && args.length < 3) {
+  console.error('Usage:');
+  console.error('  node scripts/add-result.js <gameId> <homeGoals> <awayGoals> [--dry-run]');
+  console.error('  node scripts/add-result.js --rescore-only [--dry-run]');
   process.exit(1);
 }
 
-const GAME_ID   = args[0];
-const HOME_GOALS = parseInt(args[1], 10);
-const AWAY_GOALS = parseInt(args[2], 10);
+const GAME_ID    = RESCORE_ONLY ? null : args[0];
+const HOME_GOALS = RESCORE_ONLY ? null : parseInt(args[1], 10);
+const AWAY_GOALS = RESCORE_ONLY ? null : parseInt(args[2], 10);
 
-if (isNaN(HOME_GOALS) || isNaN(AWAY_GOALS)) {
+if (!RESCORE_ONLY && (isNaN(HOME_GOALS) || isNaN(AWAY_GOALS))) {
   console.error('homeGoals and awayGoals must be integers');
   process.exit(1);
 }
 
-console.log(`Game: ${GAME_ID}  Score: ${HOME_GOALS}-${AWAY_GOALS}${DRY_RUN ? '  [DRY RUN]' : ''}\n`);
+if (RESCORE_ONLY) {
+  console.log(`Rescore-only mode — reading champion/runnerUp/topScorer from Firestore${DRY_RUN ? '  [DRY RUN]' : ''}\n`);
+} else {
+  console.log(`Game: ${GAME_ID}  Score: ${HOME_GOALS}-${AWAY_GOALS}${DRY_RUN ? '  [DRY RUN]' : ''}\n`);
+}
 
 // ── Firebase ──────────────────────────────────────────────────────────────────
 const keyPath = path.join(__dirname, '..', 'serviceAccountKey.json');
@@ -64,19 +72,26 @@ async function main() {
   const results    = resSnap.exists ? resSnap.data() : {};
   if (!results.games) results.games = {};
 
-  const prev = results.games[GAME_ID];
-  if (prev && prev.home === HOME_GOALS && prev.away === AWAY_GOALS && prev.confirmed) {
-    console.log(`Score for ${GAME_ID} already set to ${HOME_GOALS}-${AWAY_GOALS} and confirmed — no change needed.`);
-  } else {
-    console.log(`Writing ${GAME_ID}: ${HOME_GOALS}-${AWAY_GOALS} (confirmed: true)`);
-    results.games[GAME_ID] = { home: HOME_GOALS, away: AWAY_GOALS, confirmed: true };
-    if (!DRY_RUN) {
-      await resultsRef.set({ games: results.games }, { merge: true });
-      console.log('  ✓ Written to Firestore\n');
+  if (!RESCORE_ONLY) {
+    const prev = results.games[GAME_ID];
+    if (prev && prev.home === HOME_GOALS && prev.away === AWAY_GOALS && prev.confirmed) {
+      console.log(`Score for ${GAME_ID} already set to ${HOME_GOALS}-${AWAY_GOALS} and confirmed — no change needed.`);
     } else {
-      console.log('  [DRY RUN] would write to Firestore\n');
+      console.log(`Writing ${GAME_ID}: ${HOME_GOALS}-${AWAY_GOALS} (confirmed: true)`);
+      results.games[GAME_ID] = { home: HOME_GOALS, away: AWAY_GOALS, confirmed: true };
+      if (!DRY_RUN) {
+        await resultsRef.set({ games: results.games }, { merge: true });
+        console.log('  ✓ Written to Firestore\n');
+      } else {
+        console.log('  [DRY RUN] would write to Firestore\n');
+      }
     }
   }
+
+  // Log what global picks are set
+  console.log(`Champion : ${results.champion  || '(not set)'}`);
+  console.log(`Runner-up: ${results.runnerUp  || '(not set)'}`);
+  console.log(`Top scorer: ${results.topScorer || '(not set)'}\n`);
 
   // 2. Rescore all users
   const fullResults = {
@@ -136,7 +151,7 @@ async function main() {
   }
 
   console.log('\n── Summary ──');
-  console.log(`Game result written : ${GAME_ID} = ${HOME_GOALS}-${AWAY_GOALS}`);
+  if (!RESCORE_ONLY) console.log(`Game result written : ${GAME_ID} = ${HOME_GOALS}-${AWAY_GOALS}`);
   console.log(`Participants rescored: ${updates.length}`);
   if (DRY_RUN) console.log('\n[DRY RUN] No changes written. Run without --dry-run to apply.');
   else console.log('\nDone.');
