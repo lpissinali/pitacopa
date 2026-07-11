@@ -518,8 +518,8 @@ const KNOCKOUT_GAMES = [
     date: "2026-07-12T01:00:00Z", result: null },
   // ── Semifinals (July 14–15) ──────────────
   { id: "SF-1", stage: "semifinal", label: "Semi 1", labelEn: "Semifinal 1",
-    home: "TBD", homeName: "A definir", homeNameEn: "TBD", homeFlag: "🏳️",
-    away: "TBD", awayName: "A definir", awayNameEn: "TBD", awayFlag: "🏳️",
+    home: "fra", homeName: "França", homeNameEn: "France", homeFlag: "🇫🇷",
+    away: "esp", awayName: "Espanha", awayNameEn: "Spain", awayFlag: "🇪🇸",
     date: "2026-07-14T19:00:00Z", result: null },
   { id: "SF-2", stage: "semifinal", label: "Semi 2", labelEn: "Semifinal 2",
     home: "TBD", homeName: "A definir", homeNameEn: "TBD", homeFlag: "🏳️",
