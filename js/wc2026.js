@@ -522,8 +522,8 @@ const KNOCKOUT_GAMES = [
     away: "esp", awayName: "Espanha", awayNameEn: "Spain", awayFlag: "🇪🇸",
     date: "2026-07-14T19:00:00Z", result: null },
   { id: "SF-2", stage: "semifinal", label: "Semi 2", labelEn: "Semifinal 2",
-    home: "TBD", homeName: "A definir", homeNameEn: "TBD", homeFlag: "🏳️",
-    away: "TBD", awayName: "A definir", awayNameEn: "TBD", awayFlag: "🏳️",
+    home: "eng", homeName: "Inglaterra", homeNameEn: "England", homeFlag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    away: "arg", awayName: "Argentina", awayNameEn: "Argentina", awayFlag: "🇦🇷",
     date: "2026-07-15T19:00:00Z", result: null },
   // ── 3rd Place (July 18) ──────────────────
   { id: "3PL", stage: "third_place", label: "3º Lugar", labelEn: "3rd Place",
