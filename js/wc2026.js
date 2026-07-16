@@ -527,13 +527,13 @@ const KNOCKOUT_GAMES = [
     date: "2026-07-15T19:00:00Z", result: null },
   // ── 3rd Place (July 18) ──────────────────
   { id: "3PL", stage: "third_place", label: "3º Lugar", labelEn: "3rd Place",
-    home: "TBD", homeName: "A definir", homeNameEn: "TBD", homeFlag: "🏳️",
-    away: "TBD", awayName: "A definir", awayNameEn: "TBD", awayFlag: "🏳️",
+    home: "fra", homeName: "França", homeNameEn: "France", homeFlag: "🇫🇷",
+    away: "eng", awayName: "Inglaterra", awayNameEn: "England", awayFlag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
     date: "2026-07-18T21:00:00Z", result: null },
   // ── Final (July 19 — MetLife Stadium, NJ) ─
   { id: "FIN", stage: "final", label: "Final", labelEn: "Final",
-    home: "TBD", homeName: "A definir", homeNameEn: "TBD", homeFlag: "🏳️",
-    away: "TBD", awayName: "A definir", awayNameEn: "TBD", awayFlag: "🏳️",
+    home: "esp", homeName: "Espanha", homeNameEn: "Spain", homeFlag: "🇪🇸",
+    away: "arg", awayName: "Argentina", awayNameEn: "Argentina", awayFlag: "🇦🇷",
     date: "2026-07-19T19:00:00Z", result: null },
 ];
 
