@@ -1,0 +1,11 @@
+node_modules/
+server.js
+serviceAccountKey.json
+package.json
+package-lock.json
+firestore.rules
+firebase.json
+backup-*.json
+scripts/
+.env
+.env.*

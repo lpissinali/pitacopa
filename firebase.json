@@ -1,5 +1,23 @@
 {
   "firestore": {
     "rules": "firestore.rules"
+  },
+  "hosting": {
+    "public": ".",
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "ignore": [
+      "firebase.json",
+      "firestore.rules",
+      ".firebaseignore",
+      "**/.*",
+      "**/node_modules/**",
+      "server.js",
+      "serviceAccountKey.json",
+      "package.json",
+      "package-lock.json",
+      "scripts/**",
+      "backup-*.json"
+    ]
   }
 }
